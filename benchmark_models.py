@@ -11,7 +11,7 @@ from Graph2SMILES.train import main as train_G2S
 from Graph2SMILES.predict import get_predict_parser
 from Graph2SMILES.predict import main as predict_G2S
 
-from megan.bin.train import train_megan
+# from megan.bin.train import train_megan
 
 
 class MolecularTransformer(ReactionModel):
