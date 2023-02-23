@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
-from models.dgat import DGATEncoder
-from models.dgcn import DGCNEncoder
+from Graph2SMILES.models.dgat import DGATEncoder
+from Graph2SMILES.models.dgcn import DGCNEncoder
 from typing import Tuple
-from utils.data_utils import G2SBatch
+from Graph2SMILES.utils.data_utils import G2SBatch
 
 
 class GraphFeatEncoder(nn.Module):

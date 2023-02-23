@@ -1,5 +1,5 @@
 import networkx as nx
-from utils.chem_utils import BOND_TYPES
+from Graph2SMILES.utils.chem_utils import BOND_TYPES
 from rdkit import Chem
 from typing import List, Tuple, Union
 

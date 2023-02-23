@@ -7,10 +7,10 @@ import time
 import torch
 from multiprocessing import Pool
 from typing import Dict, List, Tuple
-from utils import parsing
-from utils.data_utils import get_graph_features_from_smi, load_vocab, make_vocab, \
+from Graph2SMILES.utils import parsing
+from Graph2SMILES.utils.data_utils import get_graph_features_from_smi, load_vocab, make_vocab, \
     tokenize_selfies_from_smiles, tokenize_smiles
-from utils.train_utils import log_tensor, set_seed, setup_logger
+from Graph2SMILES.utils.train_utils import log_tensor, set_seed, setup_logger
 
 
 def get_preprocess_parser():

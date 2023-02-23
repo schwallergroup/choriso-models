@@ -11,8 +11,8 @@ import torch
 from rdkit import Chem
 from torch.utils.data import Dataset
 from typing import Dict, List, Tuple
-from utils.chem_utils import ATOM_FDIM, BOND_FDIM, get_atom_features_sparse, get_bond_features
-from utils.rxn_graphs import RxnGraph
+from Graph2SMILES.utils.chem_utils import ATOM_FDIM, BOND_FDIM, get_atom_features_sparse, get_bond_features
+from Graph2SMILES.utils.rxn_graphs import RxnGraph
 
 
 def tokenize_selfies_from_smiles(smi: str) -> str:

@@ -3,11 +3,11 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from utils.chem_utils import ATOM_FDIM, BOND_FDIM
-from utils.data_utils import G2SBatch
-from utils.train_utils import log_tensor
-from models.attention_xl import AttnEncoderXL
-from models.graphfeat import GraphFeatEncoder
+from Graph2SMILES.utils.chem_utils import ATOM_FDIM, BOND_FDIM
+from Graph2SMILES.utils.data_utils import G2SBatch
+from Graph2SMILES.utils.train_utils import log_tensor
+from Graph2SMILES.models.attention_xl import AttnEncoderXL
+from Graph2SMILES.models.graphfeat import GraphFeatEncoder
 from onmt.decoders import TransformerDecoder
 from onmt.modules.embeddings import Embeddings
 from onmt.translate import BeamSearch, GNMTGlobalScorer, GreedySearch

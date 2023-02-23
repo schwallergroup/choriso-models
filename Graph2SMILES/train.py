@@ -7,13 +7,13 @@ import time
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from models.graph2seq_series_rel import Graph2SeqSeriesRel
-from models.seq2seq import Seq2Seq
+from Graph2SMILES.models.graph2seq_series_rel import Graph2SeqSeriesRel
+from Graph2SMILES.models.seq2seq import Seq2Seq
 from torch.nn.init import xavier_uniform_
 from torch.utils.data import DataLoader
-from utils import parsing
-from utils.data_utils import load_vocab, S2SDataset, G2SDataset
-from utils.train_utils import get_lr, grad_norm, NoamLR, param_count, param_norm, set_seed, setup_logger
+from Graph2SMILES.utils import parsing
+from Graph2SMILES.utils.data_utils import load_vocab, S2SDataset, G2SDataset
+from Graph2SMILES.utils.train_utils import get_lr, grad_norm, NoamLR, param_count, param_norm, set_seed, setup_logger
 
 
 def get_train_parser():

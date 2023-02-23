@@ -6,12 +6,12 @@ import os
 import sys
 import time
 import torch
-from models.graph2seq_series_rel import Graph2SeqSeriesRel
-from models.seq2seq import Seq2Seq
+from Graph2SMILES.models.graph2seq_series_rel import Graph2SeqSeriesRel
+from Graph2SMILES.models.seq2seq import Seq2Seq
 from torch.utils.data import DataLoader
-from utils import parsing
-from utils.data_utils import canonicalize_smiles, load_vocab, S2SDataset, G2SDataset
-from utils.train_utils import log_tensor, param_count, set_seed, setup_logger
+from Graph2SMILES.utils import parsing
+from Graph2SMILES.utils.data_utils import canonicalize_smiles, load_vocab, S2SDataset, G2SDataset
+from Graph2SMILES.utils.train_utils import log_tensor, param_count, set_seed, setup_logger
 
 
 def get_predict_parser():

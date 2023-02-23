@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from models.model_utils import index_select_ND
+from Graph2SMILES.models.model_utils import index_select_ND
 from typing import Tuple
 
 

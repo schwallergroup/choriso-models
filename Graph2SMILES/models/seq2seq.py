@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from utils.data_utils import S2SBatch
+from Graph2SMILES.utils.data_utils import S2SBatch
 from onmt.encoders.transformer import TransformerEncoder
 from onmt.decoders import TransformerDecoder
 from onmt.modules.embeddings import Embeddings
