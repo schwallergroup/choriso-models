@@ -5,8 +5,8 @@ import json
 import os
 from abc import ABCMeta, abstractmethod
 
-from src.datasets import Dataset
-from src.utils import to_torch_tensor
+from megan.src.datasets import Dataset
+from megan.src.utils import to_torch_tensor
 
 # all possible atom features
 ORDERED_ATOM_OH_KEYS = ['is_supernode', 'atomic_num', 'formal_charge', 'chiral_tag',

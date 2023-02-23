@@ -9,10 +9,10 @@ from rdkit import Chem
 from rdkit.Chem import rdchem, BondType, ChiralType, BondStereo, RWMol
 from rdkit.Chem.rdchem import GetPeriodicTable
 
-from src.feat.graph_features import get_atom_features
-from src.feat import ORDERED_ATOM_OH_KEYS, ORDERED_BOND_OH_KEYS, ATOM_EDIT_TUPLE_KEYS
-from src.feat.ring_actions import add_benzene_ring
-from src.feat.utils import get_atom_ind
+from megan.src.feat.graph_features import get_atom_features
+from megan.src.feat import ORDERED_ATOM_OH_KEYS, ORDERED_BOND_OH_KEYS, ATOM_EDIT_TUPLE_KEYS
+from megan.src.feat.ring_actions import add_benzene_ring
+from megan.src.feat.utils import get_atom_ind
 
 PERIODIC_TABLE = GetPeriodicTable()
 

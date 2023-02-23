@@ -12,21 +12,21 @@ from multiprocessing.pool import Pool
 
 import numpy as np
 import pandas as pd
-from src.feat import ReactionFeaturizer
+from megan.src.feat import ReactionFeaturizer
 
-from src.feat import ORDERED_ATOM_OH_KEYS, ORDERED_BOND_OH_KEYS
+from megan.src.feat import ORDERED_ATOM_OH_KEYS, ORDERED_BOND_OH_KEYS
 
-from src.feat.graph_features import ATOM_PROPS, BOND_PROPS, ATOM_PROP2OH, BOND_PROP2OH
+from megan.src.feat.graph_features import ATOM_PROPS, BOND_PROPS, ATOM_PROP2OH, BOND_PROP2OH
 from rdkit import RDLogger
 from scipy import sparse
 from tqdm import tqdm
 
-from src.datasets import Dataset
-from src.feat.featurize import featurize_parallel
-from src.feat.find_properties import find_properties_parallel
-from src.feat.mol_graph import unravel_atom_features, unravel_bond_features
-from src.split import DatasetSplit
-from src.utils import to_torch_tensor, lists_to_tuple
+from megan.src.datasets import Dataset
+from megan.src.feat.featurize import featurize_parallel
+from megan.src.feat.find_properties import find_properties_parallel
+from megan.src.feat.mol_graph import unravel_atom_features, unravel_bond_features
+from megan.src.split import DatasetSplit
+from megan.src.utils import to_torch_tensor, lists_to_tuple
 
 logger = logging.getLogger(__name__)
 

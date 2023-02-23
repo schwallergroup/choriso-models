@@ -7,8 +7,8 @@ from rdkit import Chem
 from rdkit.Chem.rdchem import Mol
 import numpy as np
 
-from src.feat.graph_features import try_get_atom_feature
-from src.feat import ATOM_EDIT_TUPLE_KEYS
+from megan.src.feat.graph_features import try_get_atom_feature
+from megan.src.feat import ATOM_EDIT_TUPLE_KEYS
 
 
 def fix_incomplete_mappings(sub_mol: Mol, prod_mol: Mol) -> Tuple[Mol, Mol]:

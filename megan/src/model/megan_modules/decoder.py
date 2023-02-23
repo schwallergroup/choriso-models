@@ -8,7 +8,7 @@ import gin
 import torch
 from torch import nn
 
-from src.model.graph.gat import MultiHeadGraphConvLayer
+from megan.src.model.graph.gat import MultiHeadGraphConvLayer
 
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 

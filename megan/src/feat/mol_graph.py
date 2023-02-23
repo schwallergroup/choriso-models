@@ -8,8 +8,8 @@ from typing import Tuple, List
 import numpy as np
 import torch
 
-from src.feat.graph_features import get_atom_features, get_bond_features, BOND_PROP2OH, ATOM_PROP2OH
-from src.feat import ORDERED_ATOM_OH_KEYS, ORDERED_BOND_OH_KEYS
+from megan.src.feat.graph_features import get_atom_features, get_bond_features, BOND_PROP2OH, ATOM_PROP2OH
+from megan.src.feat import ORDERED_ATOM_OH_KEYS, ORDERED_BOND_OH_KEYS
 
 logger = logging.getLogger(__name__)
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'

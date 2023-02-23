@@ -9,7 +9,7 @@ from abc import ABCMeta, abstractmethod
 
 import pandas as pd
 
-from src import DATA_DIR
+from megan.src import DATA_DIR
 
 
 class Dataset(metaclass=ABCMeta):

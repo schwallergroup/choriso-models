@@ -7,8 +7,8 @@ import os
 
 import numpy as np
 import pandas as pd
-from src.datasets import Dataset
-from src.datasets.util import unzip_and_clean
+from megan.src.datasets import Dataset
+from megan.src.datasets.util import unzip_and_clean
 from rdkit import RDLogger
 from tqdm import tqdm
 

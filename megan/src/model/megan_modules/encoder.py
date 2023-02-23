@@ -7,7 +7,7 @@ import gin
 import torch
 from torch import nn
 
-from src.model.graph.gat import MultiHeadGraphConvLayer
+from megan.src.model.graph.gat import MultiHeadGraphConvLayer
 
 
 @gin.configurable(blacklist=['hidden_dim', 'bond_emb_dim'])

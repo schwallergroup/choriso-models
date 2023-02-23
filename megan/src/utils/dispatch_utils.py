@@ -10,7 +10,7 @@ from typing import Callable, Dict, List, TextIO, Optional
 
 import gin
 
-from src import CONFIGS_DIR, configure_logger, LOG_LEVEL
+from megan.src import CONFIGS_DIR, configure_logger, LOG_LEVEL
 
 logger = logging.getLogger(__name__)
 

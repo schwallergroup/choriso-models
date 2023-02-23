@@ -7,7 +7,7 @@ import pandas as pd
 
 from abc import abstractmethod, ABCMeta
 
-from src.datasets import Dataset
+from megan.src.datasets import Dataset
 
 SPLITS = ['train', 'valid', 'test']
 

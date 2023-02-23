@@ -6,7 +6,7 @@ import logging
 import numpy as np
 import pandas as pd
 import torch
-from src.feat import ORDERED_ATOM_OH_KEYS
+from megan.src.feat import ORDERED_ATOM_OH_KEYS
 from rdkit import Chem
 from rdkit.Chem import rdchem, Atom, Mol, BondStereo, BondType
 

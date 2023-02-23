@@ -12,13 +12,13 @@ from rdkit import Chem
 from rdkit.Chem.rdchem import RWMol, Mol
 from scipy import sparse
 
-from src.feat.mol_graph import get_graph
-from src.feat.reaction_actions import ReactionAction, AddRingAction, AddAtomAction, BondEditAction, AtomEditAction, \
+from megan.src.feat.mol_graph import get_graph
+from megan.src.feat.reaction_actions import ReactionAction, AddRingAction, AddAtomAction, BondEditAction, AtomEditAction, \
     StopAction
-from src.feat.ring_actions import find_added_benzene_rings
-from src.feat.utils import atom_to_edit_tuple, get_bond_tuple, fix_incomplete_mappings, reac_to_canonical, \
+from megan.src.feat.ring_actions import find_added_benzene_rings
+from megan.src.feat.utils import atom_to_edit_tuple, get_bond_tuple, fix_incomplete_mappings, reac_to_canonical, \
     fix_explicit_hs
-from src.utils import renumber_atoms_for_mapping, mark_reactants
+from megan.src.utils import renumber_atoms_for_mapping, mark_reactants
 
 logger = logging.getLogger(__name__)
 

@@ -3,10 +3,10 @@ Functions for loading configured model, dataset and featurizer instances
 """
 
 import gin
-from src import config
-from src.datasets import Dataset
-from src.feat import ReactionFeaturizer
-from src.split import DatasetSplit
+from megan.src import config
+from megan.src.datasets import Dataset
+from megan.src.feat import ReactionFeaturizer
+from megan.src.split import DatasetSplit
 
 
 @gin.configurable()

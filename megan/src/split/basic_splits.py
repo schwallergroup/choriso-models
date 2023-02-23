@@ -4,8 +4,8 @@ A place for data split algorithms.
 """
 import os
 
-from src.split import DatasetSplit
-from src.datasets import Dataset
+from megan.src.split import DatasetSplit
+from megan.src.datasets import Dataset
 
 
 class DefaultSplit(DatasetSplit):

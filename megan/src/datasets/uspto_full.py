@@ -6,10 +6,10 @@ import logging
 import os
 
 import pandas as pd
-from src.datasets import Dataset
-from src.feat.utils import fix_incomplete_mappings
-from src.split.basic_splits import DefaultSplit
-from src.utils import filter_reactants
+from megan.src.datasets import Dataset
+from megan.src.feat.utils import fix_incomplete_mappings
+from megan.src.split.basic_splits import DefaultSplit
+from megan.src.utils import filter_reactants
 from rdkit import Chem
 from tqdm import tqdm
 

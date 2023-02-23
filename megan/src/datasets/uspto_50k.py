@@ -8,9 +8,9 @@ import os
 import pandas as pd
 from tqdm import tqdm
 
-from src import DATA_DIR
-from src.datasets import Dataset
-from src.utils import complete_mappings
+from megan.src import DATA_DIR
+from megan.src.datasets import Dataset
+from megan.src.utils import complete_mappings
 
 logger = logging.getLogger(__name__)
 

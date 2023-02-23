@@ -3,15 +3,15 @@
 Configuration of datasets and featurizers and splits
 """
 
-from src import N_JOBS
-from src.feat import ReactionFeaturizer
-from src.datasets import Dataset
-from src.datasets.uspto_50k import Uspto50k
-from src.datasets.uspto_full import UsptoFull
-from src.datasets.uspto_mit import UsptoMit
-from src.feat.megan_graph import MeganTrainingSamplesFeaturizer
-from src.split import DatasetSplit
-from src.split.basic_splits import DefaultSplit
+from megan.src import N_JOBS
+from megan.src.feat import ReactionFeaturizer
+from megan.src.datasets import Dataset
+from megan.src.datasets.uspto_50k import Uspto50k
+from megan.src.datasets.uspto_full import UsptoFull
+from megan.src.datasets.uspto_mit import UsptoMit
+from megan.src.feat.megan_graph import MeganTrainingSamplesFeaturizer
+from megan.src.split import DatasetSplit
+from megan.src.split.basic_splits import DefaultSplit
 
 DEFAULT_SPLIT = DefaultSplit()
 

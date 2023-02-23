@@ -8,8 +8,8 @@ import os
 from rdkit import Chem
 from rdkit.Chem.rdchem import Mol
 
-from src.feat.graph_features import ATOM_PROPS, try_get_atom_feature, BOND_PROPS, try_get_bond_feature
-from src.feat.utils import fix_explicit_hs
+from megan.src.feat.graph_features import ATOM_PROPS, try_get_atom_feature, BOND_PROPS, try_get_bond_feature
+from megan.src.feat.utils import fix_explicit_hs
 
 logger = logging.getLogger(__name__)
 

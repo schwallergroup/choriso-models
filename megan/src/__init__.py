@@ -6,7 +6,7 @@ import os
 import random
 import numpy as np
 
-from src.utils import configure_logger
+from megan.src.utils import configure_logger
 
 DATA_DIR = os.environ.get("DATA_DIR", './data')
 LOGS_DIR = os.environ.get("LOGS_DIR", './logs')

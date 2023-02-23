@@ -5,7 +5,7 @@ from typing import List
 from rdkit import Chem
 from rdkit.Chem.rdchem import Mol
 
-from src.feat.utils import atom_to_edit_tuple
+from megan.src.feat.utils import atom_to_edit_tuple
 
 
 def add_benzene_ring(mol: Mol, start_atom_ind: int, ring_atom_maps: List[int]):

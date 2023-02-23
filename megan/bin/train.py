@@ -23,16 +23,16 @@ from collections import Counter
 import gin
 import numpy as np
 import torch
-from src.config import get_featurizer
+from megan.src.config import get_featurizer
 from tqdm import tqdm
 
-from src.get_instances import get_dataset
-from src.model.utils import DumpTensorflowSummaries
-from src.model.megan import Megan
-from src.model.megan_utils import generate_batch
-from src.utils import dispatch_utils, summary, save_weights, load_state_dict
-from src.utils.dispatch_utils import save_current_config, log_current_config
-from src.feat.megan_graph import MeganTrainingSamplesFeaturizer, get_actions_vocab_path, get_prop2oh_vocab_path
+from megan.src.get_instances import get_dataset
+from megan.src.model.utils import DumpTensorflowSummaries
+from megan.src.model.megan import Megan
+from megan.src.model.megan_utils import generate_batch
+from megan.src.utils import dispatch_utils, summary, save_weights, load_state_dict
+from megan.src.utils.dispatch_utils import save_current_config, log_current_config
+from megan.src.feat.megan_graph import MeganTrainingSamplesFeaturizer, get_actions_vocab_path, get_prop2oh_vocab_path
 
 logger = logging.getLogger(__name__)
 

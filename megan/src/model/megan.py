@@ -5,12 +5,12 @@ from typing import Tuple, Optional, List
 
 import gin
 import torch
-from src.feat import ORDERED_ATOM_OH_KEYS, ORDERED_BOND_OH_KEYS
+from megan.src.feat import ORDERED_ATOM_OH_KEYS, ORDERED_BOND_OH_KEYS
 from torch import nn
 from torch.autograd import Variable
 
-from src.model.megan_modules.decoder import MeganDecoder
-from src.model.megan_modules.encoder import MeganEncoder
+from megan.src.model.megan_modules.decoder import MeganDecoder
+from megan.src.model.megan_modules.encoder import MeganEncoder
 
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 

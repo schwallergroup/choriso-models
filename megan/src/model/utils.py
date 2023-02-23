@@ -6,7 +6,7 @@ import tensorflow
 import torch
 from torch.autograd import Variable
 
-from src import logger
+from megan.src import logger
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 

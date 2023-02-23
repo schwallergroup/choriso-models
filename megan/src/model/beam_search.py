@@ -6,15 +6,15 @@ from typing import List, Tuple, Optional
 
 import numpy as np
 import torch
-from src.feat import ORDERED_BOND_OH_KEYS, ORDERED_ATOM_OH_KEYS
-from src.feat.mol_graph import get_graph
-from src.feat.reaction_actions import ReactionAction, StopAction, AtomEditAction, AddAtomAction, AddRingAction, \
+from megan.src.feat import ORDERED_BOND_OH_KEYS, ORDERED_ATOM_OH_KEYS
+from megan.src.feat.mol_graph import get_graph
+from megan.src.feat.reaction_actions import ReactionAction, StopAction, AtomEditAction, AddAtomAction, AddRingAction, \
     BondEditAction
 from rdkit import Chem
 from rdkit.Chem.rdchem import Mol
 
-from src.model.megan import Megan
-from src.model.megan_utils import generate_eval_batch, mols_from_graph, RdkitCache
+from megan.src.model.megan import Megan
+from megan.src.model.megan_utils import generate_eval_batch, mols_from_graph, RdkitCache
 
 logger = logging.getLogger(__name__)
 
