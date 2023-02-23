@@ -13,9 +13,9 @@ from typing import Tuple
 
 from rdkit.Chem import Mol
 
-from src import config
-from src.config import get_featurizer
-from src.feat.megan_graph import MeganTrainingSamplesFeaturizer
+from megan.src import config
+from megan.src.config import get_featurizer
+from megan.src.feat.megan_graph import MeganTrainingSamplesFeaturizer
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 

@@ -9,7 +9,7 @@ import logging
 
 import argh
 
-from src.config import DATASET_INITIALIZERS, FEATURIZER_INITIALIZERS, get_featurizer, get_dataset
+from megan.src.config import DATASET_INITIALIZERS, FEATURIZER_INITIALIZERS, get_featurizer, get_dataset
 
 logger = logging.getLogger(__name__)
 
