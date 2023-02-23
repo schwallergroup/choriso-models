@@ -136,5 +136,9 @@ class MEGAN(ReactionModel):
 
 if __name__ == "__main__":
     this_dir = os.path.dirname(os.path.realpath(__file__))
-    g2s_dir = os.path.join(this_dir, "Models", "G2S")
+    models_dir = os.path.join(this_dir, "Models")
+    if not os.path.exists(models_dir):
+        os.mkdir(models_dir)
+        
+    g2s_dir = os.path.join(models_dir, "G2S")
     test_model = G2S(g2s_dir)
