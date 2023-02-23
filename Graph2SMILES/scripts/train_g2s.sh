@@ -1,8 +1,10 @@
 #!/bin/bash
 
+export PYTHONPATH=$PYTHONPATH:/rwthfs/rz/cluster/home/iz782675/reaction_forward
+
 LOAD_FROM=""
 MODEL=g2s_series_rel
-TASK=retrosynthesis
+TASK=reaction_prediction
 DATASET=USPTO_50k
 MPN_TYPE=dgat
 MAX_REL_POS=4
@@ -27,7 +29,7 @@ REPR_END=smiles
 
 PREFIX=${DATASET}_${MODEL}_${REPR_START}_${REPR_END}
 
-
+cd Graph2SMILES
 python train.py \
   --model="$MODEL" \
   --data_name="$DATASET" \
