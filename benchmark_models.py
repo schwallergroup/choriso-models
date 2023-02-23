@@ -144,3 +144,4 @@ if __name__ == "__main__":
     g2s_dir = os.path.join(models_dir, "G2S")
 
     test_model = G2S(g2s_dir)
+    test_model.train()
