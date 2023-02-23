@@ -12,7 +12,7 @@ from Graph2SMILES.train import main as train_G2S
 from Graph2SMILES.predict import get_predict_parser
 from Graph2SMILES.predict import main as predict_G2S
 
-from megan.bin.train import train_megan
+# from megan.bin.train import train_megan
 
 
 class MolecularTransformer(ReactionModel):
@@ -109,10 +109,12 @@ class MEGAN(ReactionModel):
 
 if __name__ == "__main__":
     this_dir = os.path.dirname(os.path.realpath(__file__))
+
     models_dir = os.path.join(this_dir, "Models")
     if not os.path.exists(models_dir):
         os.mkdir(models_dir)
 
     g2s_dir = os.path.join(models_dir, "G2S")
+
     test_model = G2S(g2s_dir)
 
