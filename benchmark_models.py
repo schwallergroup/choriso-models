@@ -47,9 +47,8 @@ class MolecularTransformer(ReactionModel):
 
 class G2S(ReactionModel):
 
-    def __init__(self):
-        super().__init__()
-        pass
+    def __init__(self, model_dir: str):
+        super().__init__(model_dir)
 
     def load_checkpoint(self, path):
         """Load a pre-trained model from a provided path"""
@@ -72,7 +71,7 @@ class G2S(ReactionModel):
 
         torch.set_printoptions(profile="full")
         train_G2S(args)
-        
+
     def predict(self, data):
         """Predict provided data with the reaction model"""
 
@@ -136,4 +135,6 @@ class MEGAN(ReactionModel):
 
 
 if __name__ == "__main__":
-    test_model = G2S()
+    this_dir = os.path.dirname(os.path.realpath(__file__))
+    g2s_dir = os.path.join(this_dir, "Models", "G2S")
+    test_model = G2S(g2s_dir)

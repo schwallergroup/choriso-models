@@ -10,21 +10,12 @@ class Parameters:
 
 class ReactionModel(abc.ABC):
 
-    def __init__(self, model_dir, params, model, checkpoint=None):
+    def __init__(self, model_dir: str):
         self.model_dir = model_dir
 
         # create model folder if not already existing
         if not os.path.exists(model_dir):
             os.mkdir(model_dir)
-
-        self.params = params
-
-        # build model from the assigned parameters
-        self.model = model(**self.params)
-
-        # if a checkpoint is provided, load it
-        if checkpoint is not None:
-            self.load_checkpoint(checkpoint)
 
     def load_checkpoint(self, path):
         """Load a pre-trained model from a provided path"""
