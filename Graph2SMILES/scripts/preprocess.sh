@@ -1,8 +1,10 @@
 #!/bin/bash
 
-DATASET=USPTO_50k
+export PYTHONPATH=$PYTHONPATH:/rwthfs/rz/cluster/home/iz782675/reaction_forward
+
+DATASET=USPTO_480k
 MODEL=g2s_series_rel
-TASK=retrosynthesis
+TASK=reaction_prediction
 REPR_START=smiles
 REPR_END=smiles
 N_WORKERS=8
