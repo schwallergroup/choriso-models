@@ -59,6 +59,16 @@ class G2S(ReactionModel):
         """Get the embedding of the reaction model"""
         pass
 
+    def preprocess(self, preprocess_dir):
+        """Do data preprocessing. Skip if preprocessed data already exists"""
+        if os.path.exists(preprocess_dir):
+            if not os.listdir(preprocess_dir):
+                print("Preprocessing directory exists and is not empty. Assuming preprocessing was already carried "
+                      "out...")
+                return
+
+        os.system("sh Graph2SMILES/scripts/preprocess.sh")
+
     def train(self):
         """Train the reaction model. Should also contain validation and test steps"""
         os.system("sh Graph2SMILES/scripts/train_g2s.sh")
