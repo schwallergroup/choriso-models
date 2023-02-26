@@ -292,5 +292,8 @@ if __name__ == "__main__":
     torch.set_printoptions(profile="full")
 
     G_vocab = {}            # global vocab
-
-    preprocess_main(args)
+    if os.path.exists(args.preprocess_output_path) and not os.listdir(args.preprocess_output_path):
+        print("Preprocessing directory exists and is not empty. Assuming preprocessing was already carried "
+              "out...")
+    else:
+        preprocess_main(args)

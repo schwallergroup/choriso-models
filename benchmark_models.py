@@ -57,16 +57,6 @@ class G2S(ReactionModel):
 
     def preprocess(self):
         """Do data preprocessing. Skip if preprocessed data already exists"""
-
-        # load preprocess parser to get preprocessing path
-        preprocess_parser = get_preprocess_parser()
-        args = preprocess_parser.parse_args()
-
-        if os.path.exists(args.preprocess_output_path) and not os.listdir(args.preprocess_output_path):
-            print("Preprocessing directory exists and is not empty. Assuming preprocessing was already carried "
-                  "out...")
-            return
-
         os.system("sh Graph2SMILES/scripts/preprocess.sh")
 
     def train(self):
