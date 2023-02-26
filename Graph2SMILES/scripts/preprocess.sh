@@ -11,6 +11,7 @@ N_WORKERS=8
 
 PREFIX=${DATASET}_${MODEL}_${REPR_START}_${REPR_END}
 
+cd Graph2SMILES
 python preprocess.py \
   --model="$MODEL" \
   --data_name="$DATASET" \
