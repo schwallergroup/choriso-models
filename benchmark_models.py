@@ -6,11 +6,7 @@ from reaction_model import *
 
 from MolecularTransformer.train import main as train_MolecularTransformer
 
-from Graph2SMILES.train import get_train_parser
-from Graph2SMILES.utils.train_utils import set_seed, setup_logger
-from Graph2SMILES.train import main as train_G2S
-from Graph2SMILES.predict import get_predict_parser
-from Graph2SMILES.predict import main as predict_G2S
+from Graph2SMILES.preprocess import get_preprocess_parser
 
 # from megan.bin.train import train_megan
 
@@ -59,13 +55,17 @@ class G2S(ReactionModel):
         """Get the embedding of the reaction model"""
         pass
 
-    def preprocess(self, preprocess_dir):
+    def preprocess(self):
         """Do data preprocessing. Skip if preprocessed data already exists"""
-        if os.path.exists(preprocess_dir):
-            if not os.listdir(preprocess_dir):
-                print("Preprocessing directory exists and is not empty. Assuming preprocessing was already carried "
-                      "out...")
-                return
+
+        # load preprocess parser to get preprocessing path
+        preprocess_parser = get_preprocess_parser()
+        args = preprocess_parser.parse_args()
+
+        if os.path.exists(args.preprocess_output_path) and not os.listdir(args.preprocess_output_path):
+            print("Preprocessing directory exists and is not empty. Assuming preprocessing was already carried "
+                  "out...")
+            return
 
         os.system("sh Graph2SMILES/scripts/preprocess.sh")
 
@@ -127,4 +127,5 @@ if __name__ == "__main__":
     g2s_dir = os.path.join(models_dir, "G2S")
 
     test_model = G2S(g2s_dir)
+    test_model.preprocess()
     test_model.train()
