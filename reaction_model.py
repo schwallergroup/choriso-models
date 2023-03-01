@@ -25,6 +25,10 @@ class ReactionModel(abc.ABC):
         """Get the embedding of the reaction model"""
         pass
 
+    def preprocess(self):
+        """Do data preprocessing. Skip if preprocessed data already exists"""
+        pass
+
     def train(self):
         """Train the reaction model. Should also contain validation and test steps"""
         pass
