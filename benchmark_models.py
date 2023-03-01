@@ -14,12 +14,8 @@ from Graph2SMILES.preprocess import get_preprocess_parser
 class MolecularTransformer(ReactionModel):
 
     def __init__(self):
+        self.name = "MolecularTransformer"
         super().__init__()
-        pass
-
-    def load_checkpoint(self, path):
-        """Load a pre-trained model from a provided path"""
-        pass
 
     def embed(self):
         """Get the embedding of the reaction model"""
@@ -37,23 +33,12 @@ class MolecularTransformer(ReactionModel):
         """Predict provided data with the reaction model"""
         pass
 
-    def save_results(self):
-        """Save the results obtained by training"""
-        pass
-
-    def load_results(self, path):
-        """Load the results from a given path"""
-        pass
-
 
 class G2S(ReactionModel):
 
-    def __init__(self, model_dir: str):
-        super().__init__(model_dir)
-
-    def load_checkpoint(self, path):
-        """Load a pre-trained model from a provided path"""
-        pass
+    def __init__(self):
+        self.name = "Graph2SMILES"
+        super().__init__()
 
     def embed(self):
         """Get the embedding of the reaction model"""
@@ -71,28 +56,20 @@ class G2S(ReactionModel):
         """Predict provided data with the reaction model"""
         os.system("sh Graph2SMILES/scripts/predict.sh")
 
-    def save_results(self):
-        """Save the results obtained by training"""
-        pass
-
-    def load_results(self, path):
-        """Load the results from a given path"""
-        pass
-
 
 class MEGAN(ReactionModel):
 
     def __init__(self):
+        self.name = "MEGAN"
         super().__init__()
-        pass
-
-    def load_checkpoint(self, path):
-        """Load a pre-trained model from a provided path"""
-        pass
 
     def embed(self):
         """Get the embedding of the reaction model"""
         pass
+
+    def preprocess(self):
+        """Do data preprocessing. Skip if preprocessed data already exists"""
+        os.system("sh megan/preprocess.sh")
 
     def train(self):
         """Train the reaction model. Should also contain validation and test steps"""
@@ -100,26 +77,20 @@ class MEGAN(ReactionModel):
 
     def predict(self, data):
         """Predict provided data with the reaction model"""
-        pass
+        os.system("sh megan/train.sh")
 
-    def save_results(self):
-        """Save the results obtained by training"""
-        pass
 
-    def load_results(self, path):
-        """Load the results from a given path"""
-        pass
+class BenchmarkPipeline:
+
+    def __init__(self, model: ReactionModel):
+        self.model = model
+
+    def run_train_pipeline(self):
+        self.model.preprocess()
+        self.model.train()
 
 
 if __name__ == "__main__":
-    this_dir = os.path.dirname(os.path.realpath(__file__))
-
-    models_dir = os.path.join(this_dir, "Models")
-    if not os.path.exists(models_dir):
-        os.mkdir(models_dir)
-
-    g2s_dir = os.path.join(models_dir, "G2S")
-
-    test_model = G2S(g2s_dir)
-    test_model.preprocess()
-    test_model.train()
+    reaction_model = MEGAN()
+    pipeline = BenchmarkPipeline(model=reaction_model)
+    pipeline.run_train_pipeline()

@@ -10,16 +10,19 @@ class Parameters:
 
 class ReactionModel(abc.ABC):
 
-    def __init__(self, model_dir: str):
-        self.model_dir = model_dir
+    name:  str
 
-        # create model folder if not already existing
-        if not os.path.exists(model_dir):
-            os.mkdir(model_dir)
-
-    def load_checkpoint(self, path):
-        """Load a pre-trained model from a provided path"""
-        pass
+    def __init__(self):
+        assert self.name is not None, "PLease set name before calling super-class"
+        # get the path of this file
+        this_dir = os.path.dirname(os.path.realpath(__file__))
+        # define the Models directory
+        all_models_dir = os.path.join(this_dir, "Models")
+        # if it doesn't exist, create it
+        if not os.path.exists(all_models_dir):
+            os.mkdir(all_models_dir)
+        # define the path of the current model. point to the directory
+        self.model_dir = os.path.join(all_models_dir, self.name)
 
     def embed(self):
         """Get the embedding of the reaction model"""
@@ -37,11 +40,4 @@ class ReactionModel(abc.ABC):
         """Predict provided data with the reaction model"""
         pass
 
-    def save_results(self):
-        """Save the results obtained by training"""
-        pass
-
-    def load_results(self, path):
-        """Load the results from a given path"""
-        pass
 

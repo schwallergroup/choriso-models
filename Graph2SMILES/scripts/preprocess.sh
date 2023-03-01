@@ -2,7 +2,7 @@
 
 export PYTHONPATH=$PYTHONPATH:/rwthfs/rz/cluster/home/iz782675/reaction_forward
 
-DATASET=USPTO_480k
+DATASET=cjhif
 MODEL=g2s_series_rel
 TASK=reaction_prediction
 REPR_START=smiles
@@ -18,12 +18,12 @@ python preprocess.py \
   --task="$TASK" \
   --representation_start=$REPR_START \
   --representation_end=$REPR_END \
-  --train_src="./data/$DATASET/src-train.txt" \
-  --train_tgt="./data/$DATASET/tgt-train.txt" \
-  --val_src="./data/$DATASET/src-val.txt" \
-  --val_tgt="./data/$DATASET/tgt-val.txt" \
-  --test_src="./data/$DATASET/src-test.txt" \
-  --test_tgt="./data/$DATASET/tgt-test.txt" \
+  --train_src="../data/$DATASET/src-train.txt" \
+  --train_tgt="../data/$DATASET/tgt-train.txt" \
+  --val_src="../data/$DATASET/src-val.txt" \
+  --val_tgt="../data/$DATASET/tgt-val.txt" \
+  --test_src="../data/$DATASET/src-test.txt" \
+  --test_tgt="../data/$DATASET/tgt-test.txt" \
   --log_file="$PREFIX.preprocess.log" \
   --preprocess_output_path="./preprocessed/$PREFIX/" \
   --seed=42 \

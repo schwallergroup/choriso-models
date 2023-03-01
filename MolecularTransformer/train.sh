@@ -2,9 +2,9 @@ export PYTHONPATH=$PYTHONPATH:/rwthfs/rz/cluster/home/iz782675/reaction_forward
 
 cd MolecularTransformer
 
-dataset=MIT_mixed_augm # MIT_mixed_augm / STEREO_mixed_augm
+dataset=cjhif
 
-python  train.py -data data/${dataset}/${dataset} \
+python  train.py -data processed/${dataset}/ \
                    -save_model experiments/checkpoints/${dataset}/${dataset}_model \
                    -seed 42 -gpu_ranks 0 -save_checkpoint_steps 10000 -keep_checkpoint 20 \
                    -train_steps 500000 -param_init 0  -param_init_glorot -max_generator_batches 32 \
