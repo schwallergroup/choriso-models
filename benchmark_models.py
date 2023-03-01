@@ -25,9 +25,13 @@ class MolecularTransformer(ReactionModel):
         """Get the embedding of the reaction model"""
         pass
 
+    def preprocess(self):
+        """Do data preprocessing. Skip if preprocessed data already exists"""
+        os.system("sh MolecularTransformer/preprocess.sh")
+
     def train(self):
         """Train the reaction model. Should also contain validation and test steps"""
-        pass
+        os.system("sh MolecularTransformer/train.sh")
 
     def predict(self, data):
         """Predict provided data with the reaction model"""
