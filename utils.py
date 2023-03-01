@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 
@@ -31,12 +32,18 @@ def random_split(data: pd.DataFrame, val_percent, test_percent):
 
 if __name__ == "__main__":
 
-    test_rxn_smiles = "CCCCCCCCC>>CCCCCC.OOOOOOOO"
+    file_names = ["test", "val", "train"]
 
-    test_df = pd.DataFrame([test_rxn_smiles]*100, columns=["SMILES"])
+    data_dir = "data/cjhif/"
 
-    test = prepare_data(test_df)
+    for file_name in file_names:
 
-    tr, val, te = random_split(test, 0.1, 0.1)
+        reactions = pd.read_csv(os.path.join(data_dir, f"{file_name}.tsv"), sep="\t", error_bad_lines=False)
 
-    print("0")
+        split_reactions = prepare_data(reactions, rsmiles_col="canonic_rxn")
+
+        reactant_data = split_reactions["reactants"]
+        product_data = split_reactions["products"]
+
+        reactant_data.to_csv(os.path.join(data_dir, f"src-{file_name}.txt"), sep="\t", index=False, header=False)
+        product_data.to_csv(os.path.join(data_dir, f"tgt-{file_name}.txt"), sep="\t", index=False, header=False)
