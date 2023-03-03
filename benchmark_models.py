@@ -73,11 +73,11 @@ class MEGAN(ReactionModel):
 
     def train(self):
         """Train the reaction model. Should also contain validation and test steps"""
-        pass
+        os.system("sh megan/train.sh")
 
     def predict(self, data):
         """Predict provided data with the reaction model"""
-        os.system("sh megan/train.sh")
+        pass
 
 
 class BenchmarkPipeline:

@@ -10,7 +10,7 @@ from torch import nn
 from megan.src.model.graph.gat import MultiHeadGraphConvLayer
 
 
-@gin.configurable(blacklist=['hidden_dim', 'bond_emb_dim'])
+@gin.configurable(denylist=['hidden_dim', 'bond_emb_dim'])
 class MeganEncoder(nn.Module):
     def __init__(self, hidden_dim: int, bond_emb_dim: int, n_encoder_conv: int = 4,
                  enc_residual: bool = True, enc_dropout: float = 0.0):

@@ -18,7 +18,7 @@ def softmax(values, base, dim):
     return exp / torch.sum(exp, dim=dim).unsqueeze(-1)
 
 
-@gin.configurable(blacklist=['hidden_dim', 'bond_emb_dim', 'n_atom_actions', 'n_bond_actions'])
+@gin.configurable(denylist=['hidden_dim', 'bond_emb_dim', 'n_atom_actions', 'n_bond_actions'])
 class MeganDecoder(nn.Module):
     def __init__(self, hidden_dim: int, bond_emb_dim, n_atom_actions: int, n_bond_actions: int,
                  n_fc: int = 3, n_decoder_conv: int = 4, dec_residual: bool = True, bond_atom_dim: int = 32,

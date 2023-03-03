@@ -11,7 +11,7 @@ from torch import nn
 logger = logging.getLogger(__name__)
 
 
-@gin.configurable(whitelist=['att_heads', 'att_dim'])
+@gin.configurable(allowlist=['att_heads', 'att_dim'])
 class MultiHeadGraphConvLayer(nn.Module):
     def __init__(self, bond_dim: int, input_dim: int, output_dim: int, residual: bool,
                  att_heads: int = 8, att_dim: int = 64):

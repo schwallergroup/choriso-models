@@ -24,10 +24,19 @@ def featurize(dataset_key: str, featurizer_key: str):
     :param featurizer_key: key of the dataset
     """
     dataset = get_dataset(dataset_key)
+
+    if not dataset.is_acquired():
+        logger.info("Acquiring dataset!")
+        dataset.acquire()
+
     featurizer = get_featurizer(featurizer_key)
-    logger.info(f"Featurizing with '{featurizer_key}' on dataset '{dataset_key}'")
-    featurizer.featurize_dataset(dataset)
-    logger.info(f"Finished featurizing with '{featurizer_key}' on dataset '{dataset_key}'!")
+    if not featurizer.has_finished(dataset.feat_dir):
+        logger.info(f"Featurizing with '{featurizer_key}' on dataset '{dataset_key}'")
+        featurizer.featurize_dataset(dataset)
+        logger.info(f"Finished featurizing with '{featurizer_key}' on dataset '{dataset_key}'!")
+
+    else:
+        logger.info("Featurization was already done!")
 
 
 if __name__ == '__main__':

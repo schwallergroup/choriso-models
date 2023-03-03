@@ -100,7 +100,8 @@ class MeganTrainingSamplesFeaturizer(ReactionFeaturizer):
         if self._vocabulary is None:
             with open(get_actions_vocab_path(self.dir(feat_dir)), 'r') as fp:
                 action_tuples = json.load(fp)
-
+            print("get_actions_vocab_path(self.dir(feat_dir)): ", get_actions_vocab_path(self.dir(feat_dir)))
+            print("action_tuples: ", action_tuples)
             prop2oh_path = get_prop2oh_vocab_path(self.dir(feat_dir))
             if not os.path.exists(prop2oh_path):
                 # use default OH feature values (for backward compatibility)
@@ -185,7 +186,11 @@ class MeganTrainingSamplesFeaturizer(ReactionFeaturizer):
         logger.info("Max. number of nodes: {}".format(max_n_nodes))
 
         # we do not featurize test set for training
-        all_inds = np.argwhere(split['test'] == 0).flatten()
+        # originally (didn't work for custom dataset):
+        # all_inds = np.argwhere(split['test'] == 0).flatten()
+        # our implementation:
+        condition = split['test'].values == 0
+        all_inds = np.flatnonzero(condition)
 
         # shuffle indices for featurization in multiple threads
         np.random.shuffle(all_inds)
@@ -352,7 +357,7 @@ class MeganTrainingSamplesFeaturizer(ReactionFeaturizer):
         sparse.save_npz(get_nodes_path(feat_dir), nodes_mat)
         sparse.save_npz(get_adj_path(feat_dir), adj_mat)
 
-        n_saved_reacs = len(np.unique(meta['reaction_ind']))
+        n_saved_reacs = len(np.unique(meta['reaction_ind'])) if len(np.unique(meta['reaction_ind'])) != 0 else 1
 
         logger.info(f"Saved {n_saved_reacs}/{len(all_inds)} reactions ({n_saved_reacs / len(all_inds) * 100}%)")
         logger.info(f"Saved {len(meta)} paths (avg. {len(meta) / n_saved_reacs} paths per reaction)")

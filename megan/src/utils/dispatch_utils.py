@@ -35,6 +35,7 @@ def save_current_config(output_path: str):
 
 
 def parse_config_key(arg: str):
+    print("CONFIGS_DIR: ", CONFIGS_DIR)
     if arg.endswith('.gin'):
         return arg  # assume this is a concrete path
     else:
@@ -144,8 +145,8 @@ def dispatch_configurable_command(function: Callable[[str], None]):
         return
 
     conf_path = sys.argv[1]
-
     conf_path = parse_config_key(conf_path)
+
     parse_config_file(conf_path)
 
     binding_keys = _argparse_gin_bindings(parser)

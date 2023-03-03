@@ -29,7 +29,7 @@ default_atom_features = 'is_supernode', 'atomic_num', 'formal_charge', 'chiral_t
 default_bond_features = 'bond_type', 'bond_stereo', 'is_edited'
 
 
-@gin.configurable(blacklist=['n_atom_actions', 'n_bond_actions', 'prop2oh'])
+@gin.configurable(denylist=['n_atom_actions', 'n_bond_actions', 'prop2oh'])
 class Megan(nn.Module):
     def __init__(self, n_atom_actions: int, n_bond_actions: int, prop2oh: dict,
                  bond_emb_dim: int = 8, hidden_dim: int = 512, stateful: bool = True,

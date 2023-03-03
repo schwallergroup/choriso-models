@@ -9,6 +9,7 @@ from megan.src.datasets import Dataset
 from megan.src.datasets.uspto_50k import Uspto50k
 from megan.src.datasets.uspto_full import UsptoFull
 from megan.src.datasets.uspto_mit import UsptoMit
+from megan.src.datasets.cjhif import CJHIF
 from megan.src.feat.megan_graph import MeganTrainingSamplesFeaturizer
 from megan.src.split import DatasetSplit
 from megan.src.split.basic_splits import DefaultSplit
@@ -24,7 +25,8 @@ SPLIT_INITIALIZERS = {
 DATASET_INITIALIZERS = {
     'uspto_50k': lambda: Uspto50k(),
     'uspto_mit': lambda: UsptoMit(),
-    'uspto_full': lambda: UsptoFull()
+    'uspto_full': lambda: UsptoFull(),
+    'cjhif': lambda: CJHIF()
 }
 
 # all featurizer variants that we used in experiments

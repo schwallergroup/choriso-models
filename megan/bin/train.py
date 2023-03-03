@@ -37,7 +37,7 @@ from megan.src.feat.megan_graph import MeganTrainingSamplesFeaturizer, get_actio
 logger = logging.getLogger(__name__)
 
 
-@gin.configurable(blacklist=['save_path'])
+@gin.configurable(denylist=['save_path'])
 def train_megan(
         save_path: str,
         featurizer_key: str,
@@ -280,8 +280,11 @@ def train_megan(
         train_ind = train_ind & (metadata['path_i'] == 0)
         valid_ind = valid_ind & (metadata['path_i'] == 0)
 
-    train_ind = np.argwhere(train_ind).flatten()
-    valid_ind = np.argwhere(valid_ind).flatten()
+    # train_ind = np.argwhere(train_ind).flatten()
+    # valid_ind = np.argwhere(valid_ind).flatten()
+
+    train_ind = np.flatnonzero(train_ind)
+    valid_ind = np.flatnonzero(valid_ind)
 
     logger.info(f"Training on chunk of {len(train_ind)} training samples and {len(valid_ind)} valid samples")
     if train_samples_per_epoch == -1:
