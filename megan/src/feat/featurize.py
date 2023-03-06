@@ -375,6 +375,8 @@ def featurize_parallel(params) -> int:
             metadata['class'].append(data_x['class'][reaction_i])
 
         for sample_ind, sample in enumerate(training_samples):
+            print("sample: ", sample)
+            breakpoint()
             ind = start_ind + sample_ind
             action_tuples.append((ind, sample['action_tuple']))
 

@@ -1,14 +1,9 @@
 import os
 import sys
 import torch
+import wandb
 
 from reaction_model import *
-
-from MolecularTransformer.train import main as train_MolecularTransformer
-
-from Graph2SMILES.preprocess import get_preprocess_parser
-
-# from megan.bin.train import train_megan
 
 
 class MolecularTransformer(ReactionModel):
@@ -28,6 +23,29 @@ class MolecularTransformer(ReactionModel):
     def train(self):
         """Train the reaction model. Should also contain validation and test steps"""
         os.system("sh MolecularTransformer/train.sh")
+
+    def predict(self, data):
+        """Predict provided data with the reaction model"""
+        pass
+
+
+class OpenNMT(ReactionModel):
+
+    def __init__(self):
+        self.name = "OpenNMT_Transformer"
+        super().__init__()
+
+    def embed(self):
+        """Get the embedding of the reaction model"""
+        pass
+
+    def preprocess(self):
+        """Do data preprocessing. Skip if preprocessed data already exists"""
+        os.system("sh OpenNMT_Transformer/preprocess.sh")
+
+    def train(self):
+        """Train the reaction model. Should also contain validation and test steps"""
+        os.system("sh OpenNMT_Transformer/train.sh")
 
     def predict(self, data):
         """Predict provided data with the reaction model"""
@@ -91,6 +109,6 @@ class BenchmarkPipeline:
 
 
 if __name__ == "__main__":
-    reaction_model = MEGAN()
+    reaction_model = OpenNMT()
     pipeline = BenchmarkPipeline(model=reaction_model)
     pipeline.run_train_pipeline()
