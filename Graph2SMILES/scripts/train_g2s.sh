@@ -63,7 +63,7 @@ python train.py \
   --attn_dropout="$DROPOUT" \
   --max_relative_positions="$MAX_REL_POS" \
   --seed=42 \
-  --epoch=2000 \
+  --epoch=2 \
   --max_steps="$MAX_STEP" \
   --warmup_steps=8000 \
   --lr="$LR" \

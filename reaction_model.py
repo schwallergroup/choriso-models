@@ -16,13 +16,13 @@ class ReactionModel(abc.ABC):
         assert self.name is not None, "PLease set name before calling super-class"
         # get the path of this file
         this_dir = os.path.dirname(os.path.realpath(__file__))
-        # define the Models directory
-        all_models_dir = os.path.join(this_dir, "Models")
-        # if it doesn't exist, create it
-        if not os.path.exists(all_models_dir):
-            os.mkdir(all_models_dir)
+
         # define the path of the current model. point to the directory
-        self.model_dir = os.path.join(all_models_dir, self.name)
+        self.model_dir = os.path.join(this_dir, self.name)
+
+        # if it doesn't exist, create it
+        if not os.path.exists(self.model_dir):
+            os.mkdir(self.model_dir)
 
     def embed(self):
         """Get the embedding of the reaction model"""
