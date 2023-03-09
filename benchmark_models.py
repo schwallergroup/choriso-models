@@ -4,10 +4,11 @@ import torch
 import wandb
 import pandas as pd
 import json
+import numpy as np
 from transformers import AutoConfig, AutoModel, AutoTokenizer, Trainer, TrainingArguments
 from transformers import AutoModelForSeq2SeqLM, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForSeq2Seq
+import evaluate
 
-model = AutoModelForSeq2SeqLM.from_pretrained("t5-small")
 from transformers.integrations import WandbCallback, CodeCarbonCallback
 
 from reaction_model import *
@@ -121,6 +122,12 @@ class HuggingFaceTransformerCustom(ReactionModel):
         """Get the embedding of the reaction model"""
         pass
 
+    def compute_metrics(self, eval_pred):
+        metric = evaluate.load("accuracy")
+        logits, labels = eval_pred
+        predictions = np.argmax(logits, axis=-1)
+        return metric.compute(predictions=predictions, references=labels)
+
     def preprocess(self, dataset: str = "cjhif"):
         """Do data preprocessing. Skip if preprocessed data already exists"""
         root_dir = os.path.dirname(self.model_dir)
@@ -147,24 +154,24 @@ class HuggingFaceTransformerCustom(ReactionModel):
 
                 split_reactions = split_reactions.to_dict("list")
 
+                # tokenize the dataset
                 reaction_dataset = self.tokenizer(split_reactions["reactants"], text_target=split_reactions["products"],
-                                               truncation=True, max_length=1000)
-                print("reaction_dataset: ", reaction_dataset)
+                                               truncation=True, padding=True, max_length=1000)
+
+                # make it a dict
                 reaction_dataset = dict(reaction_dataset)
-                print("type of reaction_dataset: ", type(reaction_dataset))
+
+                # save results
                 with open(save_path, "w") as outfile:
                     json.dump(reaction_dataset, outfile)
 
             if file_name == "train":
-                self.train_dataset = reaction_dataset
+                self.train_dataset = ReactionForwardDataset(reaction_dataset)
             else:
-                self.val_dataset = reaction_dataset
+                self.val_dataset = ReactionForwardDataset(reaction_dataset)
 
     def train(self):
         """Train the reaction model. Should also contain validation and test steps"""
-        print("self.train_dataset.keys: ", self.train_dataset.keys())
-        print("self.val_dataset: ", self.val_dataset.keys())
-        breakpoint()
         data_collator = DataCollatorForSeq2Seq(tokenizer=self.tokenizer, model=self.model)
         trainer = Seq2SeqTrainer(model=self.model,
                                  args=self.train_args,
@@ -172,7 +179,8 @@ class HuggingFaceTransformerCustom(ReactionModel):
                                  eval_dataset=self.val_dataset,
                                  data_collator=data_collator,
                                  tokenizer=self.tokenizer,
-                                 callbacks=[CodeCarbonCallback])
+                                 compute_metrics=self.compute_metrics,
+                                 callbacks=[WandbCallback, CodeCarbonCallback])
         trainer.train()
 
     def predict(self, data):
@@ -247,13 +255,13 @@ if __name__ == "__main__":
         "save_total_limit": 3,
         "num_train_epochs": 3,  # total number of training epochs
         "per_device_train_batch_size": 16,  # batch size per device during training
-        "per_device_eval_batch_size": 64,  # batch size for evaluation
+        "per_device_eval_batch_size": 32,  # batch size for evaluation
         "warmup_steps": 500,  # number of warmup steps for learning rate scheduler
         "weight_decay": 0.01,  # strength of weight decay
         "logging_dir": 'logs',  # directory for storing logs
         "logging_steps": 10,
     }
-    reaction_model = HuggingFaceTransformerCustom(model_architecture="t5-small",
+    reaction_model = HuggingFaceTransformerCustom(model_architecture="bert-base-uncased",
                                                   train_args=train_args)
     pipeline = BenchmarkPipeline(model=reaction_model)
     pipeline.run_train_pipeline()

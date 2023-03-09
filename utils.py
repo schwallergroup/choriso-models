@@ -39,20 +39,15 @@ class ReactionForwardDataset(torch.utils.data.Dataset):
     """Class wrapper for reaction forward prediction data. Adapted from
     https://huggingface.co/transformers/v3.2.0/custom_datasets.html"""
 
-    def __init__(self, reactants, products):
-        self.reactants = reactants
-        self.products = products
+    def __init__(self, tokenizer_outs):
+        self.tokenizer_outs = tokenizer_outs
 
     def __getitem__(self, idx):
-        item = {key: torch.tensor(val[idx]) for key, val in self.reactants.items()}
-        print("item: ", item)
-        target = {key: torch.tensor(val[idx]) for key, val in self.products.items()}
-        print("target: ", target)
-        item['labels'] = torch.tensor(self.products[idx])
+        item = {key: torch.tensor(val[idx]) for key, val in self.tokenizer_outs.items()}
         return item
 
     def __len__(self):
-        return len(self.reactants)
+        return len(self.tokenizer_outs["labels"])
 
 
 if __name__ == "__main__":
