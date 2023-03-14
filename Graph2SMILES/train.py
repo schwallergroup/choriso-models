@@ -7,6 +7,8 @@ import time
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import wandb
+from codecarbon import EmissionsTracker
 from Graph2SMILES.models.graph2seq_series_rel import Graph2SeqSeriesRel
 from Graph2SMILES.models.seq2seq import Seq2Seq
 from torch.nn.init import xavier_uniform_
@@ -93,8 +95,12 @@ def main(args):
 
     o_start = time.time()
 
+    wandb.init(project="Graph2SMILES")
+    tracker = EmissionsTracker()
+
     logging.info("Start training")
     for epoch in range(args.epoch):
+        tracker.start()
         model.zero_grad()
 
         train_dataset.sort()
@@ -131,6 +137,8 @@ def main(args):
 
                 losses.append(loss.item())
                 accs.append(acc.item() * 100)
+
+                wandb.log({"step": total_step, "train_loss": loss.item(), "train_acc": acc.item() * 100}, commit=False)
 
                 accum += 1
 
@@ -198,6 +206,9 @@ def main(args):
 
                 logging.info(f"Evaluation (with teacher) at step {total_step}, eval loss: {eval_meters[0]}, "
                              f"eval acc: {eval_meters[1]}")
+
+                wandb.log({"eval_loss": eval_meters[0], "eval_acc": eval_meters[1]}, commit=False)
+
                 sys.stdout.flush()
 
                 model.train()
@@ -291,6 +302,10 @@ def main(args):
 
             model.zero_grad()
             accum = 0
+
+        emission = tracker.stop()
+
+        wandb.log({"CO2 emission (in Kg)": emission})
 
 
 if __name__ == "__main__":

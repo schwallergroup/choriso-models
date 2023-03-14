@@ -5,9 +5,14 @@ import wandb
 import pandas as pd
 import json
 import numpy as np
-from transformers import AutoConfig, AutoModel, AutoTokenizer, Trainer, TrainingArguments
+import tempfile
+from tokenizers import Regex, Tokenizer, pre_tokenizers, processors
+from tokenizers import models as tokenizer_models
+from tokenizers.trainers import WordLevelTrainer
+from transformers import AutoConfig, AutoTokenizer, EncoderDecoderConfig, PreTrainedTokenizerFast, BertConfig
 from transformers import AutoModelForSeq2SeqLM, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForSeq2Seq
 import evaluate
+
 
 from transformers.integrations import WandbCallback, CodeCarbonCallback
 
@@ -54,64 +59,105 @@ class OpenNMT(ReactionModel):
 
     def train(self):
         """Train the reaction model. Should also contain validation and test steps"""
-        wandb.init(project="OpenNMT_Transformer")
-        wandb.tensorboard.patch(root_logdir=os.path.join(self.model_dir, "log_dir"))
+        # wandb.init(project="OpenNMT_Transformer")
+        # wandb.tensorboard.patch(root_logdir=os.path.join(self.model_dir, "log_dir"))
         os.system("sh OpenNMT_Transformer/train.sh")
-        wandb.finish()
+        # wandb.finish()
 
     def predict(self, data):
         """Predict provided data with the reaction model"""
         os.system("sh OpenNMT_Transformer/predict.sh")
 
 
-class HuggingFaceTransformerPretrained(ReactionModel):
-
-    def __init__(self, pretrained_model: str, model_kwargs: dict = None):
-        self.name = f"HuggingFaceTransformerPretrained_{pretrained_model}"
-        super().__init__()
-        model_kwargs = {} if model_kwargs is None else model_kwargs
-
-        self.tokenizer = AutoTokenizer.from_pretrained(pretrained_model, **model_kwargs)
-        self.model = AutoModel.from_pretrained(pretrained_model, **model_kwargs)
-
-    def embed(self):
-        """Get the embedding of the reaction model"""
-        pass
-
-    def preprocess(self):
-        """Do data preprocessing. Skip if preprocessed data already exists"""
-        pass
-
-    def train(self):
-        """Train the reaction model. Should also contain validation and test steps"""
-        pass
-
-    def predict(self, data):
-        """Predict provided data with the reaction model"""
-        pass
-
-
 class HuggingFaceTransformerCustom(ReactionModel):
 
-    def __init__(self, model_architecture: str, train_args: dict, model_args: dict = None):
+    def __init__(self, model_architecture: str, train_args: dict, model_args: dict = None, dataset: str = "cjhif"):
         name_suffix = model_architecture.split("/")[-1]
         self.name = f"HuggingFaceTransformerCustom_{name_suffix}"
         super().__init__()
-        # if we already have saved a config, load it
-        config_path = os.path.join(self.model_dir, "config.json")
+        chem_tokenizer_path = os.path.join(self.model_dir, "chem_tokenizer")
+        if not os.path.exists(chem_tokenizer_path):
+            # TODO wip hardcoded MolecularTransformer tokenization
+            pattern = Regex(
+                r"(\%\([0-9]{3}\)|\[[^\]]+]|Br?|Cl?|N|O|S|P|F|I|b|c|n|o|s|p|\||\(|\)|\.|=|#|-|\+|\\|\/|:|~|@|\?|>>?|\*|\$|\%[0-9]{2}|[0-9])")
+            # define simple Tokenizer that creates the vocabulary from the regex pattern
+            chem_tokenizer = Tokenizer(tokenizer_models.WordLevel(unk_token="[UNK]"))
+
+            chem_tokenizer.pre_tokenizer = pre_tokenizers.Split(pattern, "isolated")
+            chem_tokenizer.post_processor = processors.BertProcessing(cls=("[CLS]", 1), sep=("[SEP]", 2))
+            trainer = WordLevelTrainer(special_tokens=["[UNK]", "[PAD]", "[CLS]", "[SEP]", "[MASK]"])
+
+            # get data for tokenizer training --> for building the vocab!
+            root_dir = os.path.dirname(self.model_dir)
+            data_dir = os.path.join(root_dir, "data", dataset)
+            paths = [os.path.join(data_dir, f"{file_name}.tsv") for file_name in ["train", "val"]]
+
+            # obtain reaction smiles and merge them into one dataframe
+            reactions = [pd.read_csv(path, sep="\t")["canonic_rxn"] for path in paths]
+            reactions = pd.concat(reactions)
+
+            # open a temporary file for the train+val smiles so it doesn't need to be stored
+            with tempfile.NamedTemporaryFile(suffix=".txt") as tmp:
+                # save to temp file
+                reactions.to_csv(tmp, sep="\t", index=False, header=False)
+
+                # do training and store the final tokenizer
+                chem_tokenizer.train([tmp.name], trainer)
+                chem_tokenizer = PreTrainedTokenizerFast(tokenizer_object=chem_tokenizer,
+                                                         unk_token="[UNK]",
+                                                         pad_token="[PAD]",
+                                                         cls_token="[CLS]",
+                                                         sep_token="[SEP]",
+                                                         mask_token="[MASK]",
+                                                         model_max_length=1024)
+
+                chem_tokenizer.save_pretrained(chem_tokenizer_path)
+
+        else:
+            # use pre-trained tokenizer
+            chem_tokenizer = AutoTokenizer.from_pretrained(chem_tokenizer_path)
+
+        self.tokenizer = chem_tokenizer
+
+        # if we already have saved a model config, load it
+        config_path = os.path.join(self.model_dir, "config")
         if os.path.exists(config_path):
             print("WARNING: Saved parameters are used! If you want to change the architecture, please delete the "
                   "config file.")
             config = AutoConfig.from_pretrained(config_path)
+
         else:
             model_kwargs = {} if model_args is None else model_args
-            config = AutoConfig.from_pretrained(model_architecture, **model_kwargs)
+            # we need to decide which architecture to use. We could either use pre-defined ones like T5 or specify a
+            # encoder-decoder model ourselves. In this case we need to specify encoder and decoder configs
+
+            if "encoder" in model_kwargs.keys() and "decoder" in model_kwargs.keys():
+                # use encoder-decoder architecture with given parameters
+                enc_config = model_kwargs["encoder"]
+                dec_config = model_kwargs["decoder"]
+
+                config = EncoderDecoderConfig.from_encoder_decoder_configs(enc_config, dec_config)
+
+                # overwrite arguments with tokenizer specifications
+                config.decoder_start_token_id = self.tokenizer.cls_token_id
+                config.pad_token_id = self.tokenizer.pad_token_id
+                config.vocab_size = self.tokenizer.vocab_size
+
+                config.tie_word_embeddings = True
+
+            else:
+                # use pre-built architecture
+                config = AutoConfig.from_pretrained(model_architecture, **model_kwargs)
+
+            # save config for later runsl
+            config.save_pretrained(config_path, push_to_hub=False)
 
         # choose model based on config
         self.model = AutoModelForSeq2SeqLM.from_config(config)
 
-        # choose tokenizer based on the model architecture
-        self.tokenizer = AutoTokenizer.from_pretrained(model_architecture)
+        # resize the token length to fit the tokenizer
+        self.model.encoder.resize_token_embeddings(len(self.tokenizer))
+        self.model.decoder.resize_token_embeddings(len(self.tokenizer))
 
         # route the given dir to the model dir
         train_args["output_dir"] = os.path.join(self.model_dir, train_args["output_dir"])
@@ -148,9 +194,9 @@ class HuggingFaceTransformerCustom(ReactionModel):
 
             # else do preprocessing and save it in a json file so it can be retrieved more easily
             else:
-                reactions = pd.read_csv(os.path.join(data_dir, f"{file_name}.tsv"), sep="\t", error_bad_lines=False)
+                reactions = pd.read_csv(os.path.join(data_dir, f"{file_name}.tsv"), sep="\t")
 
-                split_reactions = prepare_data(reactions[:1000], rsmiles_col="canonic_rxn")
+                split_reactions = prepare_data(reactions, rsmiles_col="canonic_rxn")
 
                 split_reactions = split_reactions.to_dict("list")
 
@@ -179,7 +225,7 @@ class HuggingFaceTransformerCustom(ReactionModel):
                                  eval_dataset=self.val_dataset,
                                  data_collator=data_collator,
                                  tokenizer=self.tokenizer,
-                                 compute_metrics=self.compute_metrics,
+                                 # compute_metrics=self.compute_metrics,
                                  callbacks=[WandbCallback, CodeCarbonCallback])
         trainer.train()
 
@@ -250,19 +296,69 @@ class BenchmarkPipeline:
 if __name__ == "__main__":
     train_args = {
         "output_dir": 'results',  # output directory
-        "evaluation_strategy": "epoch",
-        "learning_rate": 2e-5,
-        "save_total_limit": 3,
-        "num_train_epochs": 3,  # total number of training epochs
-        "per_device_train_batch_size": 16,  # batch size per device during training
-        "per_device_eval_batch_size": 32,  # batch size for evaluation
-        "warmup_steps": 500,  # number of warmup steps for learning rate scheduler
+
+        # training setup
+        "max_steps": 400000,  # total number of training steps
+        "evaluation_strategy": "steps",
+        "eval_steps": 10000,
+        "save_strategy": "steps",
+        "save_steps": 5000,
+
+        # model and optimizer params
+        "learning_rate": 2,
+        "save_total_limit": 4,
+        "per_device_train_batch_size": 8,  # batch size per device during training
+        "per_device_eval_batch_size": 8,  # batch size for evaluation
+        "warmup_steps": 8000,  # number of warmup steps for learning rate scheduler
         "weight_decay": 0.01,  # strength of weight decay
         "logging_dir": 'logs',  # directory for storing logs
         "logging_steps": 10,
+        "adam_beta1": 0.9,
+        "adam_beta2": 0.998,
+        "max_grad_norm": 0,
+        "label_smoothing_factor": 0,
+        # "load_best_model_at_end": False,
+    }
+    enc_config = BertConfig(hidden_size = 384,
+                              num_hidden_layers = 4,
+                              num_attention_heads = 8,
+                              intermediate_size = 2048,
+                              hidden_act = 'gelu',
+                              hidden_dropout_prob = 0.1,
+                              attention_probs_dropout_prob = 0.1,
+                              max_position_embeddings = 1024,
+                              type_vocab_size = 2,
+                              initializer_range = 0.02,
+                              layer_norm_eps = 1e-12,
+                              pad_token_id = 0,
+                              position_embedding_type = 'absolute',
+                              use_cache = True,
+                              classifier_dropout = None,
+                            num_beams=10, vocab_size=1024)
+
+    dec_config = BertConfig(hidden_size=384,
+                            num_hidden_layers=4,
+                            num_attention_heads=8,
+                            intermediate_size=2048,
+                            hidden_act='gelu',
+                            hidden_dropout_prob=0.1,
+                            attention_probs_dropout_prob=0.1,
+                            max_position_embeddings=1024,
+                            type_vocab_size=2,
+                            initializer_range=0.02,
+                            layer_norm_eps=1e-12,
+                            pad_token_id=0,
+                            position_embedding_type='absolute',
+                            use_cache=True,
+                            classifier_dropout=None, num_beams=10, vocab_size=1024)
+
+    model_args = {
+        "encoder": enc_config,
+        "decoder": dec_config
     }
     reaction_model = HuggingFaceTransformerCustom(model_architecture="bert-base-uncased",
-                                                  train_args=train_args)
+                                                  train_args=train_args, model_args=model_args)
+
     pipeline = BenchmarkPipeline(model=reaction_model)
     pipeline.run_train_pipeline()
     # pipeline.predict()
