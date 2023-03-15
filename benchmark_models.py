@@ -359,6 +359,9 @@ if __name__ == "__main__":
     reaction_model = HuggingFaceTransformerCustom(model_architecture="bert-base-uncased",
                                                   train_args=train_args, model_args=model_args)
 
-    pipeline = BenchmarkPipeline(model=reaction_model)
+    onmt_model = OpenNMT()
+    g2s_model = G2S()
+
+    pipeline = BenchmarkPipeline(model=onmt_model)
     pipeline.run_train_pipeline()
     # pipeline.predict()

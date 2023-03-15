@@ -2,12 +2,6 @@ import abc
 import os
 
 
-class Parameters:
-
-    def __init__(self, params: dict):
-        self.params = params
-
-
 class ReactionModel(abc.ABC):
 
     name:  str
