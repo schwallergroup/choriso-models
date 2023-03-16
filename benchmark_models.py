@@ -69,11 +69,11 @@ class OpenNMT(ReactionModel):
         os.system("sh OpenNMT_Transformer/predict.sh")
 
 
-class HuggingFaceTransformerCustom(ReactionModel):
+class HuggingFaceTransformer(ReactionModel):
 
     def __init__(self, model_architecture: str, train_args: dict, model_args: dict = None, dataset: str = "cjhif"):
         name_suffix = model_architecture.split("/")[-1]
-        self.name = f"HuggingFaceTransformerCustom_{name_suffix}"
+        self.name = f"HuggingFaceTransformer_{name_suffix}"
         super().__init__()
         chem_tokenizer_path = os.path.join(self.model_dir, "chem_tokenizer")
         if not os.path.exists(chem_tokenizer_path):
@@ -326,7 +326,7 @@ if __name__ == "__main__":
                               hidden_act = 'gelu',
                               hidden_dropout_prob = 0.1,
                               attention_probs_dropout_prob = 0.1,
-                              max_position_embeddings = 1024,
+                              max_position_embeddings = 512,
                               type_vocab_size = 2,
                               initializer_range = 0.02,
                               layer_norm_eps = 1e-12,
@@ -343,7 +343,7 @@ if __name__ == "__main__":
                             hidden_act='gelu',
                             hidden_dropout_prob=0.1,
                             attention_probs_dropout_prob=0.1,
-                            max_position_embeddings=1024,
+                            max_position_embeddings=512,
                             type_vocab_size=2,
                             initializer_range=0.02,
                             layer_norm_eps=1e-12,
@@ -356,12 +356,12 @@ if __name__ == "__main__":
         "encoder": enc_config,
         "decoder": dec_config
     }
-    reaction_model = HuggingFaceTransformerCustom(model_architecture="bert-base-uncased",
+    reaction_model = HuggingFaceTransformer(model_architecture="bert-base-uncased",
                                                   train_args=train_args, model_args=model_args)
 
     onmt_model = OpenNMT()
     g2s_model = G2S()
 
-    pipeline = BenchmarkPipeline(model=onmt_model)
+    pipeline = BenchmarkPipeline(model=reaction_model)
     pipeline.run_train_pipeline()
     # pipeline.predict()
