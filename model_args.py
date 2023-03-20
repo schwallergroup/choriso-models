@@ -64,7 +64,7 @@ class OpenNMTArgs(ReactionModelArgs):
         return parser
 
 
-class HuggingfaceArgs(ReactionModelArgs):
+class HuggingFaceArgs(ReactionModelArgs):
 
     def __init__(self):
         super().__init__()
@@ -96,7 +96,7 @@ class HuggingfaceArgs(ReactionModelArgs):
 
 if __name__ == "__main__":
 
-    test_args = HuggingfaceArgs()
+    test_args = HuggingFaceArgs()
     parser = test_args.training_args()
     args = parser.parse_args()
 

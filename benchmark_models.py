@@ -6,17 +6,20 @@ import pandas as pd
 import json
 import numpy as np
 import tempfile
+import datetime
 from tokenizers import Regex, Tokenizer, pre_tokenizers, processors
 from tokenizers import models as tokenizer_models
 from tokenizers.trainers import WordLevelTrainer
 from transformers import AutoConfig, AutoTokenizer, EncoderDecoderConfig, PreTrainedTokenizerFast, BertConfig
 from transformers import AutoModelForSeq2SeqLM, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForSeq2Seq
 import evaluate
-
+from onmt.bin.train import main as onmt_train
+from onmt.bin.build_vocab import main as onmt_preprocess
 
 from transformers.integrations import WandbCallback, CodeCarbonCallback
 
 from reaction_model import *
+from model_args import *
 from utils import prepare_data, ReactionForwardDataset
 
 
@@ -25,10 +28,6 @@ class MolecularTransformer(ReactionModel):
     def __init__(self):
         self.name = "MolecularTransformer"
         super().__init__()
-
-    def embed(self):
-        """Get the embedding of the reaction model"""
-        pass
 
     def preprocess(self):
         """Do data preprocessing. Skip if preprocessed data already exists"""
@@ -49,20 +48,21 @@ class OpenNMT(ReactionModel):
         self.name = "OpenNMT_Transformer"
         super().__init__()
 
-    def embed(self):
-        """Get the embedding of the reaction model"""
-        pass
+        self.args = OpenNMTArgs()
 
     def preprocess(self):
         """Do data preprocessing. Skip if preprocessed data already exists"""
         os.system("sh OpenNMT_Transformer/preprocess.sh")
+        # onmt_preprocess()
 
     def train(self):
         """Train the reaction model. Should also contain validation and test steps"""
-        # wandb.init(project="OpenNMT_Transformer")
-        # wandb.tensorboard.patch(root_logdir=os.path.join(self.model_dir, "log_dir"))
-        os.system("sh OpenNMT_Transformer/train.sh")
-        # wandb.finish()
+        log_dir = os.path.join(self.model_dir, "log_dir", "*") # , datetime.datetime.now().strftime("%b-%d_%H-%M-%S"))
+        wandb.init(project="OpenNMT_Transformer", sync_tensorboard=True)
+        # wandb.tensorboard.patch(root_logdir=log_dir)
+        os.system(f"sh OpenNMT_Transformer/train.sh")
+        # onmt_train()
+        wandb.finish()
 
     def predict(self, data):
         """Predict provided data with the reaction model"""
@@ -75,6 +75,9 @@ class HuggingFaceTransformer(ReactionModel):
         name_suffix = model_architecture.split("/")[-1]
         self.name = f"HuggingFaceTransformer_{name_suffix}"
         super().__init__()
+
+        self.args = HuggingFaceArgs()
+
         chem_tokenizer_path = os.path.join(self.model_dir, "chem_tokenizer")
         if not os.path.exists(chem_tokenizer_path):
             # TODO wip hardcoded MolecularTransformer tokenization
@@ -149,7 +152,7 @@ class HuggingFaceTransformer(ReactionModel):
                 # use pre-built architecture
                 config = AutoConfig.from_pretrained(model_architecture, **model_kwargs)
 
-            # save config for later runsl
+            # save config for later runs
             config.save_pretrained(config_path, push_to_hub=False)
 
         # choose model based on config
@@ -163,16 +166,6 @@ class HuggingFaceTransformer(ReactionModel):
         train_args["output_dir"] = os.path.join(self.model_dir, train_args["output_dir"])
         train_args["logging_dir"] = os.path.join(self.model_dir, train_args["logging_dir"])
         self.train_args = Seq2SeqTrainingArguments(**train_args)
-
-    def embed(self):
-        """Get the embedding of the reaction model"""
-        pass
-
-    def compute_metrics(self, eval_pred):
-        metric = evaluate.load("accuracy")
-        logits, labels = eval_pred
-        predictions = np.argmax(logits, axis=-1)
-        return metric.compute(predictions=predictions, references=labels)
 
     def preprocess(self, dataset: str = "cjhif"):
         """Do data preprocessing. Skip if preprocessed data already exists"""
@@ -216,6 +209,12 @@ class HuggingFaceTransformer(ReactionModel):
             else:
                 self.val_dataset = ReactionForwardDataset(reaction_dataset)
 
+    def compute_metrics(self, eval_pred):
+        predictions, labels = eval_pred
+        predictions = np.argmax(predictions, axis=1)
+        accuracy_metric = evaluate.load("accuracy")
+        return accuracy_metric.compute(predictions=predictions.flatten(), references=labels.flatten())
+
     def train(self):
         """Train the reaction model. Should also contain validation and test steps"""
         data_collator = DataCollatorForSeq2Seq(tokenizer=self.tokenizer, model=self.model)
@@ -225,7 +224,7 @@ class HuggingFaceTransformer(ReactionModel):
                                  eval_dataset=self.val_dataset,
                                  data_collator=data_collator,
                                  tokenizer=self.tokenizer,
-                                 # compute_metrics=self.compute_metrics,
+                                 compute_metrics=self.compute_metrics,
                                  callbacks=[WandbCallback, CodeCarbonCallback])
         trainer.train()
 
@@ -239,10 +238,7 @@ class G2S(ReactionModel):
     def __init__(self):
         self.name = "Graph2SMILES"
         super().__init__()
-
-    def embed(self):
-        """Get the embedding of the reaction model"""
-        pass
+        self.args = G2SArgs()
 
     def preprocess(self):
         """Do data preprocessing. Skip if preprocessed data already exists"""
@@ -298,17 +294,17 @@ if __name__ == "__main__":
         "output_dir": 'results',  # output directory
 
         # training setup
-        "max_steps": 400000,  # total number of training steps
+        "max_steps": 200000,  # total number of training steps
         "evaluation_strategy": "steps",
-        "eval_steps": 10000,
+        "eval_steps": 20,
         "save_strategy": "steps",
         "save_steps": 5000,
 
         # model and optimizer params
-        "learning_rate": 2,
-        "save_total_limit": 4,
+        "learning_rate": 1.5e-3,
+        "save_total_limit": 3,
         "per_device_train_batch_size": 8,  # batch size per device during training
-        "per_device_eval_batch_size": 8,  # batch size for evaluation
+        "per_device_eval_batch_size": 32,  # batch size for evaluation
         "warmup_steps": 8000,  # number of warmup steps for learning rate scheduler
         "weight_decay": 0.01,  # strength of weight decay
         "logging_dir": 'logs',  # directory for storing logs
@@ -317,6 +313,10 @@ if __name__ == "__main__":
         "adam_beta2": 0.998,
         "max_grad_norm": 0,
         "label_smoothing_factor": 0,
+        "gradient_accumulation_steps": 4,
+        "eval_accumulation_steps": 10,
+        "predict_with_generate": True,
+        # "lr_scheduler_type": "noam"
         # "load_best_model_at_end": False,
     }
     enc_config = BertConfig(hidden_size = 384,
@@ -362,6 +362,7 @@ if __name__ == "__main__":
     onmt_model = OpenNMT()
     g2s_model = G2S()
 
+    # onmt_model.train()
     pipeline = BenchmarkPipeline(model=reaction_model)
     pipeline.run_train_pipeline()
     # pipeline.predict()

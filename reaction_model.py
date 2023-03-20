@@ -1,10 +1,12 @@
 import abc
 import os
+from model_args import ReactionModelArgs
 
 
 class ReactionModel(abc.ABC):
 
     name:  str
+    args: ReactionModelArgs
 
     def __init__(self):
         assert self.name is not None, "PLease set name before calling super-class"
@@ -17,10 +19,6 @@ class ReactionModel(abc.ABC):
         # if it doesn't exist, create it
         if not os.path.exists(self.model_dir):
             os.mkdir(self.model_dir)
-
-    def embed(self):
-        """Get the embedding of the reaction model"""
-        pass
 
     def preprocess(self):
         """Do data preprocessing. Skip if preprocessed data already exists"""
