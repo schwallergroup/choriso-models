@@ -13,6 +13,7 @@ from tokenizers.trainers import WordLevelTrainer
 from transformers import AutoConfig, AutoTokenizer, EncoderDecoderConfig, PreTrainedTokenizerFast, BertConfig
 from transformers import AutoModelForSeq2SeqLM, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForSeq2Seq
 import evaluate
+from functools import reduce
 from onmt.bin.train import main as onmt_train
 from onmt.bin.build_vocab import main as onmt_preprocess
 
@@ -20,7 +21,7 @@ from transformers.integrations import WandbCallback, CodeCarbonCallback
 
 from reaction_model import *
 from model_args import *
-from utils import prepare_data, ReactionForwardDataset
+from utils import prepare_data, ReactionForwardDataset, canonicalize_smiles
 
 
 class MolecularTransformer(ReactionModel):
@@ -209,11 +210,39 @@ class HuggingFaceTransformer(ReactionModel):
             else:
                 self.val_dataset = ReactionForwardDataset(reaction_dataset)
 
-    def compute_metrics(self, eval_pred):
-        predictions, labels = eval_pred
-        predictions = np.argmax(predictions, axis=1)
-        accuracy_metric = evaluate.load("accuracy")
-        return accuracy_metric.compute(predictions=predictions.flatten(), references=labels.flatten())
+    def postprocess_text(self, text):
+        # preds = [char2SMILES(pred.replace(" ", ""),dictionary_file=TOKENIZER_PATH+"SMILES2char.pkl") for pred in preds]
+        # labels = [[char2SMILES(label.replace(" ", ""),dictionary_file=TOKENIZER_PATH+"SMILES2char.pkl")] for label in labels]
+        canon_text = canonicalize_smiles(text.replace(" ", ""))
+        return canon_text
+
+    def apply_metric(self, preds, labels):
+        accuracy = evaluate.load("accuracy")
+        preds_tok = self.tokenizer(preds)["input_ids"]
+        labels_tok = self.tokenizer(labels)["input_ids"]
+        result = reduce(lambda a, b: a + b,
+                        map(lambda x, y: accuracy.compute(references=x, predictions=y)["accuracy"], labels_tok,
+                            preds_tok)) / len(preds_tok)
+        result = {"accuracy": result}
+        return result
+
+    def compute_metrics(self, eval_preds):
+        labels = eval_preds.label_ids
+        preds = eval_preds.predictions
+        # transform back to SMILES
+        decoded_preds = self.tokenizer.batch_decode(preds, skip_special_tokens=True)
+        print(decoded_preds)
+
+        # Replace -100 in the labels as we can't decode them.
+        labels = np.where(labels != -100, labels, self.tokenizer.pad_token_id)
+        decoded_labels = self.tokenizer.batch_decode(labels, skip_special_tokens=True)
+
+        # canonicalize smiles
+        decoded_preds, decoded_labels = list(map(self.postprocess_text, decoded_preds)), list(
+            map(self.postprocess_text, decoded_labels))
+        # apply metric
+        result = self.apply_metric(decoded_preds, decoded_labels)
+        return result
 
     def train(self):
         """Train the reaction model. Should also contain validation and test steps"""
@@ -303,7 +332,7 @@ if __name__ == "__main__":
         # model and optimizer params
         "learning_rate": 1.5e-3,
         "save_total_limit": 3,
-        "per_device_train_batch_size": 8,  # batch size per device during training
+        "per_device_train_batch_size": 32,  # batch size per device during training
         "per_device_eval_batch_size": 32,  # batch size for evaluation
         "warmup_steps": 8000,  # number of warmup steps for learning rate scheduler
         "weight_decay": 0.01,  # strength of weight decay

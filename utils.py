@@ -2,10 +2,22 @@ import os
 import pandas as pd
 import numpy as np
 import torch
+from rdkit import Chem
 
 from typing import List
 
 from Graph2SMILES.utils.data_utils import tokenize_smiles
+
+
+def canonicalize_smiles(smiles, verbose=False):
+    # will raise an Exception if invalid SMILES
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is not None:
+        return Chem.MolToSmiles(mol)
+    else:
+        if verbose:
+            print(f'{smiles} is invalid.')
+        return ''
 
 
 def split_reaction(reaction: str):
