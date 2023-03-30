@@ -207,8 +207,8 @@ class HuggingFaceTransformer(ReactionModel):
                 split_reactions = split_reactions.to_dict("list")
 
                 # tokenize the dataset
-                reaction_dataset = self.tokenizer(split_reactions["reactants"][:10000],
-                                                  text_target=split_reactions["products"][:1000],
+                reaction_dataset = self.tokenizer(split_reactions["reactants"],
+                                                  text_target=split_reactions["products"],
                                                   truncation=True, padding=True)  #, max_length=1000)
 
                 # make it a dict
@@ -405,7 +405,7 @@ if __name__ == "__main__":
         # training setup
         "max_steps": 200000,  # total number of training steps
         "evaluation_strategy": "steps",
-        "eval_steps": 500,
+        "eval_steps": 2500,
         "save_strategy": "steps",
         "save_steps": 5000,
 
@@ -445,7 +445,7 @@ if __name__ == "__main__":
                             classifier_dropout = None,
                             num_beams=10,
                             vocab_size=1024,
-                            max_length=512,
+                            max_length=96,
                             min_length=1
                             )
 
@@ -465,13 +465,13 @@ if __name__ == "__main__":
                             classifier_dropout=None,
                             num_beams=10,
                             vocab_size=1024,
-                            max_length=512,
+                            max_length=96,
                             min_length=1)
 
     model_args = {
         "encoder": enc_config,
         "decoder": dec_config,
-        "length_penalty": 2.0,
+        "length_penalty": -2.0,
         "max_length": 96,
         "min_length": 3
     }
@@ -482,6 +482,6 @@ if __name__ == "__main__":
     g2s_model = G2S()
 
     # onmt_model.train()
-    pipeline = BenchmarkPipeline(model=reaction_model)
+    pipeline = BenchmarkPipeline(model=g2s_model)
     pipeline.run_train_pipeline()
     # pipeline.predict()
