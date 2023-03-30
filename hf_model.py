@@ -7,13 +7,15 @@ import tempfile
 from functools import reduce
 from sklearn.metrics import top_k_accuracy_score
 
-from transformers.integrations import WandbCallback, CodeCarbonCallback
+import evaluate
 from tokenizers import models as tokenizer_models
 from tokenizers.trainers import WordLevelTrainer
+from tokenizers import Regex, Tokenizer, pre_tokenizers, processors
+from transformers.integrations import WandbCallback, CodeCarbonCallback
 from transformers import AutoConfig, AutoTokenizer, EncoderDecoderConfig, PreTrainedTokenizerFast, BertConfig, \
-    AutoModelForSeq2SeqLM, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForSeq2Seq, Regex, Tokenizer, \
-    pre_tokenizers, processors, Seq2SeqTrainingArguments, HfArgumentParser, BertConfig, PretrainedConfig
-import evaluate
+    AutoModelForSeq2SeqLM, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForSeq2Seq, Seq2SeqTrainingArguments, \
+    HfArgumentParser, BertConfig, PretrainedConfig
+
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from model_args import ReactionModelArgs
