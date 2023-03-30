@@ -9,7 +9,7 @@ class ReactionModel(abc.ABC):
     args: ReactionModelArgs
 
     def __init__(self):
-        assert self.name is not None, "PLease set name before calling super-class"
+        assert self.name is not None, "Please set name before calling super-class"
         # get the path of this file
         this_dir = os.path.dirname(os.path.realpath(__file__))
 
