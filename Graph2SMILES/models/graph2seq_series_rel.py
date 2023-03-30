@@ -122,7 +122,7 @@ class Graph2SeqSeriesRel(nn.Module):
         dec_outs, _ = self.decoder(
             tgt=dec_in,
             memory_bank=padded_memory_bank,
-            memory_lengths=memory_lengths
+            src_len=memory_lengths
         )
 
         dec_outs = self.output_layer(dec_outs)                                  # [t, b, h] => [t, b, v]
@@ -193,7 +193,7 @@ class Graph2SeqSeriesRel(nn.Module):
         target_prefix = None
         fn_map_state, memory_bank, memory_lengths, src_map = decode_strategy.initialize(
             memory_bank=padded_memory_bank,
-            src_lengths=memory_lengths,
+            src_len=memory_lengths,
             src_map=src_map,
             target_prefix=target_prefix
         )
@@ -204,7 +204,7 @@ class Graph2SeqSeriesRel(nn.Module):
 
             dec_out, dec_attn = self.decoder(tgt=decoder_input,
                                              memory_bank=memory_bank,
-                                             memory_lengths=memory_lengths,
+                                             src_len=memory_lengths,
                                              step=step)
 
             if "std" in dec_attn:

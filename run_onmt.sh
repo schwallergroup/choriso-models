@@ -1,4 +1,4 @@
-#!/usr/local_rwth/bin/zsh
+###!/usr/local_rwth/bin/zsh
 
 #SBATCH --cpus-per-task=2
 #SBATCH --mem-per-cpu=90G
@@ -18,7 +18,7 @@ export PATH=~/anaconda3/envs/reaction_pred/bin:$PATH
 # conda env
 source activate reaction_pred
 
-export PYTHONPATH=$PYTHONPATH:/rwthfs/rz/cluster/home/iz782675/reaction_forward
+export PYTHONPATH=$PYTHONPATH:~/reaction_forward
 
 
 python benchmark_models.py
