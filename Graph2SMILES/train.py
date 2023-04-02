@@ -138,7 +138,7 @@ def main(args):
                 losses.append(loss.item())
                 accs.append(acc.item() * 100)
 
-                wandb.log({"step": total_step, "train_loss": loss.item(), "train_acc": acc.item() * 100}, commit=False)
+                wandb.log({"step": total_step, "train_loss": loss.item(), "train_acc": acc.item() * 100})
 
                 accum += 1
 
@@ -207,7 +207,7 @@ def main(args):
                 logging.info(f"Evaluation (with teacher) at step {total_step}, eval loss: {eval_meters[0]}, "
                              f"eval acc: {eval_meters[1]}")
 
-                wandb.log({"eval_loss": eval_meters[0], "eval_acc": eval_meters[1]}, commit=False)
+                wandb.log({"eval_loss": eval_meters[0], "eval_acc": eval_meters[1]})
 
                 sys.stdout.flush()
 

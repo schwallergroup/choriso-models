@@ -21,4 +21,4 @@ source activate reaction_pred
 export PYTHONPATH=$PYTHONPATH:~/reaction_forward
 
 
-python onmt_model.py
+python hf_model.py
