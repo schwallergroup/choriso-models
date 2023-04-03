@@ -73,7 +73,7 @@ class HuggingFaceTransformer(ReactionModel):
             chem_tokenizer = Tokenizer(tokenizer_models.WordLevel(unk_token="[UNK]"))
 
             chem_tokenizer.pre_tokenizer = pre_tokenizers.Split(pattern, "isolated")
-            chem_tokenizer.post_processor = processors.BertProcessing(cls=("[CLS]", 1), sep=("[SEP]", 2))
+
 
             trainer = WordLevelTrainer(special_tokens=["[UNK]", "[PAD]", "[CLS]", "[SEP]", "[MASK]"])
 
@@ -101,6 +101,9 @@ class HuggingFaceTransformer(ReactionModel):
                                                          mask_token="[MASK]",
                                                          model_max_length=2048,
                                                          padding_side="right")
+
+                chem_tokenizer.post_processor = processors.BertProcessing(cls=("[CLS]", chem_tokenizer.cls_token_id),
+                                                                          sep=("[SEP]", chem_tokenizer.sep_token_id))
 
                 chem_tokenizer.save_pretrained(chem_tokenizer_path)
 
@@ -330,10 +333,13 @@ class HuggingFaceTransformer(ReactionModel):
             if "checkpoint-100000" in dir and os.path.isdir(dir):
                 model = AutoModelForSeq2SeqLM.from_pretrained(dir)
                 input_ids = self.tokenizer(inputs[:10], padding=True, truncation=True, return_tensors="pt")["input_ids"]
+                target_ids = self.tokenizer(targets[:10], padding=True, truncation=True, return_tensors="pt")["input_ids"]
                 print("self.tokenizer.pad_token_id: ", self.tokenizer.pad_token_id)
                 print("self.tokenizer.eos_token_id: ", self.tokenizer.eos_token_id)
                 print("self.tokenizer.cls_token_id: ", self.tokenizer.cls_token_id)
                 print("self.tokenizer.bos_token_id: ", self.tokenizer.bos_token_id)
+                print("input_ids[0]: ", input_ids[0])
+                print("target_ids[0]: ", target_ids[0])
 
                 beam_outputs = model.generate(input_ids,
                                               max_length=96,
