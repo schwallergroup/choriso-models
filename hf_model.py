@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import tempfile
 from functools import reduce
+from fnmatch import fnmatch
 from sklearn.metrics import top_k_accuracy_score
 
 import evaluate
@@ -325,7 +326,7 @@ class HuggingFaceTransformer(ReactionModel):
         preds = []
         # check if there are saved models in the dir
         for dir in os.listdir(checkpoint_dir):
-            if "checkpoint" in dir and os.path.isdir(dir):
+            if fnmatch(dir, "checkpoint") and os.path.isdir(dir):
                 model = AutoModelForSeq2SeqLM.from_pretrained(dir)
 
                 beam_outputs = model.generate(inputs,
