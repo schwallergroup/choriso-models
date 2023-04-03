@@ -8,6 +8,9 @@ from typing import List
 
 # from Graph2SMILES.utils.data_utils import tokenize_smiles
 
+def remove_spaces(spaced_str: str):
+    return spaced_str.replace(" ", "")
+
 
 def is_correct_pred(pred: str, target: str):
     if pred == target:
@@ -48,6 +51,7 @@ def top_k_accuracy(preds: List[List[str]], targets: List[str], k: int=1):
         num_correct = len(rows_to_calculate) - np.sum(rows_to_calculate.astype(int), axis=0)
 
         top_k_acc = num_correct / len(rows_to_calculate)
+        print(f"top-{i+1} accuracy: ", top_k_acc)
         top_k_accs.append(top_k_acc)
 
     return top_k_accs

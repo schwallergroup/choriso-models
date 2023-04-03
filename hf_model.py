@@ -21,7 +21,7 @@ from transformers import Pipeline as HFPipeline
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from model_args import ReactionModelArgs
-from utils import prepare_data, ReactionForwardDataset, canonicalize_smiles, top_k_accuracy
+from utils import prepare_data, ReactionForwardDataset, canonicalize_smiles, top_k_accuracy, remove_spaces
 
 
 
@@ -307,7 +307,7 @@ class HuggingFaceTransformer(ReactionModel):
                                  callbacks=[WandbCallback, CodeCarbonCallback])
         trainer.train()
 
-    def predict(self, dataset: str = "cjhif"):
+    def predict(self, dataset: str = "cjhif", num_seq: int = 5):
         """Predict provided data with the reaction model"""
         # get test data path
         root_dir = os.path.dirname(self.model_dir)
@@ -327,21 +327,35 @@ class HuggingFaceTransformer(ReactionModel):
         # check if there are saved models in the dir
         for dir in os.listdir(checkpoint_dir):
             dir = os.path.join(checkpoint_dir, dir)
-            if "checkpoint" in dir and os.path.isdir(dir):
+            if "checkpoint-100000" in dir and os.path.isdir(dir):
                 model = AutoModelForSeq2SeqLM.from_pretrained(dir)
-                input_ids = self.tokenizer(inputs, padding=True, truncation=True, return_tensors="pt")["input_ids"]
+                input_ids = self.tokenizer(inputs[:10], padding=True, truncation=True, return_tensors="pt")["input_ids"]
                 print("input_ids.shape: ", input_ids.shape)
                 beam_outputs = model.generate(input_ids,
-                                              max_length=96,
-                                              num_beams=5,
-                                              num_return_sequences=5)
+                                              max_length=48,
+                                              num_beams=10, pad_token_id=self.tokenizer.pad_token_id, eos_token_id=self.tokenizer.eos_token_id, decoder_start_token_id = self.tokenizer.cls_token_id,
+                                              num_return_sequences=num_seq, early_stopping=True)
                 print("beam_outputs: ", beam_outputs)
-                preds.append(beam_outputs)
+                print("beam_shape: ", beam_outputs.shape)
+                pred_smiles = self.tokenizer.batch_decode(beam_outputs.tolist(), skip_special_tokens=True, clean_up_tokenization_spaces=True)
+                pred_smiles = np.array(pred_smiles).reshape(-1, num_seq)
+                pred_smiles = np.vectorize(remove_spaces)(pred_smiles)
+                print("pred_smiles.shape: ", pred_smiles.shape)
+                for target_smiles, temp_smiles in zip(targets[:10], pred_smiles.tolist()):
+                    print("Target: ", target_smiles)
+                    print("\n")
 
-        print("preds: ", preds)
+                    print("Prediction: ", temp_smiles)
+                    print("\n")
 
-        top_k_accs = top_k_accuracy(preds, targets, k=5)
-        print("top_k_accs: ", top_k_accs)
+                top_k_acc = top_k_accuracy(pred_smiles.tolist(), targets[:10], k=5)
+                print("top_k_acc: ", top_k_acc)
+                preds.append(pred_smiles)
+
+        # print("preds: ", preds)
+
+        # top_k_accs = top_k_accuracy(preds, targets, k=5)
+        # print("top_k_accs: ", top_k_accs)
 
 
 if __name__ == "__main__":
