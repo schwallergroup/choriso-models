@@ -326,7 +326,8 @@ class HuggingFaceTransformer(ReactionModel):
         preds = []
         # check if there are saved models in the dir
         for dir in os.listdir(checkpoint_dir):
-            if fnmatch(dir, "checkpoint") and os.path.isdir(dir):
+            dir = os.path.join(checkpoint_dir, dir)
+            if "checkpoint" in dir and os.path.isdir(dir):
                 model = AutoModelForSeq2SeqLM.from_pretrained(dir)
 
                 beam_outputs = model.generate(inputs,
