@@ -330,13 +330,21 @@ class HuggingFaceTransformer(ReactionModel):
             if "checkpoint-100000" in dir and os.path.isdir(dir):
                 model = AutoModelForSeq2SeqLM.from_pretrained(dir)
                 input_ids = self.tokenizer(inputs[:10], padding=True, truncation=True, return_tensors="pt")["input_ids"]
-                print("input_ids.shape: ", input_ids.shape)
+                print("self.tokenizer.pad_token_id: ", self.tokenizer.pad_token_id)
+                print("self.tokenizer.eos_token_id: ", self.tokenizer.eos_token_id)
+                print("self.tokenizer.cls_token_id: ", self.tokenizer.cls_token_id)
+                print("self.tokenizer.bos_token_id: ", self.tokenizer.bos_token_id)
+
                 beam_outputs = model.generate(input_ids,
-                                              max_length=48,
-                                              num_beams=10, pad_token_id=self.tokenizer.pad_token_id, eos_token_id=self.tokenizer.eos_token_id, decoder_start_token_id = self.tokenizer.cls_token_id,
-                                              num_return_sequences=num_seq, early_stopping=True)
-                print("beam_outputs: ", beam_outputs)
-                print("beam_shape: ", beam_outputs.shape)
+                                              max_length=96,
+                                              num_beams=10,
+                                              pad_token_id=self.tokenizer.pad_token_id,
+                                              eos_token_id=self.tokenizer.eos_token_id,
+                                              decoder_start_token_id=self.tokenizer.cls_token_id,
+                                              bos_token_id=self.tokenizer.bos_token_id,
+                                              num_return_sequences=num_seq,
+                                              early_stopping=True)
+
                 pred_smiles = self.tokenizer.batch_decode(beam_outputs.tolist(), skip_special_tokens=True, clean_up_tokenization_spaces=True)
                 pred_smiles = np.array(pred_smiles).reshape(-1, num_seq)
                 pred_smiles = np.vectorize(remove_spaces)(pred_smiles)
