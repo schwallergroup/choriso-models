@@ -320,7 +320,7 @@ class HuggingFaceTransformer(ReactionModel):
         inputs = split_reactions["reactants"]
         targets = split_reactions["products"]
 
-        checkpoint_dir = os.path.join(self.model_dir, self.train_args["output_dir"])
+        checkpoint_dir = os.path.join(self.model_dir, self.train_args.output_dir)
 
         preds = []
         # check if there are saved models in the dir
