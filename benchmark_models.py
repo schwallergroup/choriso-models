@@ -53,4 +53,4 @@ class BenchmarkPipeline:
         self.model.train()
 
     def predict(self):
-        self.model.predict(data=None)
+        self.model.predict()

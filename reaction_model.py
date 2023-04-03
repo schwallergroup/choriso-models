@@ -28,7 +28,7 @@ class ReactionModel(abc.ABC):
         """Train the reaction model. Should also contain validation and test steps"""
         pass
 
-    def predict(self, data):
+    def predict(self, data=None):
         """Predict provided data with the reaction model"""
         pass
 
