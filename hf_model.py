@@ -23,15 +23,6 @@ from model_args import ReactionModelArgs
 from utils import prepare_data, ReactionForwardDataset, canonicalize_smiles, top_k_accuracy
 
 
-class InferencePipeline(HFPipeline):
-
-    def _forward(self, model_inputs):
-        outputs = self.model.generate(model_inputs["input_ids"],
-                                      max_length=96,
-                                      num_beams=5,
-                                      num_return_sequences=5)
-        return outputs
-
 
 class HuggingFaceArgs(ReactionModelArgs):
 
@@ -336,15 +327,18 @@ class HuggingFaceTransformer(ReactionModel):
         for dir in os.listdir(checkpoint_dir):
             if "checkpoint" in dir and os.path.isdir(dir):
                 model = AutoModelForSeq2SeqLM.from_pretrained(dir)
-                predict_pipeline = InferencePipeline(task="text2text-generation", model=model, tokenizer=self.tokenizer)
 
-                model_preds = predict_pipeline(inputs)
-                preds.append(model_preds)
+                beam_outputs = model.generate(inputs,
+                                              max_length=self.model.decoder.max_length,
+                                              num_beams=self.model.decoder.num_beams,
+                                              num_return_sequences=5)
+                print("beam_outputs: ", beam_outputs)
+                preds.append(beam_outputs)
 
-        print(preds)
+        print("preds: ", preds)
 
         top_k_accs = top_k_accuracy(preds, targets, k=5)
-        print(top_k_accs)
+        print("top_k_accs: ", top_k_accs)
 
 
 if __name__ == "__main__":
