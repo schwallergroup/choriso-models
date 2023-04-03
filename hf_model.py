@@ -377,7 +377,7 @@ if __name__ == "__main__":
         "output_dir": 'results',  # output directory
 
         # training setup
-        "max_steps": 100000,  # total number of training steps
+        "max_steps": 200000,  # total number of training steps
         "evaluation_strategy": "steps",
         "eval_steps": 10000,
         "save_strategy": "steps",
@@ -386,7 +386,7 @@ if __name__ == "__main__":
         # model and optimizer params
         "learning_rate": 1.5e-3,
         "save_total_limit": 3,
-        "per_device_train_batch_size": 64,  # batch size per device during training
+        "per_device_train_batch_size": 96,  # batch size per device during training
         "per_device_eval_batch_size": 96,  # batch size for evaluation
         "warmup_steps": 8000,  # number of warmup steps for learning rate scheduler
         "weight_decay": 0.01,  # strength of weight decay
@@ -432,5 +432,5 @@ if __name__ == "__main__":
     reaction_model = HuggingFaceTransformer(model_architecture="bert-base-uncased",
                                             train_args=train_args, model_args=model_args)
     pipeline = BenchmarkPipeline(model=reaction_model)
-    # pipeline.run_train_pipeline()
-    pipeline.predict()
+    pipeline.run_train_pipeline()
+    # pipeline.predict()
