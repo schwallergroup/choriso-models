@@ -329,10 +329,11 @@ class HuggingFaceTransformer(ReactionModel):
             dir = os.path.join(checkpoint_dir, dir)
             if "checkpoint" in dir and os.path.isdir(dir):
                 model = AutoModelForSeq2SeqLM.from_pretrained(dir)
-
-                beam_outputs = model.generate(inputs,
-                                              max_length=self.model.decoder.max_length,
-                                              num_beams=self.model.decoder.num_beams,
+                input_ids = self.tokenizer(inputs, padding=True, truncation=True, return_tensors="pt")["input_ids"]
+                print("input_ids.shape: ", input_ids.shape)
+                beam_outputs = model.generate(input_ids,
+                                              max_length=96,
+                                              num_beams=5,
                                               num_return_sequences=5)
                 print("beam_outputs: ", beam_outputs)
                 preds.append(beam_outputs)
