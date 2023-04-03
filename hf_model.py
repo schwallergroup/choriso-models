@@ -14,7 +14,7 @@ from tokenizers import Regex, Tokenizer, pre_tokenizers, processors
 from transformers.integrations import WandbCallback, CodeCarbonCallback
 from transformers import AutoConfig, AutoTokenizer, EncoderDecoderConfig, PreTrainedTokenizerFast, BertConfig, \
     AutoModelForSeq2SeqLM, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForSeq2Seq, Seq2SeqTrainingArguments, \
-    HfArgumentParser, BertConfig, PretrainedConfig
+    HfArgumentParser, BertConfig, PretrainedConfig, pipeline
 
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
@@ -154,9 +154,6 @@ class HuggingFaceTransformer(ReactionModel):
         self.model.encoder.resize_token_embeddings(len(self.tokenizer))
         self.model.decoder.resize_token_embeddings(len(self.tokenizer))
 
-        # print("Model output: ", self.model(*tuple(test_encoded.values()))[0].shape)
-        # breakpoint()
-
         # route the given dir to the model dir
         train_args["output_dir"] = os.path.join(self.model_dir, train_args["output_dir"])
         train_args["logging_dir"] = os.path.join(self.model_dir, train_args["logging_dir"])
@@ -261,17 +258,6 @@ class HuggingFaceTransformer(ReactionModel):
 
         labels[labels == -100] = self.tokenizer.pad_token_id
 
-        print("Predictions: ", preds)
-        print("Labels: ", labels)
-        print("Predictions shape: ", preds.shape)
-        print("Labels shape: ", labels.shape)
-
-        # accuracy = self.tokenwise_acc(labels, preds)
-
-        # accuracy = evaluate.load("accuracy")
-        # result = accuracy.compute(references=labels, predictions=preds)
-        # result = {"accuracy": accuracy}
-
         def remove_special_tokens(line):
             mask = np.isin(line, self.tokenizer.all_special_ids)
             line = line[~mask]
@@ -320,7 +306,24 @@ class HuggingFaceTransformer(ReactionModel):
 
     def predict(self, data):
         """Predict provided data with the reaction model"""
-        pass
+        # prepare data
+        reactions = pd.read_csv(data, sep="\t")
+        split_reactions = prepare_data(reactions, rsmiles_col="canonic_rxn").to_dict("list")
+
+        inputs = split_reactions["reactants"]
+        targets = split_reactions["products"]
+
+        checkpoint_dir = os.path.join(self.model_dir, self.train_args["output_dir"])
+
+        preds = []
+        # check if there are saved models in the dir
+        for dir in os.listdir(checkpoint_dir):
+            if "checkpoint" in dir and os.path.isdir(dir):
+                model = AutoModelForSeq2SeqLM.from_pretrained(dir)
+                predict_pipeline = pipeline(task="text2text-generation", model=model, tokenizer=self.tokenizer)
+
+                model_preds = predict_pipeline(inputs)
+                preds.append(model_preds)
 
 
 if __name__ == "__main__":

@@ -2,11 +2,55 @@ import os
 import pandas as pd
 import numpy as np
 import torch
-from rdkit import Chem
+# from rdkit import Chem
 
 from typing import List
 
-from Graph2SMILES.utils.data_utils import tokenize_smiles
+# from Graph2SMILES.utils.data_utils import tokenize_smiles
+
+
+def is_correct_pred(pred: str, target: str):
+    if pred == target:
+        return 1
+    else:
+        return 0
+
+
+def top_k_accuracy(preds: List[List[str]], targets: List[str], k: int=1):
+    assert k <= len(preds[0]), "k has to be smaller or equal than the amount of predictions per reaction"
+    assert k > 0, "k has to be greater than 0"
+
+    # transform to np arrays for easier handling. take the first k predictions
+    preds = np.array(preds)[:, :k]
+    targets = np.array(targets)
+
+    top_k_accs = []
+    # False valued rows will not be calculated. initialize with all True
+    rows_to_calculate = np.ones(targets.shape, dtype=bool)
+    for i in range(k):
+
+        # select pred column
+        kth_preds = preds[:, i]
+
+        # get indices that have to be calculated. Needs to be done for overwriting with new values
+        indices = np.argwhere(rows_to_calculate != False).squeeze()
+
+        # apply mask to only calculate not yet correctly predicted values
+        kth_preds = kth_preds[rows_to_calculate]
+        temp_targets = targets[rows_to_calculate]
+
+        # check if prediction was incorrect
+        incorrect_pred = kth_preds != temp_targets
+
+        # change mask to not calculate rows where there already was a correct prediction
+        rows_to_calculate[indices] = incorrect_pred
+
+        num_correct = len(rows_to_calculate) - np.sum(rows_to_calculate.astype(int), axis=0)
+
+        top_k_acc = num_correct / len(rows_to_calculate)
+        top_k_accs.append(top_k_acc)
+
+    return top_k_accs
 
 
 def canonicalize_smiles(smiles, verbose=False):
@@ -64,7 +108,14 @@ class ReactionForwardDataset(torch.utils.data.Dataset):
 
 if __name__ == "__main__":
 
-    file_names = ["test", "val", "train"]
+    test_preds = [["C", "CCCC", "Cafjiogae"], ["CC", "asfahk", "C"]]
+    test_targets = ["C", "CC"]
+
+    acc = top_k_accuracy(test_preds, test_targets, k=3)
+
+    print(acc)
+
+    """file_names = ["test", "val", "train"]
 
     data_dir = "data/cjhif/"
 
@@ -78,4 +129,4 @@ if __name__ == "__main__":
         product_data = split_reactions["products"].apply(lambda smi: tokenize_smiles(smi))
 
         reactant_data.to_csv(os.path.join(data_dir, f"src-{file_name}.txt"), sep="\t", index=False, header=False)
-        product_data.to_csv(os.path.join(data_dir, f"tgt-{file_name}.txt"), sep="\t", index=False, header=False)
+        product_data.to_csv(os.path.join(data_dir, f"tgt-{file_name}.txt"), sep="\t", index=False, header=False)"""
