@@ -14,12 +14,23 @@ from tokenizers import Regex, Tokenizer, pre_tokenizers, processors
 from transformers.integrations import WandbCallback, CodeCarbonCallback
 from transformers import AutoConfig, AutoTokenizer, EncoderDecoderConfig, PreTrainedTokenizerFast, BertConfig, \
     AutoModelForSeq2SeqLM, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForSeq2Seq, Seq2SeqTrainingArguments, \
-    HfArgumentParser, BertConfig, PretrainedConfig, pipeline
+    HfArgumentParser, BertConfig, PretrainedConfig
+from transformers import Pipeline as HFPipeline
 
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from model_args import ReactionModelArgs
-from utils import prepare_data, ReactionForwardDataset, canonicalize_smiles
+from utils import prepare_data, ReactionForwardDataset, canonicalize_smiles, top_k_accuracy
+
+
+class InferencePipeline(HFPipeline):
+
+    def _forward(self, model_inputs):
+        outputs = self.model.generate(model_inputs["input_ids"],
+                                      max_length=96,
+                                      num_beams=5,
+                                      num_return_sequences=5)
+        return outputs
 
 
 class HuggingFaceArgs(ReactionModelArgs):
@@ -304,10 +315,15 @@ class HuggingFaceTransformer(ReactionModel):
                                  callbacks=[WandbCallback, CodeCarbonCallback])
         trainer.train()
 
-    def predict(self, data):
+    def predict(self, dataset: str = "cjhif"):
         """Predict provided data with the reaction model"""
+        # get test data path
+        root_dir = os.path.dirname(self.model_dir)
+        data_dir = os.path.join(root_dir, "data", dataset)
+        test_data = os.path.join(data_dir, "test.tsv")
+
         # prepare data
-        reactions = pd.read_csv(data, sep="\t")
+        reactions = pd.read_csv(test_data, sep="\t")
         split_reactions = prepare_data(reactions, rsmiles_col="canonic_rxn").to_dict("list")
 
         inputs = split_reactions["reactants"]
@@ -320,10 +336,15 @@ class HuggingFaceTransformer(ReactionModel):
         for dir in os.listdir(checkpoint_dir):
             if "checkpoint" in dir and os.path.isdir(dir):
                 model = AutoModelForSeq2SeqLM.from_pretrained(dir)
-                predict_pipeline = pipeline(task="text2text-generation", model=model, tokenizer=self.tokenizer)
+                predict_pipeline = InferencePipeline(task="text2text-generation", model=model, tokenizer=self.tokenizer)
 
                 model_preds = predict_pipeline(inputs)
                 preds.append(model_preds)
+
+        print(preds)
+
+        top_k_accs = top_k_accuracy(preds, targets, k=5)
+        print(top_k_accs)
 
 
 if __name__ == "__main__":
@@ -386,4 +407,5 @@ if __name__ == "__main__":
     reaction_model = HuggingFaceTransformer(model_architecture="bert-base-uncased",
                                             train_args=train_args, model_args=model_args)
     pipeline = BenchmarkPipeline(model=reaction_model)
-    pipeline.run_train_pipeline()
+    # pipeline.run_train_pipeline()
+    pipeline.predict()
