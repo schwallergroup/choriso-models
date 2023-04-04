@@ -169,12 +169,12 @@ def build_base_model(model_opt, fields, gpu, checkpoint=None, gpu_id=None):
         device = torch.device("cuda")
     elif not gpu:
         device = torch.device("cpu")
-    model = onmt.models.NMTModel(encoder, decoder)
+    model = Graph2SMILES.onmt_v1_2_0.models.NMTModel(encoder, decoder)
 
     # Build Generator.
     if not model_opt.copy_attn:
         if model_opt.generator_function == "sparsemax":
-            gen_func = onmt.modules.sparse_activations.LogSparsemax(dim=-1)
+            gen_func = Graph2SMILES.onmt_v1_2_0.modules.sparse_activations.LogSparsemax(dim=-1)
         else:
             gen_func = nn.LogSoftmax(dim=-1)
         generator = nn.Sequential(

@@ -1,15 +1,15 @@
 """  Attention and normalization modules  """
-from onmt.modules.util_class import Elementwise
-from onmt.modules.gate import context_gate_factory, ContextGate
-from onmt.modules.global_attention import GlobalAttention
-from onmt.modules.conv_multi_step_attention import ConvMultiStepAttention
-from onmt.modules.copy_generator import CopyGenerator, CopyGeneratorLoss, \
+from Graph2SMILES.onmt_v1_2_0.modules.util_class import Elementwise
+from Graph2SMILES.onmt_v1_2_0.modules.gate import context_gate_factory, ContextGate
+from Graph2SMILES.onmt_v1_2_0.modules.global_attention import GlobalAttention
+from Graph2SMILES.onmt_v1_2_0.modules.conv_multi_step_attention import ConvMultiStepAttention
+from Graph2SMILES.onmt_v1_2_0.modules.copy_generator import CopyGenerator, CopyGeneratorLoss, \
     CopyGeneratorLossCompute
-from onmt.modules.multi_headed_attn import MultiHeadedAttention
-from onmt.modules.embeddings import Embeddings, PositionalEncoding, \
+from Graph2SMILES.onmt_v1_2_0.modules.multi_headed_attn import MultiHeadedAttention
+from Graph2SMILES.onmt_v1_2_0.modules.embeddings import Embeddings, PositionalEncoding, \
     VecEmbedding
-from onmt.modules.weight_norm import WeightNormConv2d
-from onmt.modules.average_attn import AverageAttention
+from Graph2SMILES.onmt_v1_2_0.modules.weight_norm import WeightNormConv2d
+from Graph2SMILES.onmt_v1_2_0.modules.average_attn import AverageAttention
 
 import onmt.modules.source_noise # noqa
 

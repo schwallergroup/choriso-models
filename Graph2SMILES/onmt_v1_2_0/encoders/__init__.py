@@ -1,12 +1,12 @@
 """Module defining encoders."""
-from onmt.encoders.encoder import EncoderBase
-from onmt.encoders.transformer import TransformerEncoder
-from onmt.encoders.ggnn_encoder import GGNNEncoder
-from onmt.encoders.rnn_encoder import RNNEncoder
-from onmt.encoders.cnn_encoder import CNNEncoder
-from onmt.encoders.mean_encoder import MeanEncoder
-from onmt.encoders.audio_encoder import AudioEncoder
-from onmt.encoders.image_encoder import ImageEncoder
+from Graph2SMILES.onmt_v1_2_0.encoders.encoder import EncoderBase
+from Graph2SMILES.onmt_v1_2_0.encoders.transformer import TransformerEncoder
+from Graph2SMILES.onmt_v1_2_0.encoders.ggnn_encoder import GGNNEncoder
+from Graph2SMILES.onmt_v1_2_0.encoders.rnn_encoder import RNNEncoder
+from Graph2SMILES.onmt_v1_2_0.encoders.cnn_encoder import CNNEncoder
+from Graph2SMILES.onmt_v1_2_0.encoders.mean_encoder import MeanEncoder
+from Graph2SMILES.onmt_v1_2_0.encoders.audio_encoder import AudioEncoder
+from Graph2SMILES.onmt_v1_2_0.encoders.image_encoder import ImageEncoder
 
 
 str2enc = {"ggnn": GGNNEncoder, "rnn": RNNEncoder, "brnn": RNNEncoder,

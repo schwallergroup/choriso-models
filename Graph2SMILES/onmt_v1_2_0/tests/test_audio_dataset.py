@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
-from onmt.inputters.audio_dataset import AudioSeqField, AudioDataReader
+from Graph2SMILES.onmt_v1_2_0.inputters.audio_dataset import AudioSeqField, AudioDataReader
 
 import itertools
 import os
@@ -9,7 +9,7 @@ import shutil
 import torch
 import torchaudio
 
-from onmt.tests.utils_for_tests import product_dict
+from Graph2SMILES.onmt_v1_2_0.tests.utils_for_tests import product_dict
 
 
 class TestAudioField(unittest.TestCase):

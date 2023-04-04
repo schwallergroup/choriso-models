@@ -1,8 +1,8 @@
 """Module defining decoders."""
-from onmt.decoders.decoder import DecoderBase, InputFeedRNNDecoder, \
+from Graph2SMILES.onmt_v1_2_0.decoders.decoder import DecoderBase, InputFeedRNNDecoder, \
     StdRNNDecoder
-from onmt.decoders.transformer import TransformerDecoder
-from onmt.decoders.cnn_decoder import CNNDecoder
+from Graph2SMILES.onmt_v1_2_0.decoders.transformer import TransformerDecoder
+from Graph2SMILES.onmt_v1_2_0.decoders.cnn_decoder import CNNDecoder
 
 
 str2dec = {"rnn": StdRNNDecoder, "ifrnn": InputFeedRNNDecoder,

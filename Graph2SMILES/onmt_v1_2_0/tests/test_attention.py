@@ -5,7 +5,7 @@ import unittest
 import torch
 from torch.autograd import Variable
 
-import onmt
+import Graph2SMILES.onmt_v1_2_0
 
 
 class TestAttention(unittest.TestCase):
@@ -26,7 +26,7 @@ class TestAttention(unittest.TestCase):
                                            source_lengths.max(), dim))
         hidden = Variable(torch.randn(batch_size, dim))
 
-        attn = onmt.modules.GlobalAttention(dim)
+        attn = Graph2SMILES.onmt_v1_2_0.modules.GlobalAttention(dim)
 
         _, alignments = attn(hidden, memory_bank,
                              memory_lengths=source_lengths)

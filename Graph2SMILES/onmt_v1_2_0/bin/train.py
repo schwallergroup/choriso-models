@@ -132,7 +132,7 @@ def batch_producer(generator_to_serve, queues, semaphore, opt):
 def run(opt, device_id, error_queue, batch_queue, semaphore):
     """ run process """
     try:
-        gpu_rank = onmt.utils.distributed.multi_init(opt, device_id)
+        gpu_rank = Graph2SMILES.onmt_v1_2_0.utils.distributed.multi_init(opt, device_id)
         if gpu_rank != opt.gpu_ranks[device_id]:
             raise AssertionError("An error occurred in \
                   Distributed initialization")
