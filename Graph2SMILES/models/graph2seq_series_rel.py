@@ -8,9 +8,9 @@ from Graph2SMILES.utils.data_utils import G2SBatch
 from Graph2SMILES.utils.train_utils import log_tensor
 from Graph2SMILES.models.attention_xl import AttnEncoderXL
 from Graph2SMILES.models.graphfeat import GraphFeatEncoder
-from onmt.decoders import TransformerDecoder
-from onmt.modules.embeddings import Embeddings
-from onmt.translate import BeamSearch, GNMTGlobalScorer, GreedySearch
+from Graph2SMILES.onmt_v1_2_0.decoders import TransformerDecoder
+from Graph2SMILES.onmt_v1_2_0.modules.embeddings import Embeddings
+from Graph2SMILES.onmt_v1_2_0.translate import BeamSearch, GNMTGlobalScorer, GreedySearch
 from typing import Any, Dict
 
 

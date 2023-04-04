@@ -2,10 +2,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from Graph2SMILES.utils.data_utils import S2SBatch
-from onmt.encoders.transformer import TransformerEncoder
-from onmt.decoders import TransformerDecoder
-from onmt.modules.embeddings import Embeddings
-from onmt.translate import BeamSearch, GNMTGlobalScorer, GreedySearch
+from Graph2SMILES.onmt_v1_2_0.encoders.transformer import TransformerEncoder
+from Graph2SMILES.onmt_v1_2_0.decoders import TransformerDecoder
+from Graph2SMILES.onmt_v1_2_0.modules.embeddings import Embeddings
+from Graph2SMILES.onmt_v1_2_0.translate import BeamSearch, GNMTGlobalScorer, GreedySearch
 from typing import Dict
 
 

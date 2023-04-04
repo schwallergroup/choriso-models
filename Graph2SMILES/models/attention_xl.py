@@ -1,9 +1,9 @@
 import math
 import torch
 import torch.nn as nn
-from onmt.modules.embeddings import PositionalEncoding
-from onmt.modules.position_ffn import PositionwiseFeedForward
-from onmt.utils.misc import sequence_mask
+from Graph2SMILES.onmt_v1_2_0.modules.embeddings import PositionalEncoding
+from Graph2SMILES.onmt_v1_2_0.modules.position_ffn import PositionwiseFeedForward
+from Graph2SMILES.onmt_v1_2_0.utils.misc import sequence_mask
 
 
 def get_sin_encodings(rel_pos_buckets, model_dim) -> torch.Tensor:
