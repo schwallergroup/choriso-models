@@ -24,7 +24,6 @@ from model_args import ReactionModelArgs
 from utils import prepare_data, ReactionForwardDataset, canonicalize_smiles, top_k_accuracy, remove_spaces
 
 
-
 class HuggingFaceArgs(ReactionModelArgs):
 
     def __init__(self):
