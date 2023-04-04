@@ -1,6 +1,6 @@
 import torch
 
-from onmt.translate.decode_strategy import DecodeStrategy
+from Graph2SMILES.onmt_v1_2_0.translate.decode_strategy import DecodeStrategy
 
 
 def sample_with_temperature(logits, sampling_temp, keep_topk):

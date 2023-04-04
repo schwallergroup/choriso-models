@@ -3,9 +3,9 @@ from __future__ import print_function
 import time
 from datetime import datetime
 
-import onmt
+import Graph2SMILES.onmt_v1_2_0
 
-from onmt.utils.logging import logger
+from Graph2SMILES.onmt_v1_2_0.utils.logging import logger
 
 
 def build_report_manager(opt, gpu_rank):
@@ -70,10 +70,10 @@ class ReportMgrBase(object):
         if step % self.report_every == 0:
             if multigpu:
                 report_stats = \
-                    onmt.utils.Statistics.all_gather_stats(report_stats)
+                    Graph2SMILES.onmt_v1_2_0.utils.Statistics.all_gather_stats(report_stats)
             self._report_training(
                 step, num_steps, learning_rate, patience, report_stats)
-            return onmt.utils.Statistics()
+            return Graph2SMILES.onmt_v1_2_0.utils.Statistics()
         else:
             return report_stats
 
@@ -135,7 +135,7 @@ class ReportMgr(ReportMgrBase):
                                    learning_rate,
                                    patience,
                                    step)
-        report_stats = onmt.utils.Statistics()
+        report_stats = Graph2SMILES.onmt_v1_2_0.utils.Statistics()
 
         return report_stats
 

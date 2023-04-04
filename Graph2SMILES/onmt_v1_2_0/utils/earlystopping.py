@@ -1,6 +1,6 @@
 
 from enum import Enum
-from onmt.utils.logging import logger
+from Graph2SMILES.onmt_v1_2_0.utils.logging import logger
 
 
 class PatienceEnum(Enum):

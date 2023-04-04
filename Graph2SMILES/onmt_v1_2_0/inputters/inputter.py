@@ -13,14 +13,14 @@ from torchtext.data import Field, RawField, LabelField
 from torchtext.vocab import Vocab
 from torchtext.data.utils import RandomShuffler
 
-from onmt.inputters.text_dataset import text_fields, TextMultiField
-from onmt.inputters.image_dataset import image_fields
-from onmt.inputters.audio_dataset import audio_fields
-from onmt.inputters.vec_dataset import vec_fields
-from onmt.utils.logging import logger
+from Graph2SMILES.onmt_v1_2_0.inputters.text_dataset import text_fields, TextMultiField
+from Graph2SMILES.onmt_v1_2_0.inputters.image_dataset import image_fields
+from Graph2SMILES.onmt_v1_2_0.inputters.audio_dataset import audio_fields
+from Graph2SMILES.onmt_v1_2_0.inputters.vec_dataset import vec_fields
+from Graph2SMILES.onmt_v1_2_0.utils.logging import logger
 # backwards compatibility
-from onmt.inputters.text_dataset import _feature_tokenize  # noqa: F401
-from onmt.inputters.image_dataset import (  # noqa: F401
+from Graph2SMILES.onmt_v1_2_0.inputters.text_dataset import _feature_tokenize  # noqa: F401
+from Graph2SMILES.onmt_v1_2_0.inputters.image_dataset import (  # noqa: F401
     batch_img as make_img)
 
 import gc

@@ -1,6 +1,6 @@
 """Define a minimal encoder."""
-from onmt.encoders.encoder import EncoderBase
-from onmt.utils.misc import sequence_mask
+from Graph2SMILES.onmt_v1_2_0.encoders.encoder import EncoderBase
+from Graph2SMILES.onmt_v1_2_0.utils.misc import sequence_mask
 import torch
 
 

@@ -2,7 +2,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from onmt.utils.misc import aeq
+from Graph2SMILES.onmt_v1_2_0.utils.misc import aeq
 
 
 SCALE_WEIGHT = 0.5 ** 0.5

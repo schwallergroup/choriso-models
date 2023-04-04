@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.init as init
 
-import onmt.modules
+import Graph2SMILES.onmt_v1_2_0.modules
 
 SCALE_WEIGHT = 0.5 ** 0.5
 
@@ -20,7 +20,7 @@ class GatedConv(nn.Module):
 
     def __init__(self, input_size, width=3, dropout=0.2, nopad=False):
         super(GatedConv, self).__init__()
-        self.conv = onmt.modules.WeightNormConv2d(
+        self.conv = Graph2SMILES.onmt_v1_2_0.modules.WeightNormConv2d(
             input_size, 2 * input_size, kernel_size=(width, 1), stride=(1, 1),
             padding=(width // 2 * (1 - nopad), 0))
         init.xavier_uniform_(self.conv.weight, gain=(4 * (1 - dropout))**0.5)

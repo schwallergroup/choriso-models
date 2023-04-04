@@ -3,8 +3,8 @@ from __future__ import unicode_literals, print_function
 
 import os
 import torch
-from onmt.inputters.text_dataset import TextMultiField
-from onmt.utils.alignment import build_align_pharaoh
+from Graph2SMILES.onmt_v1_2_0.inputters.text_dataset import TextMultiField
+from Graph2SMILES.onmt_v1_2_0.utils.alignment import build_align_pharaoh
 
 
 class TranslationBuilder(object):

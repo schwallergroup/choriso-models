@@ -1,5 +1,5 @@
 import unittest
-from onmt.translate.translation_server import ServerModel, TranslationServer
+from Graph2SMILES.onmt_v1_2_0.translate.translation_server import ServerModel, TranslationServer
 
 import os
 from six import string_types
@@ -7,7 +7,7 @@ from textwrap import dedent
 
 import torch
 
-from onmt.translate.translator import Translator
+from Graph2SMILES.onmt_v1_2_0.translate.translator import Translator
 
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))

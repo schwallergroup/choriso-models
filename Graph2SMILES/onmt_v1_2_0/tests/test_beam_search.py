@@ -1,5 +1,5 @@
 import unittest
-from onmt.translate.beam_search import BeamSearch, GNMTGlobalScorer
+from Graph2SMILES.onmt_v1_2_0.translate.beam_search import BeamSearch, GNMTGlobalScorer
 
 from copy import deepcopy
 

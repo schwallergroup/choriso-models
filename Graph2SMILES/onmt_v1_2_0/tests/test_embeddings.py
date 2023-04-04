@@ -1,12 +1,12 @@
 import unittest
-from onmt.modules.embeddings import Embeddings
+from Graph2SMILES.onmt_v1_2_0.modules.embeddings import Embeddings
 
 import itertools
 from copy import deepcopy
 
 import torch
 
-from onmt.tests.utils_for_tests import product_dict
+from Graph2SMILES.onmt_v1_2_0.tests.utils_for_tests import product_dict
 
 
 class TestEmbeddings(unittest.TestCase):

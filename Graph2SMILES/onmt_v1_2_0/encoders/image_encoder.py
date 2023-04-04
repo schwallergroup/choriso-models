@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch
 
-from onmt.encoders.encoder import EncoderBase
+from Graph2SMILES.onmt_v1_2_0.encoders.encoder import EncoderBase
 
 
 class ImageEncoder(EncoderBase):

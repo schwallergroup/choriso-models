@@ -11,17 +11,17 @@ import re
 import traceback
 import importlib
 import torch
-import onmt.opts
+import Graph2SMILES.onmt_v1_2_0.opts
 
 from itertools import islice, zip_longest
 from copy import deepcopy
 
-from onmt.utils.logging import init_logger
-from onmt.utils.misc import set_random_seed
-from onmt.utils.misc import check_model_config
-from onmt.utils.alignment import to_word_align
-from onmt.utils.parse import ArgumentParser
-from onmt.translate.translator import build_translator
+from Graph2SMILES.onmt_v1_2_0.utils.logging import init_logger
+from Graph2SMILES.onmt_v1_2_0.utils.misc import set_random_seed
+from Graph2SMILES.onmt_v1_2_0.utils.misc import check_model_config
+from Graph2SMILES.onmt_v1_2_0.utils.alignment import to_word_align
+from Graph2SMILES.onmt_v1_2_0.utils.parse import ArgumentParser
+from Graph2SMILES.onmt_v1_2_0.translate.translator import build_translator
 
 
 def critical(func):
@@ -346,7 +346,7 @@ class ServerModel(object):
         prec_argv = sys.argv
         sys.argv = sys.argv[:1]
         parser = ArgumentParser()
-        onmt.opts.translate_opts(parser)
+        Graph2SMILES.onmt_v1_2_0.opts.translate_opts(parser)
 
         models = opt['models']
         if not isinstance(models, (list, tuple)):

@@ -3,7 +3,7 @@ import os
 import torch
 from torchtext.data import Field
 
-from onmt.inputters.datareader_base import DataReaderBase
+from Graph2SMILES.onmt_v1_2_0.inputters.datareader_base import DataReaderBase
 
 try:
     import numpy as np

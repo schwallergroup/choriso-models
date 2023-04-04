@@ -1,5 +1,5 @@
 import unittest
-from onmt.modules.structured_attention import MatrixTree
+from Graph2SMILES.onmt_v1_2_0.modules.structured_attention import MatrixTree
 
 import torch
 

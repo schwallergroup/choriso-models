@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from onmt.encoders.encoder import EncoderBase
+from Graph2SMILES.onmt_v1_2_0.encoders.encoder import EncoderBase
 
 
 class GGNNAttrProxy(object):

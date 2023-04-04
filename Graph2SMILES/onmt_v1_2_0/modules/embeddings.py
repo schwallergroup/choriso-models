@@ -5,7 +5,7 @@ import warnings
 import torch
 import torch.nn as nn
 
-from onmt.modules.util_class import Elementwise
+from Graph2SMILES.onmt_v1_2_0.modules.util_class import Elementwise
 
 
 class PositionalEncoding(nn.Module):

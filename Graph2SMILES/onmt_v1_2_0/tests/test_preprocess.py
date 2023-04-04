@@ -9,14 +9,14 @@ import glob
 import os
 import codecs
 
-import onmt
-import onmt.inputters
-import onmt.opts
-import onmt.bin.preprocess as preprocess
+import Graph2SMILES.onmt_v1_2_0
+import Graph2SMILES.onmt_v1_2_0.inputters
+import Graph2SMILES.onmt_v1_2_0.opts
+import Graph2SMILES.onmt_v1_2_0.bin.preprocess as preprocess
 
 
 parser = configargparse.ArgumentParser(description='preprocess.py')
-onmt.opts.preprocess_opts(parser)
+Graph2SMILES.onmt_v1_2_0.opts.preprocess_opts(parser)
 
 SAVE_DATA_PREFIX = 'data/test_preprocess'
 
@@ -38,7 +38,7 @@ class TestData(unittest.TestCase):
         self.opt = opt
 
     def dataset_build(self, opt):
-        fields = onmt.inputters.get_fields("text", 0, 0)
+        fields = Graph2SMILES.onmt_v1_2_0.inputters.get_fields("text", 0, 0)
 
         if hasattr(opt, 'src_vocab') and len(opt.src_vocab) > 0:
             with codecs.open(opt.src_vocab, 'w', 'utf-8') as f:
@@ -47,9 +47,9 @@ class TestData(unittest.TestCase):
             with codecs.open(opt.tgt_vocab, 'w', 'utf-8') as f:
                 f.write('a\nb\nc\nd\ne\nf\n')
 
-        src_reader = onmt.inputters.str2reader[opt.data_type].from_opt(opt)
-        tgt_reader = onmt.inputters.str2reader["text"].from_opt(opt)
-        align_reader = onmt.inputters.str2reader["text"].from_opt(opt)
+        src_reader = Graph2SMILES.onmt_v1_2_0.inputters.str2reader[opt.data_type].from_opt(opt)
+        tgt_reader = Graph2SMILES.onmt_v1_2_0.inputters.str2reader["text"].from_opt(opt)
+        align_reader = Graph2SMILES.onmt_v1_2_0.inputters.str2reader["text"].from_opt(opt)
         preprocess.build_save_dataset(
             'train', fields, src_reader, tgt_reader, align_reader, opt)
 

@@ -9,25 +9,25 @@ from itertools import count, zip_longest
 
 import torch
 
-import onmt.model_builder
-import onmt.inputters as inputters
-import onmt.decoders.ensemble
-from onmt.translate.beam_search import BeamSearch
-from onmt.translate.greedy_search import GreedySearch
-from onmt.utils.misc import tile, set_random_seed, report_matrix
-from onmt.utils.alignment import extract_alignment, build_align_pharaoh
-from onmt.modules.copy_generator import collapse_copy_scores
+import Graph2SMILES.onmt_v1_2_0.model_builder
+import Graph2SMILES.onmt_v1_2_0.inputters as inputters
+import Graph2SMILES.onmt_v1_2_0.decoders.ensemble
+from Graph2SMILES.onmt_v1_2_0.translate.beam_search import BeamSearch
+from Graph2SMILES.onmt_v1_2_0.translate.greedy_search import GreedySearch
+from Graph2SMILES.onmt_v1_2_0.utils.misc import tile, set_random_seed, report_matrix
+from Graph2SMILES.onmt_v1_2_0.utils.alignment import extract_alignment, build_align_pharaoh
+from Graph2SMILES.onmt_v1_2_0.modules.copy_generator import collapse_copy_scores
 
 
 def build_translator(opt, report_score=True, logger=None, out_file=None):
     if out_file is None:
         out_file = codecs.open(opt.output, 'w+', 'utf-8')
 
-    load_test_model = onmt.decoders.ensemble.load_test_model \
-        if len(opt.models) > 1 else onmt.model_builder.load_test_model
+    load_test_model = Graph2SMILES.onmt_v1_2_0.decoders.ensemble.load_test_model \
+        if len(opt.models) > 1 else Graph2SMILES.onmt_v1_2_0.model_builder.load_test_model
     fields, model, model_opt = load_test_model(opt)
 
-    scorer = onmt.translate.GNMTGlobalScorer.from_opt(opt)
+    scorer = Graph2SMILES.onmt_v1_2_0.translate.GNMTGlobalScorer.from_opt(opt)
 
     translator = Translator.from_opt(
         model,
@@ -342,7 +342,7 @@ class Translator(object):
             shuffle=False
         )
 
-        xlation_builder = onmt.translate.TranslationBuilder(
+        xlation_builder = Graph2SMILES.onmt_v1_2_0.translate.TranslationBuilder(
             data, self.fields, self.n_best, self.replace_unk, tgt,
             self.phrase_table
         )

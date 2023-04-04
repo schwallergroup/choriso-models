@@ -5,10 +5,10 @@ Implementation of "Attention is All You Need"
 import torch
 import torch.nn as nn
 
-from onmt.decoders.decoder import DecoderBase
-from onmt.modules import MultiHeadedAttention, AverageAttention
-from onmt.modules.position_ffn import PositionwiseFeedForward
-from onmt.utils.misc import sequence_mask
+from Graph2SMILES.onmt_v1_2_0.decoders.decoder import DecoderBase
+from Graph2SMILES.onmt_v1_2_0.modules import MultiHeadedAttention, AverageAttention
+from Graph2SMILES.onmt_v1_2_0.modules.position_ffn import PositionwiseFeedForward
+from Graph2SMILES.onmt_v1_2_0.utils.misc import sequence_mask
 
 
 class TransformerDecoderLayer(nn.Module):

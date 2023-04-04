@@ -2,7 +2,7 @@
 
 import torch.nn as nn
 
-from onmt.utils.misc import aeq
+from Graph2SMILES.onmt_v1_2_0.utils.misc import aeq
 
 
 class EncoderBase(nn.Module):

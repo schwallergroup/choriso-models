@@ -10,7 +10,7 @@ import math
 import pickle
 import torch.distributed
 
-from onmt.utils.logging import logger
+from Graph2SMILES.onmt_v1_2_0.utils.logging import logger
 
 
 def is_master(opt, device_id):

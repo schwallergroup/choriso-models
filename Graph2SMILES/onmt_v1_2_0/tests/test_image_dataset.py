@@ -1,5 +1,5 @@
 import unittest
-from onmt.inputters.image_dataset import ImageDataReader
+from Graph2SMILES.onmt_v1_2_0.inputters.image_dataset import ImageDataReader
 
 import os
 import shutil

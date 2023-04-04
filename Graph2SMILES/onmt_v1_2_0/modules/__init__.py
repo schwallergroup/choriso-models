@@ -11,7 +11,7 @@ from Graph2SMILES.onmt_v1_2_0.modules.embeddings import Embeddings, PositionalEn
 from Graph2SMILES.onmt_v1_2_0.modules.weight_norm import WeightNormConv2d
 from Graph2SMILES.onmt_v1_2_0.modules.average_attn import AverageAttention
 
-import onmt.modules.source_noise # noqa
+import Graph2SMILES.onmt_v1_2_0.modules.source_noise # noqa
 
 __all__ = ["Elementwise", "context_gate_factory", "ContextGate",
            "GlobalAttention", "ConvMultiStepAttention", "CopyGenerator",

@@ -1,5 +1,5 @@
 import unittest
-from onmt.translate.greedy_search import GreedySearch
+from Graph2SMILES.onmt_v1_2_0.translate.greedy_search import GreedySearch
 
 import torch
 

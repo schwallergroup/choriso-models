@@ -4,7 +4,7 @@
 import torch
 import torch.nn as nn
 
-from onmt.modules.position_ffn import PositionwiseFeedForward
+from Graph2SMILES.onmt_v1_2_0.modules.position_ffn import PositionwiseFeedForward
 
 
 class AverageAttention(nn.Module):

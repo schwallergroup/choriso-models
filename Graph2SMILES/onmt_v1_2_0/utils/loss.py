@@ -7,9 +7,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-import onmt
-from onmt.modules.sparse_losses import SparsemaxLoss
-from onmt.modules.sparse_activations import LogSparsemax
+import Graph2SMILES.onmt_v1_2_0
+from Graph2SMILES.onmt_v1_2_0.modules.sparse_losses import SparsemaxLoss
+from Graph2SMILES.onmt_v1_2_0.modules.sparse_activations import LogSparsemax
 
 
 def build_loss_compute(model, tgt_field, opt, train=True):
@@ -21,7 +21,7 @@ def build_loss_compute(model, tgt_field, opt, train=True):
     Currently, the NMTLossCompute class handles all loss computation except
     for when using a copy mechanism.
     """
-    device = torch.device("cuda" if onmt.utils.misc.use_gpu(opt) else "cpu")
+    device = torch.device("cuda" if Graph2SMILES.onmt_v1_2_0.utils.misc.use_gpu(opt) else "cpu")
 
     padding_idx = tgt_field.vocab.stoi[tgt_field.pad_token]
     unk_idx = tgt_field.vocab.stoi[tgt_field.unk_token]
@@ -31,7 +31,7 @@ def build_loss_compute(model, tgt_field, opt, train=True):
             "order to use --lambda_coverage != 0"
 
     if opt.copy_attn:
-        criterion = onmt.modules.CopyGeneratorLoss(
+        criterion = Graph2SMILES.onmt_v1_2_0.modules.CopyGeneratorLoss(
             len(tgt_field.vocab), opt.copy_attn_force,
             unk_index=unk_idx, ignore_index=padding_idx
         )
@@ -51,7 +51,7 @@ def build_loss_compute(model, tgt_field, opt, train=True):
     use_raw_logits = isinstance(criterion, SparsemaxLoss)
     loss_gen = model.generator[0] if use_raw_logits else model.generator
     if opt.copy_attn:
-        compute = onmt.modules.CopyGeneratorLossCompute(
+        compute = Graph2SMILES.onmt_v1_2_0.modules.CopyGeneratorLossCompute(
             criterion, loss_gen, tgt_field.vocab, opt.copy_loss_by_seqlength,
             lambda_coverage=opt.lambda_coverage
         )
@@ -161,7 +161,7 @@ class LossComputeBase(nn.Module):
         if shard_size == 0:
             loss, stats = self._compute_loss(batch, **shard_state)
             return loss / float(normalization), stats
-        batch_stats = onmt.utils.Statistics()
+        batch_stats = Graph2SMILES.onmt_v1_2_0.utils.Statistics()
         for shard in shards(shard_state, shard_size):
             loss, stats = self._compute_loss(batch, **shard)
             loss.div(float(normalization)).backward()
@@ -182,7 +182,7 @@ class LossComputeBase(nn.Module):
         non_padding = target.ne(self.padding_idx)
         num_correct = pred.eq(target).masked_select(non_padding).sum().item()
         num_non_padding = non_padding.sum().item()
-        return onmt.utils.Statistics(loss.item(), num_non_padding, num_correct)
+        return Graph2SMILES.onmt_v1_2_0.utils.Statistics(loss.item(), num_non_padding, num_correct)
 
     def _bottle(self, _v):
         return _v.view(-1, _v.size(2))
@@ -265,7 +265,7 @@ class NMTLossCompute(LossComputeBase):
             pad_tgt_size, batch_size, _ = batch.tgt.size()
             pad_src_size = batch.src[0].size(0)
             align_matrix_size = [batch_size, pad_tgt_size, pad_src_size]
-            ref_align = onmt.utils.make_batch_align_matrix(
+            ref_align = Graph2SMILES.onmt_v1_2_0.utils.make_batch_align_matrix(
                 align_idx, align_matrix_size, normalize=True)
             # NOTE: tgt-src ref alignement that in range_ of shard
             # (coherent with batch.tgt)

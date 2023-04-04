@@ -4,7 +4,7 @@ import time
 import math
 import sys
 
-from onmt.utils.logging import logger
+from Graph2SMILES.onmt_v1_2_0.utils.logging import logger
 
 
 class Statistics(object):
@@ -54,7 +54,7 @@ class Statistics(object):
             our_stats(list([`Statistics`])): list of updated stats
         """
         from torch.distributed import get_rank
-        from onmt.utils.distributed import all_gather_list
+        from Graph2SMILES.onmt_v1_2_0.utils.distributed import all_gather_list
 
         # Get a list of world_size lists with len(stat_list) Statistics objects
         all_stats = all_gather_list(stat_list, max_size=max_size)

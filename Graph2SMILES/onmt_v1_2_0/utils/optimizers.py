@@ -8,7 +8,7 @@ from copy import copy
 from math import sqrt
 import types
 import importlib
-from onmt.utils.misc import fn_args
+from Graph2SMILES.onmt_v1_2_0.utils.misc import fn_args
 
 
 def build_torch_optimizer(model, opt):

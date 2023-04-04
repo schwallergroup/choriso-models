@@ -4,9 +4,9 @@
 import torch
 import torch.nn as nn
 
-from onmt.modules import ConvMultiStepAttention, GlobalAttention
-from onmt.utils.cnn_factory import shape_transform, GatedConv
-from onmt.decoders.decoder import DecoderBase
+from Graph2SMILES.onmt_v1_2_0.modules import ConvMultiStepAttention, GlobalAttention
+from Graph2SMILES.onmt_v1_2_0.utils.cnn_factory import shape_transform, GatedConv
+from Graph2SMILES.onmt_v1_2_0.decoders.decoder import DecoderBase
 
 SCALE_WEIGHT = 0.5 ** 0.5
 

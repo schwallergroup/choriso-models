@@ -4,18 +4,18 @@ import math
 
 import torch
 
-import onmt
-import onmt.inputters
-import onmt.opts
-from onmt.model_builder import build_embeddings, \
+import Graph2SMILES.onmt_v1_2_0
+import Graph2SMILES.onmt_v1_2_0.inputters
+import Graph2SMILES.onmt_v1_2_0.opts
+from Graph2SMILES.onmt_v1_2_0.model_builder import build_embeddings, \
     build_encoder, build_decoder
-from onmt.encoders.image_encoder import ImageEncoder
-from onmt.encoders.audio_encoder import AudioEncoder
-from onmt.utils.parse import ArgumentParser
+from Graph2SMILES.onmt_v1_2_0.encoders.image_encoder import ImageEncoder
+from Graph2SMILES.onmt_v1_2_0.encoders.audio_encoder import AudioEncoder
+from Graph2SMILES.onmt_v1_2_0.utils.parse import ArgumentParser
 
 parser = ArgumentParser(description='train.py')
-onmt.opts.model_opts(parser)
-onmt.opts.train_opts(parser)
+Graph2SMILES.onmt_v1_2_0.opts.model_opts(parser)
+Graph2SMILES.onmt_v1_2_0.opts.train_opts(parser)
 
 # -data option is required, but not used in this test, so dummy.
 opt = parser.parse_known_args(['-data', 'dummy'])[0]
@@ -28,7 +28,7 @@ class TestModel(unittest.TestCase):
         self.opt = opt
 
     def get_field(self):
-        src = onmt.inputters.get_fields("text", 0, 0)["src"]
+        src = Graph2SMILES.onmt_v1_2_0.inputters.get_fields("text", 0, 0)["src"]
         src.base_field.build_vocab([])
         return src
 
@@ -130,7 +130,7 @@ class TestModel(unittest.TestCase):
         embeddings = build_embeddings(opt, word_field, for_encoder=False)
         dec = build_decoder(opt, embeddings)
 
-        model = onmt.models.model.NMTModel(enc, dec)
+        model = Graph2SMILES.onmt_v1_2_0.models.model.NMTModel(enc, dec)
 
         test_src, test_tgt, test_length = self.get_batch(source_l=source_l,
                                                          bsize=bsize)
@@ -162,7 +162,7 @@ class TestModel(unittest.TestCase):
         embeddings = build_embeddings(opt, word_field, for_encoder=False)
         dec = build_decoder(opt, embeddings)
 
-        model = onmt.models.model.NMTModel(enc, dec)
+        model = Graph2SMILES.onmt_v1_2_0.models.model.NMTModel(enc, dec)
 
         test_src, test_tgt, test_length = self.get_batch_image(
             h=h, w=w,
@@ -199,7 +199,7 @@ class TestModel(unittest.TestCase):
         embeddings = build_embeddings(opt, word_field, for_encoder=False)
         dec = build_decoder(opt, embeddings)
 
-        model = onmt.models.model.NMTModel(enc, dec)
+        model = Graph2SMILES.onmt_v1_2_0.models.model.NMTModel(enc, dec)
 
         test_src, test_tgt, test_length = self.get_batch_audio(
             bsize=bsize,
@@ -298,7 +298,7 @@ tests_nmtmodel = [[('rnn_type', 'GRU')],
                   [],
                   ]
 
-if onmt.models.sru.check_sru_requirement():
+if Graph2SMILES.onmt_v1_2_0.models.sru.check_sru_requirement():
     #   """ Only do SRU test if requirment is safisfied. """
     # SRU doesn't support input_feed.
     tests_nmtmodel.append([('rnn_type', 'SRU'), ('input_feed', 0)])

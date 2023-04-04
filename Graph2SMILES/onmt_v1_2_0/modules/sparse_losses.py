@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 from torch.autograd import Function
 from torch.cuda.amp import custom_fwd, custom_bwd
-from onmt.modules.sparse_activations import _threshold_and_support
-from onmt.utils.misc import aeq
+from Graph2SMILES.onmt_v1_2_0.modules.sparse_activations import _threshold_and_support
+from Graph2SMILES.onmt_v1_2_0.utils.misc import aeq
 
 
 class SparsemaxLossFunction(Function):

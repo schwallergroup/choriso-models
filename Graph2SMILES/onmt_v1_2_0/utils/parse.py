@@ -3,8 +3,8 @@ import os
 
 import torch
 
-import onmt.opts as opts
-from onmt.utils.logging import logger
+import Graph2SMILES.onmt_v1_2_0.opts as opts
+from Graph2SMILES.onmt_v1_2_0.utils.logging import logger
 
 
 class ArgumentParser(cfargparse.ArgumentParser):

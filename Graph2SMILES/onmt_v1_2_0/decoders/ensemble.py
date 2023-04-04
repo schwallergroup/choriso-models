@@ -8,10 +8,10 @@ All models in the ensemble must share a target vocabulary.
 import torch
 import torch.nn as nn
 
-from onmt.encoders.encoder import EncoderBase
-from onmt.decoders.decoder import DecoderBase
-from onmt.models import NMTModel
-import onmt.model_builder
+from Graph2SMILES.onmt_v1_2_0.encoders.encoder import EncoderBase
+from Graph2SMILES.onmt_v1_2_0.decoders.decoder import DecoderBase
+from Graph2SMILES.onmt_v1_2_0.models import NMTModel
+import Graph2SMILES.onmt_v1_2_0.model_builder
 
 
 class EnsembleDecoderOutput(object):
@@ -127,7 +127,7 @@ def load_test_model(opt):
     models = []
     for model_path in opt.models:
         fields, model, model_opt = \
-            onmt.model_builder.load_test_model(opt, model_path=model_path)
+            Graph2SMILES.onmt_v1_2_0.model_builder.load_test_model(opt, model_path=model_path)
         if shared_fields is None:
             shared_fields = fields
         else:

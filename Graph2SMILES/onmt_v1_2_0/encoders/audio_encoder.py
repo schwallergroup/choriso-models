@@ -6,8 +6,8 @@ import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence as pack
 from torch.nn.utils.rnn import pad_packed_sequence as unpack
 
-from onmt.utils.rnn_factory import rnn_factory
-from onmt.encoders.encoder import EncoderBase
+from Graph2SMILES.onmt_v1_2_0.utils.rnn_factory import rnn_factory
+from Graph2SMILES.onmt_v1_2_0.encoders.encoder import EncoderBase
 
 
 class AudioEncoder(EncoderBase):

@@ -1,7 +1,7 @@
 import torch
-from onmt.translate import penalties
-from onmt.translate.decode_strategy import DecodeStrategy
-from onmt.utils.misc import tile
+from Graph2SMILES.onmt_v1_2_0.translate import penalties
+from Graph2SMILES.onmt_v1_2_0.translate.decode_strategy import DecodeStrategy
+from Graph2SMILES.onmt_v1_2_0.utils.misc import tile
 
 import warnings
 

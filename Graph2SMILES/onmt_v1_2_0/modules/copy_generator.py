@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 
-from onmt.utils.misc import aeq
-from onmt.utils.loss import NMTLossCompute
+from Graph2SMILES.onmt_v1_2_0.utils.misc import aeq
+from Graph2SMILES.onmt_v1_2_0.utils.loss import NMTLossCompute
 
 
 def collapse_copy_scores(scores, batch, tgt_vocab, src_vocabs=None,

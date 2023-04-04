@@ -1,11 +1,11 @@
 import torch
 import torch.nn as nn
 
-from onmt.models.stacked_rnn import StackedLSTM, StackedGRU
-from onmt.modules import context_gate_factory, GlobalAttention
-from onmt.utils.rnn_factory import rnn_factory
+from Graph2SMILES.onmt_v1_2_0.models.stacked_rnn import StackedLSTM, StackedGRU
+from Graph2SMILES.onmt_v1_2_0.modules import context_gate_factory, GlobalAttention
+from Graph2SMILES.onmt_v1_2_0.utils.rnn_factory import rnn_factory
 
-from onmt.utils.misc import aeq
+from Graph2SMILES.onmt_v1_2_0.utils.misc import aeq
 
 
 class DecoderBase(nn.Module):

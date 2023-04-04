@@ -1,5 +1,5 @@
 import unittest
-from onmt.inputters.text_dataset import TextMultiField, TextDataReader
+from Graph2SMILES.onmt_v1_2_0.inputters.text_dataset import TextMultiField, TextDataReader
 
 import itertools
 import os
@@ -7,7 +7,7 @@ from copy import deepcopy
 
 from torchtext.data import Field
 
-from onmt.tests.utils_for_tests import product_dict
+from Graph2SMILES.onmt_v1_2_0.tests.utils_for_tests import product_dict
 
 
 class TestTextMultiField(unittest.TestCase):
