@@ -52,5 +52,5 @@ class BenchmarkPipeline:
         self.model.preprocess()
         self.model.train()
 
-    def predict(self):
-        self.model.predict()
+    def predict(self, dataset):
+        self.model.predict(dataset=dataset)

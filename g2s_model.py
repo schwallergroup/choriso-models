@@ -39,7 +39,7 @@ class G2S(ReactionModel):
         """Train the reaction model. Should also contain validation and test steps"""
         os.system("sh Graph2SMILES/scripts/train_g2s.sh")
 
-    def predict(self, data):
+    def predict(self, dataset="cjhif"):
         """Predict provided data with the reaction model"""
         os.system("sh Graph2SMILES/scripts/predict.sh")
 

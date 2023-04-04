@@ -3,7 +3,7 @@
 MODEL=g2s_series_rel
 
 EXP_NO=1
-DATASET=USPTO_50k
+DATASET=cjhif
 CHECKPOINT=./checkpoints/pretrained/USPTO_50k_dgcn.pt
 
 BS=30

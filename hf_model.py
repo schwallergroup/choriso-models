@@ -212,12 +212,6 @@ class HuggingFaceTransformer(ReactionModel):
             else:
                 self.val_dataset = ReactionForwardDataset(reaction_dataset)
 
-    def postprocess_text(self, text):
-        # preds = [char2SMILES(pred.replace(" ", ""),dictionary_file=TOKENIZER_PATH+"SMILES2char.pkl") for pred in preds]
-        # labels = [[char2SMILES(label.replace(" ", ""),dictionary_file=TOKENIZER_PATH+"SMILES2char.pkl")] for label in labels]
-        canon_text = canonicalize_smiles(text.replace(" ", ""))
-        return canon_text
-
     def apply_metric(self, preds, labels):
         accuracy = evaluate.load("accuracy")
         preds_tok = self.tokenizer(preds)["input_ids"]
@@ -305,7 +299,6 @@ class HuggingFaceTransformer(ReactionModel):
                                  train_dataset=self.train_dataset,
                                  eval_dataset=self.val_dataset,
                                  data_collator=data_collator,
-                                 # tokenizer=self.tokenizer,
                                  compute_metrics=self.compute_metrics,
                                  callbacks=[WandbCallback, CodeCarbonCallback])
         trainer.train()

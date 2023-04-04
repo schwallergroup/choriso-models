@@ -53,7 +53,7 @@ class OpenNMT(ReactionModel):
         # onmt_train()
         wandb.finish()
 
-    def predict(self, data):
+    def predict(self, dataset="cjhif"):
         """Predict provided data with the reaction model"""
         os.system("sh OpenNMT_Transformer/predict.sh")
 
