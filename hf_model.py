@@ -131,6 +131,9 @@ class HuggingFaceTransformer(ReactionModel):
                 enc_config = model_kwargs["encoder"]
                 dec_config = model_kwargs["decoder"]
 
+                dec_config.is_decoder = True
+                dec_config.add_cross_attention = True
+
                 model_kwargs.pop("encoder", None)
                 model_kwargs.pop("decoder", None)
 
@@ -355,7 +358,7 @@ if __name__ == "__main__":
         "dataloader_num_workers": 4,
     }
     config = BertGenerationConfig(hidden_size=384,
-                                  num_hidden_layers=4,
+                                  num_hidden_layers=3,
                                   num_attention_heads=8,
                                   intermediate_size=2048,
                                   hidden_act='gelu',
@@ -373,13 +376,10 @@ if __name__ == "__main__":
                                   max_length=96,
                                   min_length=1)
 
-    decoder_config = config
-    decoder_config["is_decoder"] = True
-    decoder_config["add_cross_attention"] = True
 
     model_args = {
         "encoder": config,
-        "decoder": decoder_config,
+        "decoder": config,
         "length_penalty": 0,
         "max_length": 96,
         "min_length": 3
