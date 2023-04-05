@@ -8,6 +8,15 @@ from typing import List
 
 # from Graph2SMILES.utils.data_utils import tokenize_smiles
 
+
+def overwrite_config_with_tokenizer(config, tokenizer):
+    config.decoder_start_token_id = tokenizer.cls_token_id
+    config.pad_token_id = tokenizer.pad_token_id
+    config.eos_token_id = tokenizer.eos_token_id
+    config.vocab_size = tokenizer.vocab_size
+    return config
+
+
 def remove_spaces(spaced_str: str):
     return spaced_str.replace(" ", "")
 

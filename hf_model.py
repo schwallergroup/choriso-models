@@ -21,7 +21,7 @@ from transformers import Pipeline as HFPipeline
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from model_args import ReactionModelArgs
-from utils import prepare_data, ReactionForwardDataset, canonicalize_smiles, top_k_accuracy, remove_spaces
+from utils import prepare_data, ReactionForwardDataset, overwrite_config_with_tokenizer, top_k_accuracy, remove_spaces
 
 
 class HuggingFaceArgs(ReactionModelArgs):
@@ -131,6 +131,9 @@ class HuggingFaceTransformer(ReactionModel):
                 enc_config = model_kwargs["encoder"]
                 dec_config = model_kwargs["decoder"]
 
+                enc_config = overwrite_config_with_tokenizer(enc_config, self.tokenizer)
+                dec_config = overwrite_config_with_tokenizer(dec_config, self.tokenizer)
+
                 dec_config.is_decoder = True
                 dec_config.add_cross_attention = True
 
@@ -140,10 +143,7 @@ class HuggingFaceTransformer(ReactionModel):
                 config = EncoderDecoderConfig.from_encoder_decoder_configs(enc_config, dec_config, **model_kwargs)
 
                 # overwrite arguments with tokenizer specifications
-                config.decoder_start_token_id = self.tokenizer.cls_token_id
-                config.pad_token_id = self.tokenizer.pad_token_id
-                config.eos_token_id = self.tokenizer.eos_token_id
-                config.vocab_size = self.tokenizer.vocab_size
+                config = overwrite_config_with_tokenizer(config, self.tokenizer)
 
                 config.tie_word_embeddings = True
 
