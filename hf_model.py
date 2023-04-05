@@ -15,7 +15,7 @@ from tokenizers import Regex, Tokenizer, pre_tokenizers, processors
 from transformers.integrations import WandbCallback, CodeCarbonCallback
 from transformers import AutoConfig, AutoTokenizer, EncoderDecoderConfig, PreTrainedTokenizerFast, BertConfig, \
     AutoModelForSeq2SeqLM, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForSeq2Seq, Seq2SeqTrainingArguments, \
-    HfArgumentParser, BertConfig, PretrainedConfig
+    HfArgumentParser, BertGenerationConfig, PretrainedConfig
 from transformers import Pipeline as HFPipeline
 
 
@@ -72,7 +72,6 @@ class HuggingFaceTransformer(ReactionModel):
             chem_tokenizer = Tokenizer(tokenizer_models.WordLevel(unk_token="[UNK]"))
 
             chem_tokenizer.pre_tokenizer = pre_tokenizers.Split(pattern, "isolated")
-
 
             trainer = WordLevelTrainer(special_tokens=["[UNK]", "[PAD]", "[CLS]", "[SEP]", "[MASK]"])
 
@@ -145,6 +144,8 @@ class HuggingFaceTransformer(ReactionModel):
 
                 config.tie_word_embeddings = True
 
+                print(config)
+
             else:
                 # use pre-built architecture
                 config = AutoConfig.from_pretrained(model_architecture, **model_kwargs)
@@ -210,46 +211,6 @@ class HuggingFaceTransformer(ReactionModel):
                 self.train_dataset = ReactionForwardDataset(reaction_dataset)
             else:
                 self.val_dataset = ReactionForwardDataset(reaction_dataset)
-
-    def apply_metric(self, preds, labels):
-        accuracy = evaluate.load("accuracy")
-        preds_tok = self.tokenizer(preds)["input_ids"]
-        labels_tok = self.tokenizer(labels)["input_ids"]
-        result = reduce(lambda a, b: a + b,
-                        map(lambda x, y: accuracy.compute(references=x, predictions=y)["accuracy"], labels_tok,
-                            preds_tok)) / len(preds_tok)
-        result = {"accuracy": result}
-        return result
-
-    def tokenwise_acc(self, labels: np.array, preds: np.array):
-        # taken from the onmt docs
-        """non_padding = labels.ne(self.tokenizer.pad_token_id)
-        num_correct = preds.eq(labels).masked_select(non_padding).sum().item()
-        num_non_padding = non_padding.sum().item()"""
-
-        non_padding = np.not_equal(labels, self.tokenizer.pad_token_id)
-        print("non_padding shape: ", non_padding.shape)
-        labels_pad_mask = labels[non_padding]
-        print("labels_pad_mask shape: ", labels_pad_mask.shape)
-        correct_matrix = np.equal(preds, labels)
-        print("correct_matrix shape: ", correct_matrix.shape)
-        correct_matrix_pad_mask = correct_matrix[non_padding]
-        print("correct_matrix_pad_mask shape: ", correct_matrix_pad_mask.shape)
-        num_correct = correct_matrix_pad_mask.flatten().sum().item()
-        num_non_padding = non_padding.flatten().sum().item()
-
-        accuracy = 100 * (num_correct / num_non_padding)
-        return accuracy
-
-    def top_k_acc(self, labels: np.array, preds: np.array, k=5):
-        assert k > 0 and type(k) == int, "k has to be an integer > 0"
-
-        top_k_accs = {f"top_{i}_acc": 0 for i in range(1, k+1)}
-
-        for i in range(1, k+1):
-            top_k_accs[f"top_{i}_acc"] = top_k_accuracy_score(labels, preds, k=i)
-
-        return top_k_accs
 
     def compute_metrics(self, eval_preds):
         labels = eval_preds.label_ids
@@ -392,32 +353,34 @@ if __name__ == "__main__":
         "eval_accumulation_steps": 10,
         "predict_with_generate": True,
         "dataloader_num_workers": 4,
-        # "lr_scheduler_type": "noam"
-        # "load_best_model_at_end": False,
     }
-    config = BertConfig(hidden_size=384,
-                            num_hidden_layers=4,
-                            num_attention_heads=8,
-                            intermediate_size=2048,
-                            hidden_act='gelu',
-                            hidden_dropout_prob=0.1,
-                            attention_probs_dropout_prob=0.1,
-                            max_position_embeddings=512,
-                            type_vocab_size=2,
-                            initializer_range=0.02,
-                            layer_norm_eps=1e-12,
-                            position_embedding_type='absolute',
-                            use_cache=True,
-                            classifier_dropout=None,
-                            num_beams=10,
-                            vocab_size=1024,
-                            max_length=96,
-                            min_length=1)
+    config = BertGenerationConfig(hidden_size=384,
+                                  num_hidden_layers=4,
+                                  num_attention_heads=8,
+                                  intermediate_size=2048,
+                                  hidden_act='gelu',
+                                  hidden_dropout_prob=0.1,
+                                  attention_probs_dropout_prob=0.1,
+                                  max_position_embeddings=512,
+                                  type_vocab_size=2,
+                                  initializer_range=0.02,
+                                  layer_norm_eps=1e-12,
+                                  position_embedding_type='absolute',
+                                  use_cache=True,
+                                  classifier_dropout=None,
+                                  num_beams=10,
+                                  vocab_size=1024,
+                                  max_length=96,
+                                  min_length=1)
+
+    decoder_config = config
+    decoder_config["is_decoder"] = True
+    decoder_config["add_cross_attention"] = True
 
     model_args = {
         "encoder": config,
-        "decoder": config,
-        "length_penalty": -2.0,
+        "decoder": decoder_config,
+        "length_penalty": 0,
         "max_length": 96,
         "min_length": 3
     }
