@@ -19,6 +19,6 @@ export PATH=~/anaconda3/envs/graph2smiles/bin:$PATH
 source activate graph2smiles
 
 export PYTHONPATH=$PYTHONPATH:~/reaction_forward
-
+export PYTHONPATH=$PYTHONPATH:~/reaction_forward/Graph2SMILES/onmt_v1_2_0
 
 python g2s_model.py

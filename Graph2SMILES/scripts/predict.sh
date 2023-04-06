@@ -16,6 +16,8 @@ REPR_END=smiles
 
 PREFIX=${DATASET}_${MODEL}_${REPR_START}_${REPR_END}
 
+cd Graph2SMILES
+
 python predict.py \
   --do_predict \
   --do_score \

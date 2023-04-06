@@ -47,4 +47,5 @@ class G2S(ReactionModel):
 if __name__ == "__main__":
     reaction_model = G2S()
     pipeline = BenchmarkPipeline(model=reaction_model)
-    pipeline.run_train_pipeline()
+    # pipeline.run_train_pipeline()
+    pipeline.predict(dataset="cjhif")

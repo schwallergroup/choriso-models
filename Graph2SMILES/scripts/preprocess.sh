@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export PYTHONPATH=$PYTHONPATH:/rwthfs/rz/cluster/home/iz782675/reaction_forward
+export PYTHONPATH=$PYTHONPATH:~/reaction_forward
 
 DATASET=cjhif
 MODEL=g2s_series_rel

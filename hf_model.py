@@ -286,7 +286,7 @@ class HuggingFaceTransformer(ReactionModel):
         # check if there are saved models in the dir
         for dir in os.listdir(checkpoint_dir):
             dir = os.path.join(checkpoint_dir, dir)
-            if "checkpoint-100000" in dir and os.path.isdir(dir):
+            if "checkpoint-5000" in dir and os.path.isdir(dir):
                 model = AutoModelForSeq2SeqLM.from_pretrained(dir)
                 input_ids = self.tokenizer(inputs[:10], padding=True, truncation=True, return_tensors="pt")["input_ids"]
                 target_ids = self.tokenizer(targets[:10], padding=True, truncation=True, return_tensors="pt")["input_ids"]
@@ -335,14 +335,14 @@ if __name__ == "__main__":
         # training setup
         "max_steps": 200000,  # total number of training steps
         "evaluation_strategy": "steps",
-        "eval_steps": 10000,
+        "eval_steps": 5000,
         "save_strategy": "steps",
         "save_steps": 5000,
 
         # model and optimizer params
-        "learning_rate": 1.5e-3,
+        "learning_rate": 6e-4,
         "save_total_limit": 3,
-        "per_device_train_batch_size": 96,  # batch size per device during training
+        "per_device_train_batch_size": 72,  # batch size per device during training
         "per_device_eval_batch_size": 96,  # batch size for evaluation
         "warmup_steps": 8000,  # number of warmup steps for learning rate scheduler
         "weight_decay": 0.01,  # strength of weight decay
@@ -355,10 +355,10 @@ if __name__ == "__main__":
         "gradient_accumulation_steps": 4,
         "eval_accumulation_steps": 10,
         "predict_with_generate": True,
-        "dataloader_num_workers": 4,
+        "dataloader_num_workers": 8,
     }
     config = BertGenerationConfig(hidden_size=384,
-                                  num_hidden_layers=3,
+                                  num_hidden_layers=4,
                                   num_attention_heads=8,
                                   intermediate_size=2048,
                                   hidden_act='gelu',
@@ -388,4 +388,4 @@ if __name__ == "__main__":
                                             train_args=train_args, model_args=model_args)
     pipeline = BenchmarkPipeline(model=reaction_model)
     pipeline.run_train_pipeline()
-    # pipeline.predict()
+    # pipeline.predict(dataset="cjhif")
