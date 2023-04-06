@@ -4,7 +4,6 @@ MODEL=g2s_series_rel
 
 EXP_NO=1
 DATASET=cjhif
-CHECKPOINT=./checkpoints/pretrained/USPTO_50k_dgcn.pt
 
 BS=30
 T=1.0
@@ -15,6 +14,8 @@ REPR_START=smiles
 REPR_END=smiles
 
 PREFIX=${DATASET}_${MODEL}_${REPR_START}_${REPR_END}
+
+CHECKPOINT=./checkpoints/${PREFIX}/model.5000_0.pt
 
 cd Graph2SMILES
 
