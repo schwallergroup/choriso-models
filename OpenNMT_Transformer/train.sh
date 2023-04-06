@@ -1,8 +1,9 @@
-export PYTHONPATH=$PYTHONPATH:/rwthfs/rz/cluster/home/iz782675/reaction_forward
+export MKL_SERVICE_FORCE_INTEL=1
+export PYTHONPATH=$PYTHONPATH:~/reaction_forward
 
-### cd OpenNMT_Transformer
+cd OpenNMT_Transformer
 
-onmt_train -config OpenNMT_Transformer/run_config.yaml \
+onmt_train -config run_config.yaml \
         -seed 42 -gpu_ranks 0  \
         -param_init 0 \
         -param_init_glorot -max_generator_batches 32 \

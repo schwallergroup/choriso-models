@@ -307,7 +307,7 @@ class HuggingFaceTransformer(ReactionModel):
                                               num_return_sequences=num_seq,
                                               early_stopping=True)
 
-                pred_smiles = self.tokenizer.batch_decode(beam_outputs.tolist(), skip_special_tokens=True, clean_up_tokenization_spaces=True)
+                pred_smiles = self.tokenizer.batch_decode(beam_outputs.tolist(), skip_special_tokens=False, clean_up_tokenization_spaces=True)
                 pred_smiles = np.array(pred_smiles).reshape(-1, num_seq)
                 pred_smiles = np.vectorize(remove_spaces)(pred_smiles)
                 print("pred_smiles.shape: ", pred_smiles.shape)
@@ -335,12 +335,12 @@ if __name__ == "__main__":
         # training setup
         "max_steps": 200000,  # total number of training steps
         "evaluation_strategy": "steps",
-        "eval_steps": 5000,
+        "eval_steps": 500,
         "save_strategy": "steps",
         "save_steps": 5000,
 
         # model and optimizer params
-        "learning_rate": 6e-4,
+        "learning_rate": 5.5e-4,
         "save_total_limit": 3,
         "per_device_train_batch_size": 72,  # batch size per device during training
         "per_device_eval_batch_size": 96,  # batch size for evaluation

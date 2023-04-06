@@ -1,8 +1,9 @@
-export PYTHONPATH=$PYTHONPATH:/rwthfs/rz/cluster/home/iz782675/reaction_forward
+export MKL_SERVICE_FORCE_INTEL=1
+export PYTHONPATH=$PYTHONPATH:~/reaction_forward
 
 cd OpenNMT_Transformer
 
-onmt_translate -model runs/models/cjhif_step_500.pt -gpu 0 \
+onmt_translate -model /runs/models/cjhif_step_500.pt -gpu 0 \
     --src ../data/cjhif/src-test.txt \
     --tgt ../data/cjhif/tgt-test.txt \
     --output runs/models/cjhif_model_step_500_test_predictions.txt \

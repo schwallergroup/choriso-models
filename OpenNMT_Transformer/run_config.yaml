@@ -4,10 +4,10 @@
 
 
 ## Where the samples will be written
-save_data: OpenNMT_Transformer/runs
+save_data: ./runs
 ## Where the vocab(s) will be written
-src_vocab: OpenNMT_Transformer/runs/cjhif.vocab.src
-tgt_vocab: OpenNMT_Transformer/runs/cjhif.vocab.src
+src_vocab: ./runs/cjhif.vocab.src
+tgt_vocab: ./runs/cjhif.vocab.src
 # Prevent overwriting existing files in the folder
 overwrite: true
 share_vocab: true
@@ -15,11 +15,11 @@ share_vocab: true
 # Corpus opts:
 data:
     corpus-1:
-        path_src: data/cjhif/src-train.txt
-        path_tgt: data/cjhif/tgt-train.txt
+        path_src: ../data/cjhif/src-train.txt
+        path_tgt: ../data/cjhif/tgt-train.txt
     valid:
-        path_src: data/cjhif/src-val.txt
-        path_tgt: data/cjhif/tgt-val.txt
+        path_src: ../data/cjhif/src-val.txt
+        path_tgt: ../data/cjhif/tgt-val.txt
 
 
 # Train on a single GPU
@@ -27,12 +27,12 @@ world_size: 1
 gpu_ranks: [0]
 
 # Where to save the checkpoints
-save_model: OpenNMT_Transformer/runs/models/cjhif
+save_model: ./runs/models/cjhif
 save_checkpoint_steps: 5000
 keep_checkpoint: 3
-train_steps: 400000
+train_steps: 200000
 valid_steps: 10000
 report_every: 100
 
 tensorboard: true
-tensorboard_log_dir: OpenNMT_Transformer/log_dir
+tensorboard_log_dir: ./log_dir

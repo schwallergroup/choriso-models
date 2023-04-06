@@ -15,9 +15,9 @@ REPR_END=smiles
 
 PREFIX=${DATASET}_${MODEL}_${REPR_START}_${REPR_END}
 
-CHECKPOINT=./checkpoints/${PREFIX}/model.5000_0.pt
-
 cd Graph2SMILES
+
+CHECKPOINT=./checkpoints/${PREFIX}.${EXP_NO}/model.5000_0.pt
 
 python predict.py \
   --do_predict \
