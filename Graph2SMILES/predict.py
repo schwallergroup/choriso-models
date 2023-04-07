@@ -25,8 +25,8 @@ def get_predict_parser():
 def main(args):
     parsing.log_args(args)
 
-    if not os.path.exists(os.path.dirname(args.result_dir)):
-        os.mkdir(os.path.dirname(args.result_dir))
+    if not os.path.exists(os.path.dirname(args.result_file)):
+        os.mkdir(os.path.dirname(args.result_file))
 
     if args.do_predict and os.path.exists(args.result_file):
         logging.info(f"Result file found at {args.result_file}, skipping prediction")
@@ -117,7 +117,6 @@ def main(args):
                         smis.append(smi)
                     smis = ",".join(smis)
                     all_predictions.append(f"{smis}\n")
-
 
         with open(args.result_file, "w") as of:
             of.writelines(all_predictions)
