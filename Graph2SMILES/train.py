@@ -40,6 +40,8 @@ def main(args):
     os.makedirs(args.save_dir, exist_ok=True)
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
+    print("Device: ", device)
+
     if args.model == "s2s":
         model_class = Seq2Seq
         dataset_class = S2SDataset
@@ -274,6 +276,9 @@ def main(args):
                 logging.info(f"Evaluation (without teacher) at step {total_step}, "
                              f"eval acc (token): {np.mean(accs_token)}, "
                              f"eval acc (sequence): {np.mean(accs_seq)}")
+
+                wandb.log({"eval_acc_token": np.mean(accs_token), "eval_acc_sequence": np.mean(accs_seq)})
+
                 sys.stdout.flush()
 
                 model.train()
