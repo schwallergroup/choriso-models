@@ -25,7 +25,7 @@ python predict.py \
   --model="$MODEL" \
   --data_name="$DATASET" \
   --test_bin="./preprocessed/$PREFIX/test_0.npz" \
-  --test_tgt="./data/$DATASET/tgt-test.txt" \
+  --test_tgt="../data/$DATASET/tgt-test.txt" \
   --result_file="./results/$PREFIX.$EXP_NO.result.txt" \
   --log_file="$PREFIX.predict.$EXP_NO.log" \
   --load_from="$CHECKPOINT" \

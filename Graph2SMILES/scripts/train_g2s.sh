@@ -13,12 +13,12 @@ ENC_PE=none
 ENC_H=256
 BATCH_SIZE=4096
 ENC_EMB_SCALE=sqrt
-MAX_STEP=500000
+MAX_STEP=200000
 ENC_LAYER=4
 BATCH_TYPE=tokens
 REL_BUCKETS=11
 
-EXP_NO=1
+EXP_NO=2
 REL_POS=emb_only
 ATTN_LAYER=6
 LR=4
@@ -79,6 +79,6 @@ python train.py \
   --predict_min_len=1 \
   --predict_max_len=512 \
   --log_iter=100 \
-  --eval_iter=2000 \
+  --eval_iter=5000 \
   --save_iter=5000 \
   --compute_graph_distance

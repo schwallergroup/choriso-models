@@ -20,9 +20,9 @@ def get_base_parsers():
     return parser, {"G2S": {"base_parser": parser_g2s,
                             "args_class": G2SArgs()},
                     "ONMT": {"base_parser": parser_onmt,
-                             "args_class": OpenNMTArgs()},
-                    "HF": {"base_parser": parser_hf,
-                           "args_class": HuggingFaceArgs()}}
+                             "args_class": OpenNMTArgs()},}
+                    # "HF": {"base_parser": parser_hf,
+                    #       "args_class": HuggingFaceArgs()}}
 
 
 def add_mode_subparser(model_parser):
@@ -44,8 +44,8 @@ def build_parser():
 
         train_parser, predict_parser = add_mode_subparser(model_base_parser)
 
-        train_parser.add_parser('train_args', help='Training args', parser_class=model_args.training_args())
-        predict_parser.add_parser('pred_args', help='Prediction args', parser_class=model_args.predict_args())
+        train_parser.add_subparsers(title='train_args', help='Training args', parser_class=model_args.training_args())
+        predict_parser.add_subparsers(title='pred_args', help='Prediction args', parser_class=model_args.predict_args())
 
         parser_dict[model]["train_parser"] = train_parser
         parser_dict[model]["predict_parser"] = predict_parser

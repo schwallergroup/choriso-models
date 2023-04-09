@@ -262,7 +262,7 @@ class HuggingFaceTransformer(ReactionModel):
                                  train_dataset=self.train_dataset,
                                  eval_dataset=self.val_dataset,
                                  data_collator=data_collator,
-                                 compute_metrics=self.compute_metrics,
+                                 # compute_metrics=self.compute_metrics,
                                  callbacks=[WandbCallback, CodeCarbonCallback])
         trainer.train()
 
@@ -333,9 +333,9 @@ if __name__ == "__main__":
         "output_dir": 'results',  # output directory
 
         # training setup
-        "max_steps": 200000,  # total number of training steps
+        "max_steps": 150000,  # total number of training steps
         "evaluation_strategy": "steps",
-        "eval_steps": 500,
+        "eval_steps": 5000,
         "save_strategy": "steps",
         "save_steps": 5000,
 
@@ -344,7 +344,7 @@ if __name__ == "__main__":
         "save_total_limit": 3,
         "per_device_train_batch_size": 72,  # batch size per device during training
         "per_device_eval_batch_size": 96,  # batch size for evaluation
-        "warmup_steps": 8000,  # number of warmup steps for learning rate scheduler
+        "warmup_steps": 5000,  # number of warmup steps for learning rate scheduler
         "weight_decay": 0.01,  # strength of weight decay
         "logging_dir": 'logs',  # directory for storing logs
         "logging_steps": 10,
