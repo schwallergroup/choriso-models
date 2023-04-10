@@ -13,12 +13,12 @@ ENC_PE=none
 ENC_H=256
 BATCH_SIZE=4096
 ENC_EMB_SCALE=sqrt
-MAX_STEP=200000
+MAX_STEP=20000
 ENC_LAYER=4
 BATCH_TYPE=tokens
 REL_BUCKETS=11
 
-EXP_NO=2
+EXP_NO=3
 REL_POS=emb_only
 ATTN_LAYER=6
 LR=4
@@ -74,7 +74,7 @@ python train.py \
   --valid_batch_size="$BATCH_SIZE" \
   --predict_batch_size="$BATCH_SIZE" \
   --accumulation_count="$ACCUM_COUNT" \
-  --num_workers=0 \
+  --num_workers=8 \
   --beam_size=5 \
   --predict_min_len=1 \
   --predict_max_len=512 \

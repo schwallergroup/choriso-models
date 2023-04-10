@@ -61,4 +61,5 @@ class OpenNMT(ReactionModel):
 if __name__ == "__main__":
     reaction_model = OpenNMT()
     pipeline = BenchmarkPipeline(model=reaction_model)
-    pipeline.run_train_pipeline()
+    # pipeline.run_train_pipeline()
+    pipeline.predict(dataset="cjhif")
