@@ -357,7 +357,7 @@ if __name__ == "__main__":
         "predict_with_generate": True,
         "dataloader_num_workers": 8,
     }
-    config = BertGenerationConfig(hidden_size=384,
+    """config = BertGenerationConfig(hidden_size=384,
                                   num_hidden_layers=4,
                                   num_attention_heads=8,
                                   intermediate_size=2048,
@@ -376,7 +376,6 @@ if __name__ == "__main__":
                                   max_length=96,
                                   min_length=1)
 
-
     model_args = {
         "encoder": config,
         "decoder": config,
@@ -385,7 +384,29 @@ if __name__ == "__main__":
         "min_length": 3
     }
     reaction_model = HuggingFaceTransformer(model_architecture="bert-base-uncased",
+                                            train_args=train_args, model_args=model_args)"""
+    model_args = {"d_model": 384,
+                  "encoder_layers": 4,
+                  "decoder_layers": 4,
+                  "encoder_attention_heads": 8,
+                  "decoder_attention_heads": 8,
+                  "encoder_ffn_dim": 2048,
+                  "decoder_ffn_dim": 2048,
+                  "activation_function ": 'gelu',
+                  "dropout": 0.1,
+                  "attention_dropout ": 0.1,
+                  "max_position_embeddings": 512,
+                  "layer_norm_eps": 1e-12,
+                  "position_embedding_type": 'absolute',
+                  "use_cache": True,
+                  "num_beams": 10,
+                  "vocab_size": 1024,
+                  "max_length": 96,
+                  "min_length": 1}
+
+    reaction_model = HuggingFaceTransformer(model_architecture="facebook/bart-large",
                                             train_args=train_args, model_args=model_args)
+
     pipeline = BenchmarkPipeline(model=reaction_model)
     pipeline.run_train_pipeline()
     # pipeline.predict(dataset="cjhif")
