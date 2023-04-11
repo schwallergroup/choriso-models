@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 import torch
-# from rdkit import Chem
+from rdkit import Chem
 
 from typing import List
 
@@ -34,6 +34,8 @@ def top_k_accuracy(preds: List[List[str]], targets: List[str], k: int=1):
 
     # transform to np arrays for easier handling. take the first k predictions
     preds = np.array(preds)[:, :k]
+    preds = np.vectorize(canonicalize_smiles)(preds)
+    
     targets = np.array(targets)
 
     top_k_accs = []
@@ -79,7 +81,10 @@ def canonicalize_smiles(smiles, verbose=False):
 
 def split_reaction(reaction: str):
     """Splits a given reaction SMILES into one reactant- and one product SMILES."""
-    reactants, products = reaction.split(">>")
+    reactants, reagents, products = reaction.split(">")
+
+    if reagents != "":
+        reactants = reactants + "." + reagents
 
     return reactants, products
 
@@ -118,21 +123,24 @@ class ReactionForwardDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.tokenizer_outs["labels"])
 
-
 if __name__ == "__main__":
 
-    preds = pd.read_csv('OpenNMT_Transformer/runs/models/cjhif_model_step_200000_test_predictions.txt', sep="\t",
+    targets = pd.read_csv("", sep="\t")
+
+    targets = targets.apply(lambda x: x.replace(">", ""))
+
+    """preds = pd.read_csv('OpenNMT_Transformer/runs/models/cjhif_model_step_200000_test_predictions.txt', sep="\t",
                         header=None).tolist()
-    
+
     targets = pd.read_csv('data/cjhif/tgt_test.txt', sep="\t", header=None).tolist()
     num_pred = int(preds/targets)
     preds = [preds[i:i+num_pred] for i in range(0, len(preds), num_pred)]
 
     acc = top_k_accuracy(preds, targets, k=5)
 
-    print(acc)
+    print(acc)"""
 
-    """file_names = ["test", "val", "train"]
+    """file_names = ["test"] # ["test", "val", "train"]
 
     data_dir = "data/cjhif/"
 
