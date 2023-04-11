@@ -121,10 +121,14 @@ class ReactionForwardDataset(torch.utils.data.Dataset):
 
 if __name__ == "__main__":
 
-    test_preds = [["C", "CCCC", "Cafjiogae"], ["CC", "asfahk", "C"]]
-    test_targets = ["C", "CC"]
+    preds = pd.read_csv('OpenNMT_Transformer/runs/models/cjhif_model_step_200000_test_predictions.txt', sep="\t",
+                        header=None).tolist()
+    
+    targets = pd.read_csv('data/cjhif/tgt_test.txt', sep="\t", header=None).tolist()
+    num_pred = int(preds/targets)
+    preds = [preds[i:i+num_pred] for i in range(0, len(preds), num_pred)]
 
-    acc = top_k_accuracy(test_preds, test_targets, k=3)
+    acc = top_k_accuracy(preds, targets, k=5)
 
     print(acc)
 
