@@ -5,6 +5,7 @@ import logging
 import argparse
 import os
 import numpy as np
+import pandas as pd
 import rdkit
 import scipy
 import multiprocessing
@@ -53,8 +54,10 @@ def gen_prod_fps(args):
     for phase in ['train', 'valid', 'test']:
         logging.info(f'Processing {phase}')
 
-        with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
-            clean_rxnsmi_phase = pickle.load(f)
+        """with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
+            clean_rxnsmi_phase = pickle.load(f)"""
+
+        clean_rxnsmi_phase = pd.read_csv(os.path.join(data_dir, f"{file_name}.tsv"), sep="\t")["canonic_rxn"].values
 
         num_cores = len(os.sched_getaffinity(0))
         logging.info(f'Parallelizing over {num_cores} cores')
@@ -78,6 +81,7 @@ def gen_prod_fps(args):
 
         with open(args.data_folder / f"{args.output_file_prefix}_to_{args.final_fp_size}_prod_smis_nomap_{phase}.smi", 'wb') as f:
             pickle.dump(phase_prod_smi_nomap, f, protocol=4)
+        # to csv?
 
 def log_row(row):
     return sparse.csr_matrix(np.log(row.toarray() + 1))
@@ -163,8 +167,9 @@ def get_train_templates(args):
     '''
     logging.info('Extracting templates from training data')
     phase = 'train'
-    with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
-        clean_rxnsmi_phase = pickle.load(f)
+    """with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
+        clean_rxnsmi_phase = pickle.load(f)"""
+    clean_rxnsmi_phase = pd.read_csv(os.path.join(data_dir, f"{file_name}.tsv"), sep="\t")["canonic_rxn"].values
 
     templates = {}
     rxns = []
@@ -287,10 +292,14 @@ def match_templates(args):
     logging.info('Matching against extracted templates')
     for phase in ['train', 'valid', 'test']:
         logging.info(f'Processing {phase}')
-        with open(args.data_folder / f"{args.output_file_prefix}_prod_smis_nomap_{phase}.smi", 'rb') as f:
-            phase_prod_smi_nomap = pickle.load(f)
-        with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
-            clean_rxnsmi_phase = pickle.load(f)
+        """with open(args.data_folder / f"{args.output_file_prefix}_prod_smis_nomap_{phase}.smi", 'rb') as f:
+            phase_prod_smi_nomap = pickle.load(f)"""
+        phase_prod_smi_nomap = pd.read_csv(os.path.join(data_dir, f"{file_name}.tsv"), sep="\t")["canonic_rxn"].values
+
+        """with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
+            clean_rxnsmi_phase = pickle.load(f)"""
+        clean_rxnsmi_phase = pd.read_csv(os.path.join(data_dir, f"{file_name}.tsv"), sep="\t")["canonic_rxn"].values
+
         
         tasks = []
         for idx, rxn_smi in tqdm(enumerate(clean_rxnsmi_phase), desc='Building tasks', total=len(clean_rxnsmi_phase)):
