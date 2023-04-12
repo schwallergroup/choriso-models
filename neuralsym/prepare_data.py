@@ -57,7 +57,9 @@ def gen_prod_fps(args):
         """with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
             clean_rxnsmi_phase = pickle.load(f)"""
 
-        clean_rxnsmi_phase = pd.read_csv(os.path.join(data_dir, f"{file_name}.tsv"), sep="\t")["canonic_rxn"].values
+        clean_rxnsmi_phase = pd.read_csv(os.path.join(args.data_folder, args.dataset, f"{phase}.tsv"), sep="\t")
+        clean_rxnsmi_phase = clean_rxnsmi_phase["canonic_rxn"].values
+        clean_rxnsmi_phase = [i[0] for i in clean_rxnsmi_phase]
 
         num_cores = len(os.sched_getaffinity(0))
         logging.info(f'Parallelizing over {num_cores} cores')
@@ -169,7 +171,9 @@ def get_train_templates(args):
     phase = 'train'
     """with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
         clean_rxnsmi_phase = pickle.load(f)"""
-    clean_rxnsmi_phase = pd.read_csv(os.path.join(data_dir, f"{file_name}.tsv"), sep="\t")["canonic_rxn"].values
+    clean_rxnsmi_phase = pd.read_csv(os.path.join(args.data_folder, args.dataset, f"{phase}.tsv"), sep="\t")
+    clean_rxnsmi_phase = clean_rxnsmi_phase["canonic_rxn"].values
+    clean_rxnsmi_phase = [i[0] for i in clean_rxnsmi_phase]
 
     templates = {}
     rxns = []
@@ -292,14 +296,14 @@ def match_templates(args):
     logging.info('Matching against extracted templates')
     for phase in ['train', 'valid', 'test']:
         logging.info(f'Processing {phase}')
-        """with open(args.data_folder / f"{args.output_file_prefix}_prod_smis_nomap_{phase}.smi", 'rb') as f:
-            phase_prod_smi_nomap = pickle.load(f)"""
-        phase_prod_smi_nomap = pd.read_csv(os.path.join(data_dir, f"{file_name}.tsv"), sep="\t")["canonic_rxn"].values
+        with open(args.data_folder / f"{args.output_file_prefix}_prod_smis_nomap_{phase}.smi", 'rb') as f:
+            phase_prod_smi_nomap = pickle.load(f)
 
         """with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
             clean_rxnsmi_phase = pickle.load(f)"""
-        clean_rxnsmi_phase = pd.read_csv(os.path.join(data_dir, f"{file_name}.tsv"), sep="\t")["canonic_rxn"].values
-
+        clean_rxnsmi_phase = pd.read_csv(os.path.join(args.data_folder, args.dataset, f"{phase}.tsv"), sep="\t")
+        clean_rxnsmi_phase = clean_rxnsmi_phase["canonic_rxn"].values
+        clean_rxnsmi_phase = [i[0] for i in clean_rxnsmi_phase]
         
         tasks = []
         for idx, rxn_smi in tqdm(enumerate(clean_rxnsmi_phase), desc='Building tasks', total=len(clean_rxnsmi_phase)):
@@ -373,16 +377,15 @@ def parse_args():
     parser = argparse.ArgumentParser("prepare_data.py")
     # file names
     parser.add_argument("--log_file", help="log_file", type=str, default="prepare_data")
-    parser.add_argument("--data_folder", help="Path to data folder (do not change)", type=str,
-                        default=None) 
-    parser.add_argument("--rxnsmi_file_prefix", help="Prefix of the 3 pickle files containing the train/valid/test reaction SMILES strings (do not change)", type=str,
-                        default='50k_clean_rxnsmi_noreagent_allmapped_canon') 
-    parser.add_argument("--output_file_prefix", help="Prefix of output files", 
-                        type=str)
+    parser.add_argument("--data_folder", help="Path to data folder (do not change)", type=str, default="../data")
+    parser.add_argument("--dataset", help="dataset", type=str, default="cjhif")
+    parser.add_argument("--rxnsmi_file_prefix", help="Prefix of the 3 csv files containing the train/valid/test "
+                                                     "reaction SMILES strings (do not change)", type=str, default='')
+    parser.add_argument("--output_file_prefix", help="Prefix of output files", type=str)
     parser.add_argument("--templates_file", help="Filename of templates extracted from training data", 
-                        type=str, default='50k_training_templates')
-
-    parser.add_argument("--min_freq", help="Minimum frequency of template in training data to be retained", type=int, default=1)
+                        type=str, default='training_templates')
+    parser.add_argument("--min_freq", help="Minimum frequency of template in training data to be retained", type=int,
+                        default=1)
     parser.add_argument("--radius", help="Fingerprint radius", type=int, default=2)
     parser.add_argument("--fp_size", help="Fingerprint size", type=int, default=1000000)
     parser.add_argument("--final_fp_size", help="Fingerprint size", type=int, default=32681)
