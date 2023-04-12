@@ -26,8 +26,8 @@ from rdkit import RDLogger
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
-from model import TemplateNN_Highway, TemplateNN_FC
-from dataset import FingerprintDataset
+from neuralsym.model import TemplateNN_Highway, TemplateNN_FC
+from neuralsym.dataset import FingerprintDataset
 
 DATA_FOLDER = Path(__file__).resolve().parent / 'data'
 CHECKPOINT_FOLDER = Path(__file__).resolve().parent / 'checkpoint'

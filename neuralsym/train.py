@@ -23,8 +23,8 @@ from scipy import sparse
 from tqdm import tqdm
 from rdkit import RDLogger
 
-from model import TemplateNN_Highway, TemplateNN_FC
-from dataset import FingerprintDataset
+from neuralsym.model import TemplateNN_Highway, TemplateNN_FC
+from neuralsym.dataset import FingerprintDataset
 
 DATA_FOLDER = Path(__file__).resolve().parent / 'data'
 CHECKPOINT_FOLDER = Path(__file__).resolve().parent / 'checkpoint'

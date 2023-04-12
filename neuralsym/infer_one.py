@@ -17,9 +17,9 @@ from tqdm import tqdm
 from rdkit import RDLogger
 from rdkit import Chem
 
-from model import TemplateNN_Highway
-from prepare_data import mol_smi_to_count_fp
-from infer_config import infer_config
+from neuralsym.model import TemplateNN_Highway
+from neuralsym.prepare_data import mol_smi_to_count_fp
+from neuralsym.infer_config import infer_config
 
 DATA_FOLDER = Path(__file__).resolve().parent / 'data'
 CHECKPOINT_FOLDER = Path(__file__).resolve().parent / 'checkpoint'
