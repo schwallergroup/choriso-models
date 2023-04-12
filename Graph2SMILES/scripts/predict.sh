@@ -2,7 +2,7 @@
 
 MODEL=g2s_series_rel
 
-EXP_NO=1
+EXP_NO=5
 DATASET=cjhif
 
 BS=30
@@ -17,7 +17,7 @@ PREFIX=${DATASET}_${MODEL}_${REPR_START}_${REPR_END}
 
 cd Graph2SMILES
 
-CHECKPOINT=./checkpoints/${PREFIX}.${EXP_NO}/model.5000_0.pt
+CHECKPOINT=./checkpoints/${PREFIX}.${EXP_NO}/model.20000_3.pt
 
 python predict.py \
   --do_predict \

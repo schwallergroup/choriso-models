@@ -6,7 +6,7 @@ from rdkit import Chem
 
 from typing import List
 
-# from Graph2SMILES.utils.data_utils import tokenize_smiles
+from Graph2SMILES.utils.data_utils import tokenize_smiles
 
 
 def overwrite_config_with_tokenizer(config, tokenizer):
@@ -128,11 +128,11 @@ class ReactionForwardDataset(torch.utils.data.Dataset):
 
 if __name__ == "__main__":
 
-    preds = pd.read_csv('OpenNMT_Transformer/runs/models/cjhif_model_step_200000_test_predictions.txt', sep="\t",
+    """preds = pd.read_csv('OpenNMT_Transformer/runs/models/USPTO_STEREO_test_predictions.txt', sep="\t",
                         header=None).values
     preds = [pred[0] for pred in preds]
 
-    targets = pd.read_csv('data/cjhif/tgt-test.txt', sep="\t", header=None).values
+    targets = pd.read_csv('data/USPTO_STEREO/tgt-test.txt', sep="\t", header=None).values
     targets = [target[0] for target in targets]
 
     print(targets)
@@ -141,9 +141,9 @@ if __name__ == "__main__":
 
     acc = top_k_accuracy(preds, targets, k=5)
 
-    print(acc)
+    print(acc)"""
 
-    """file_names = ["test"] # ["test", "val", "train"]
+    file_names = ["test", "val", "train"]
 
     data_dir = "data/cjhif/"
 
@@ -157,4 +157,4 @@ if __name__ == "__main__":
         product_data = split_reactions["products"].apply(lambda smi: tokenize_smiles(smi))
 
         reactant_data.to_csv(os.path.join(data_dir, f"src-{file_name}.txt"), sep="\t", index=False, header=False)
-        product_data.to_csv(os.path.join(data_dir, f"tgt-{file_name}.txt"), sep="\t", index=False, header=False)"""
+        product_data.to_csv(os.path.join(data_dir, f"tgt-{file_name}.txt"), sep="\t", index=False, header=False)

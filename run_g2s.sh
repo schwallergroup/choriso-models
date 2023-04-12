@@ -14,9 +14,9 @@
 module load cuda
 module load intel
 
-export PATH=~/anaconda3/envs/graph2smiles/bin:$PATH
+export PATH=~/anaconda3/envs/reaction_prediction/bin:$PATH
 # conda env
-source activate graph2smiles
+source activate reaction_prediction
 
 export PYTHONPATH=$PYTHONPATH:~/reaction_forward
 export PYTHONPATH=$PYTHONPATH:~/reaction_forward/Graph2SMILES/onmt_v1_2_0

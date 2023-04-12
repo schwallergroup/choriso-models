@@ -13,12 +13,12 @@ ENC_PE=none
 ENC_H=256
 BATCH_SIZE=4096
 ENC_EMB_SCALE=sqrt
-MAX_STEP=20000
+MAX_STEP=40000
 ENC_LAYER=4
 BATCH_TYPE=tokens
 REL_BUCKETS=11
 
-EXP_NO=3
+EXP_NO=1
 REL_POS=emb_only
 ATTN_LAYER=6
 LR=4
@@ -63,7 +63,7 @@ python train.py \
   --attn_dropout="$DROPOUT" \
   --max_relative_positions="$MAX_REL_POS" \
   --seed=42 \
-  --epoch=2 \
+  --epoch=200000 \
   --max_steps="$MAX_STEP" \
   --warmup_steps=8000 \
   --lr="$LR" \
