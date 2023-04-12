@@ -34,9 +34,12 @@ def top_k_accuracy(preds: List[List[str]], targets: List[str], k: int=1):
 
     # transform to np arrays for easier handling. take the first k predictions
     preds = np.array(preds)[:, :k]
+    preds = np.vectorize(lambda x: x.replace(" ", ""))(preds)
     preds = np.vectorize(canonicalize_smiles)(preds)
-    
+
     targets = np.array(targets)
+    targets = np.vectorize(lambda x: x.replace(" ", ""))(targets)
+    targets = np.vectorize(canonicalize_smiles)(targets)
 
     top_k_accs = []
     # False valued rows will not be calculated. initialize with all True
@@ -125,20 +128,20 @@ class ReactionForwardDataset(torch.utils.data.Dataset):
 
 if __name__ == "__main__":
 
-    targets = pd.read_csv("", sep="\t")
+    preds = pd.read_csv('OpenNMT_Transformer/runs/models/cjhif_model_step_200000_test_predictions.txt', sep="\t",
+                        header=None).values
+    preds = [pred[0] for pred in preds]
 
-    targets = targets.apply(lambda x: x.replace(">", ""))
+    targets = pd.read_csv('data/cjhif/tgt-test.txt', sep="\t", header=None).values
+    targets = [target[0] for target in targets]
 
-    """preds = pd.read_csv('OpenNMT_Transformer/runs/models/cjhif_model_step_200000_test_predictions.txt', sep="\t",
-                        header=None).tolist()
-
-    targets = pd.read_csv('data/cjhif/tgt_test.txt', sep="\t", header=None).tolist()
-    num_pred = int(preds/targets)
+    print(targets)
+    num_pred = int(len(preds)/len(targets))
     preds = [preds[i:i+num_pred] for i in range(0, len(preds), num_pred)]
 
     acc = top_k_accuracy(preds, targets, k=5)
 
-    print(acc)"""
+    print(acc)
 
     """file_names = ["test"] # ["test", "val", "train"]
 
