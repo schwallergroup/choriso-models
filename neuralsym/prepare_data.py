@@ -59,7 +59,7 @@ def gen_prod_fps(args):
 
         clean_rxnsmi_phase = pd.read_csv(os.path.join(args.data_folder, args.dataset, f"{phase}.tsv"), sep="\t")
         clean_rxnsmi_phase = clean_rxnsmi_phase["canonic_rxn"].values
-        clean_rxnsmi_phase = [i[0] for i in clean_rxnsmi_phase]
+        print(clean_rxnsmi_phase)
 
         num_cores = len(os.sched_getaffinity(0))
         logging.info(f'Parallelizing over {num_cores} cores')
@@ -173,7 +173,6 @@ def get_train_templates(args):
         clean_rxnsmi_phase = pickle.load(f)"""
     clean_rxnsmi_phase = pd.read_csv(os.path.join(args.data_folder, args.dataset, f"{phase}.tsv"), sep="\t")
     clean_rxnsmi_phase = clean_rxnsmi_phase["canonic_rxn"].values
-    clean_rxnsmi_phase = [i[0] for i in clean_rxnsmi_phase]
 
     templates = {}
     rxns = []
@@ -303,8 +302,7 @@ def match_templates(args):
             clean_rxnsmi_phase = pickle.load(f)"""
         clean_rxnsmi_phase = pd.read_csv(os.path.join(args.data_folder, args.dataset, f"{phase}.tsv"), sep="\t")
         clean_rxnsmi_phase = clean_rxnsmi_phase["canonic_rxn"].values
-        clean_rxnsmi_phase = [i[0] for i in clean_rxnsmi_phase]
-        
+
         tasks = []
         for idx, rxn_smi in tqdm(enumerate(clean_rxnsmi_phase), desc='Building tasks', total=len(clean_rxnsmi_phase)):
             r = rxn_smi.split('>>')[0]
