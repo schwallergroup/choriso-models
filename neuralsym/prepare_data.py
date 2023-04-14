@@ -58,7 +58,7 @@ def gen_prod_fps(args):
             clean_rxnsmi_phase = pickle.load(f)"""
 
         clean_rxnsmi_phase = pd.read_csv(os.path.join(args.data_folder, args.dataset, f"{phase}.tsv"), sep="\t")
-        clean_rxnsmi_phase = clean_rxnsmi_phase["canonic_rxn"].values
+        clean_rxnsmi_phase = clean_rxnsmi_phase["rxnmapper_aam"].values
         print(clean_rxnsmi_phase)
 
         num_cores = len(os.sched_getaffinity(0))
@@ -172,7 +172,7 @@ def get_train_templates(args):
     """with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
         clean_rxnsmi_phase = pickle.load(f)"""
     clean_rxnsmi_phase = pd.read_csv(os.path.join(args.data_folder, args.dataset, f"{phase}.tsv"), sep="\t")
-    clean_rxnsmi_phase = clean_rxnsmi_phase["canonic_rxn"].values
+    clean_rxnsmi_phase = clean_rxnsmi_phase["rxnmapper_aam"].values
 
     templates = {}
     rxns = []
@@ -301,7 +301,7 @@ def match_templates(args):
         """with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
             clean_rxnsmi_phase = pickle.load(f)"""
         clean_rxnsmi_phase = pd.read_csv(os.path.join(args.data_folder, args.dataset, f"{phase}.tsv"), sep="\t")
-        clean_rxnsmi_phase = clean_rxnsmi_phase["canonic_rxn"].values
+        clean_rxnsmi_phase = clean_rxnsmi_phase["rxnmapper_aam"].values
 
         tasks = []
         for idx, rxn_smi in tqdm(enumerate(clean_rxnsmi_phase), desc='Building tasks', total=len(clean_rxnsmi_phase)):
