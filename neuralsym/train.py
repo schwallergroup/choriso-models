@@ -74,14 +74,14 @@ def train(args):
     optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
 
     train_dataset = FingerprintDataset(
-                            args.prodfps_prefix+'_train.npz', 
+                            args.reacfps_prefix+'_train.npz',
                             args.labels_prefix+'_train.npy'
                         )
     train_size = len(train_dataset)
     train_loader = DataLoader(train_dataset, batch_size=args.bs, shuffle=True)
 
     valid_dataset = FingerprintDataset(
-                            args.prodfps_prefix+'_valid.npz', 
+                            args.reacfps_prefix+'_valid.npz',
                             args.labels_prefix+'_valid.npy'
                         )
     valid_size = len(valid_dataset)
@@ -307,7 +307,7 @@ def test(model, args):
 
     criterion = nn.CrossEntropyLoss(reduction='sum')
     test_dataset = FingerprintDataset(
-                            args.prodfps_prefix+'_test.npz', 
+                            args.reacfps_prefix+'_test.npz',
                             args.labels_prefix+'_test.npy'
                         )
     test_size = len(test_dataset)
@@ -414,8 +414,8 @@ def parse_args():
     # file names
     parser.add_argument("--log_file", help="log_file", type=str, default="train")
     parser.add_argument("--templates_file", help="templates_file", type=str, default="50k_training_templates")
-    parser.add_argument("--prodfps_prefix",
-                        help="npz file of product fingerprints",
+    parser.add_argument("--reacfps_prefix",
+                        help="npz file of reactant fingerprints",
                         type=str)
     parser.add_argument("--labels_prefix",
                         help="npy file of labels",
