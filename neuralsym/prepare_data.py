@@ -29,12 +29,14 @@ sparse_fp = scipy.sparse.csr_matrix
 def mol_smi_to_count_fp(
     mol_smi: str, radius: int = 2, fp_size: int = 32681, dtype: str = "int32"
 ) -> scipy.sparse.csr_matrix:
-    fp_gen = GetMorganGenerator(
+    """fp_gen = GetMorganGenerator(
         radius=radius, useCountSimulation=True, includeChirality=True, fpSize=fp_size
-    )
+    )"""
     mol = Chem.MolFromSmiles(mol_smi)
-    uint_count_fp = fp_gen.GetCountFingerprint(mol)
+    # uint_count_fp = fp_gen.GetCountFingerprint(mol)
+    uint_count_fp = Chem.rdMolDescriptors.GetMorganFingerprintAsBitVect(mol, radius=radius, nBits=fp_size, useChirality=True)
     count_fp = np.empty((1, fp_size), dtype=dtype)
+
     DataStructs.ConvertToNumpyArray(uint_count_fp, count_fp)
     return sparse.csr_matrix(count_fp, dtype=dtype)
 
@@ -45,7 +47,6 @@ def gen_prod_fps_helper(args, rxn_smi):
     prod_smi_nomap = Chem.MolToSmiles(prod_mol, True)
     # Sometimes stereochem takes another canonicalization... (just in case)
     prod_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(prod_smi_nomap), True)
-    
     prod_fp = mol_smi_to_count_fp(prod_smi_nomap, args.radius, args.fp_size)
     return prod_smi_nomap, prod_fp
 
@@ -68,6 +69,7 @@ def gen_prod_fps(args):
         phase_prod_smi_nomap = []
         phase_rxn_prod_fps = []
         gen_prod_fps_partial = partial(gen_prod_fps_helper, args)
+        print(gen_prod_fps_partial)
         for result in tqdm(pool.imap(gen_prod_fps_partial, clean_rxnsmi_phase),
                             total=len(clean_rxnsmi_phase), desc='Processing rxn_smi'):
             prod_smi_nomap, prod_fp = result
