@@ -15,7 +15,7 @@ class FingerprintDataset(Dataset):
     """
     def __init__(
         self,
-        prodfps_filename: str,
+        reacfps_filename: str,
         labels_filename: str,
         root: Optional[str] = None,
     ):
@@ -23,14 +23,14 @@ class FingerprintDataset(Dataset):
             root = Path(__file__).resolve().parent / 'data'
         else:
             root = Path(root)
-        if (root / prodfps_filename).exists():
+        if (root / reacfps_filename).exists():
             logging.info("Loading pre-computed product fingerprints...")
-            self.data = sparse.load_npz(root / prodfps_filename)
+            self.data = sparse.load_npz(root / reacfps_filename)
             self.data = self.data.tocsr()
         else:
             raise RuntimeError(
                 f"Could not find precomputed product fingerprints at "
-                f"{root / prodfps_filename}"
+                f"{root / reacfps_filename}"
             )
 
         if (root / labels_filename).exists():
@@ -43,19 +43,19 @@ class FingerprintDataset(Dataset):
             )
 
     def __getitem__(self, idx: Union[int, Tensor]) -> Tuple[Tensor, Tensor, Union[int, List]]:
-        """Returns tuple of product fingerprint, label (template index), and index of prod_smi (in CSV file)
+        """Returns tuple of reactant fingerprint, label (template index), and index of reac_smi (in CSV file)
         """
-        # return idx for retrieving product SMILES & labels from CSV file
+        # return idx for retrieving reactant SMILES & labels from CSV file
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        prod_fps = torch.as_tensor(
+        reac_fps = torch.as_tensor(
             self.data[idx].toarray()
         )
         labels = torch.as_tensor(
             self.labels[idx]
         )
-        return prod_fps.float(), labels.long(), idx
+        return reac_fps.float(), labels.long(), idx
 
     def __len__(self):
         return self.data.shape[0]

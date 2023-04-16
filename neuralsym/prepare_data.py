@@ -29,28 +29,31 @@ sparse_fp = scipy.sparse.csr_matrix
 def mol_smi_to_count_fp(
     mol_smi: str, radius: int = 2, fp_size: int = 32681, dtype: str = "int32"
 ) -> scipy.sparse.csr_matrix:
-    """fp_gen = GetMorganGenerator(
-        radius=radius, useCountSimulation=True, includeChirality=True, fpSize=fp_size
-    )"""
     mol = Chem.MolFromSmiles(mol_smi)
-    # uint_count_fp = fp_gen.GetCountFingerprint(mol)
+    """
+    Original, but didn't work because of pickling error:
+    fp_gen = GetMorganGenerator(
+        radius=radius, useCountSimulation=True, includeChirality=True, fpSize=fp_size
+    )
+    uint_count_fp = fp_gen.GetCountFingerprint(mol) 
+    """
     uint_count_fp = Chem.rdMolDescriptors.GetMorganFingerprintAsBitVect(mol, radius=radius, nBits=fp_size, useChirality=True)
     count_fp = np.empty((1, fp_size), dtype=dtype)
 
     DataStructs.ConvertToNumpyArray(uint_count_fp, count_fp)
     return sparse.csr_matrix(count_fp, dtype=dtype)
 
-def gen_prod_fps_helper(args, rxn_smi):
-    prod_smi_map = rxn_smi.split('>>')[-1]
-    prod_mol = Chem.MolFromSmiles(prod_smi_map)
-    [atom.ClearProp('molAtomMapNumber') for atom in prod_mol.GetAtoms()]
-    prod_smi_nomap = Chem.MolToSmiles(prod_mol, True)
+def gen_reac_fps_helper(args, rxn_smi):
+    reac_smi_map = rxn_smi.split('>>')[0]
+    reac_mol = Chem.MolFromSmiles(reac_smi_map)
+    [atom.ClearProp('molAtomMapNumber') for atom in reac_mol.GetAtoms()]
+    reac_smi_nomap = Chem.MolToSmiles(reac_mol, True)
     # Sometimes stereochem takes another canonicalization... (just in case)
-    prod_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(prod_smi_nomap), True)
-    prod_fp = mol_smi_to_count_fp(prod_smi_nomap, args.radius, args.fp_size)
-    return prod_smi_nomap, prod_fp
+    reac_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(reac_smi_nomap), True)
+    reac_fp = mol_smi_to_count_fp(reac_smi_nomap, args.radius, args.fp_size)
+    return reac_smi_nomap, reac_fp
 
-def gen_prod_fps(args):
+def gen_reac_fps(args):
     # parallelizing makes it very slow for some reason
     for phase in ['train', 'valid', 'test']:
         logging.info(f'Processing {phase}')
@@ -66,25 +69,24 @@ def gen_prod_fps(args):
         logging.info(f'Parallelizing over {num_cores} cores')
         pool = multiprocessing.Pool(num_cores)
 
-        phase_prod_smi_nomap = []
-        phase_rxn_prod_fps = []
-        gen_prod_fps_partial = partial(gen_prod_fps_helper, args)
-        print(gen_prod_fps_partial)
-        for result in tqdm(pool.imap(gen_prod_fps_partial, clean_rxnsmi_phase),
+        phase_reac_smi_nomap = []
+        phase_rxn_reac_fps = []
+        gen_reac_fps_partial = partial(gen_reac_fps_helper, args)
+        for result in tqdm(pool.imap(gen_reac_fps_partial, clean_rxnsmi_phase),
                             total=len(clean_rxnsmi_phase), desc='Processing rxn_smi'):
-            prod_smi_nomap, prod_fp = result
-            phase_prod_smi_nomap.append(prod_smi_nomap)
-            phase_rxn_prod_fps.append(prod_fp)
+            reac_smi_nomap, reac_fp = result
+            phase_reac_smi_nomap.append(reac_smi_nomap)
+            phase_rxn_reac_fps.append(reac_fp)
 
         # these are the input data into the network
-        phase_rxn_prod_fps = sparse.vstack(phase_rxn_prod_fps)
+        phase_rxn_reac_fps = sparse.vstack(phase_rxn_reac_fps)
         sparse.save_npz(
-            args.data_folder / f"{args.output_file_prefix}_prod_fps_{phase}.npz",
-            phase_rxn_prod_fps
+            args.data_folder / f"{args.output_file_prefix}_reac_fps_{phase}.npz",
+            phase_rxn_reac_fps
         )
 
-        with open(args.data_folder / f"{args.output_file_prefix}_to_{args.final_fp_size}_prod_smis_nomap_{phase}.smi", 'wb') as f:
-            pickle.dump(phase_prod_smi_nomap, f, protocol=4)
+        with open(args.data_folder / f"{args.output_file_prefix}_to_{args.final_fp_size}_reac_smis_nomap_{phase}.smi", 'wb') as f:
+            pickle.dump(phase_reac_smi_nomap, f, protocol=4)
         # to csv?
 
 def log_row(row):
@@ -95,7 +97,7 @@ def var_col(col):
 
 def variance_cutoff(args):
     for phase in ['train', 'valid', 'test']:
-        prod_fps = sparse.load_npz(args.data_folder / f"{args.output_file_prefix}_prod_fps_{phase}.npz")
+        reac_fps = sparse.load_npz(args.data_folder / f"{args.output_file_prefix}_reac_fps_{phase}.npz")
 
         num_cores = len(os.sched_getaffinity(0))
         logging.info(f'Parallelizing over {num_cores} cores')
@@ -104,12 +106,12 @@ def variance_cutoff(args):
         logged = []
         # imap is much, much faster than map
         # take log(x+1), ~2.5 min for 1mil-dim on 8 cores (parallelized)
-        for result in tqdm(pool.imap(log_row, prod_fps),
-                       total=prod_fps.shape[0], desc='Taking log(x+1)'):
+        for result in tqdm(pool.imap(log_row, reac_fps),
+                       total=reac_fps.shape[0], desc='Taking log(x+1)'):
             logged.append(result)
         logged = sparse.vstack(logged)
 
-        # collect variance statistics by column index from training product fingerprints
+        # collect variance statistics by column index from training reactant fingerprints
         # VERY slow with 2 for-loops to access each element individually.
         # idea: tranpose the sparse matrix, then go through 1 million rows using pool.imap 
         # massive speed up from 280 hours to 1 hour on 8 cores
@@ -138,7 +140,7 @@ def variance_cutoff(args):
             )
         thresholded = sparse.vstack(thresholded)
         sparse.save_npz(
-            args.data_folder / f"{args.output_file_prefix}_to_{args.final_fp_size}_prod_fps_{phase}.npz",
+            args.data_folder / f"{args.output_file_prefix}_to_{args.final_fp_size}_reac_fps_{phase}.npz",
             thresholded
         )
         
@@ -200,8 +202,9 @@ def get_train_templates(args):
         # canonicalize template (needed, bcos q a number of templates are equivalent, 10247 --> 10198)
         p_temp = cano_smarts(template['products'])
         r_temp = cano_smarts(template['reactants'])
-        cano_temp = p_temp + '>>' + r_temp
-        # NOTE: 'reaction_smarts' is actually: p_temp >> r_temp !!!!! 
+        cano_temp = r_temp + '>>' + p_temp
+
+        # NOTE: 'reaction_smarts' is actually: p_temp >> r_temp !!!!! But only for retrosynthesis!
 
         if cano_temp not in templates:
             templates[cano_temp] = 1
@@ -227,7 +230,7 @@ def get_template_idx(temps_dict, task):
         return rxn_idx, -1 # unable to extract template
     p_temp = cano_smarts(rxn_template['products'])
     r_temp = cano_smarts(rxn_template['reactants'])
-    cano_temp = p_temp + '>>' + r_temp
+    cano_temp = r_temp + '>>' + p_temp
 
     if cano_temp in temps_dict:
         return rxn_idx, temps_dict[cano_temp]
@@ -297,8 +300,8 @@ def match_templates(args):
     logging.info('Matching against extracted templates')
     for phase in ['train', 'valid', 'test']:
         logging.info(f'Processing {phase}')
-        with open(args.data_folder / f"{args.output_file_prefix}_prod_smis_nomap_{phase}.smi", 'rb') as f:
-            phase_prod_smi_nomap = pickle.load(f)
+        with open(args.data_folder / f"{args.output_file_prefix}_reac_smis_nomap_{phase}.smi", 'rb') as f:
+            phase_reac_smi_nomap = pickle.load(f)
 
         """with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
             clean_rxnsmi_phase = pickle.load(f)"""
@@ -327,7 +330,7 @@ def match_templates(args):
         pool = multiprocessing.Pool(num_cores)
 
         # make CSV file to save labels (template_idx) & rxn data for monitoring training
-        col_names = ['rxn_idx', 'prod_smi', 'rcts_smi', 'temp_idx', 'template']
+        col_names = ['rxn_idx', 'prod_smi', 'reac_smi', 'temp_idx', 'template']
         rows = []
         labels = []
         found = 0
@@ -337,18 +340,18 @@ def match_templates(args):
                        total=len(tasks)):
             rxn_idx, template_idx = result
 
-            rcts_smi_map = clean_rxnsmi_phase[rxn_idx].split('>>')[0]
-            rcts_mol = Chem.MolFromSmiles(rcts_smi_map)
-            [atom.ClearProp('molAtomMapNumber') for atom in rcts_mol.GetAtoms()]
-            rcts_smi_nomap = Chem.MolToSmiles(rcts_mol, True)
+            prod_smi_map = clean_rxnsmi_phase[rxn_idx].split('>>')[-1]
+            prod_mol = Chem.MolFromSmiles(prod_smi_map)
+            [atom.ClearProp('molAtomMapNumber') for atom in prod_mol.GetAtoms()]
+            prod_smi_nomap = Chem.MolToSmiles(prod_mol, True)
             # Sometimes stereochem takes another canonicalization...
-            rcts_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(rcts_smi_nomap), True)
+            prod_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(prod_smi_nomap), True)
 
             template = temps_filtered[template_idx] if template_idx != len(temps_filtered) else ''
             rows.append([
                 rxn_idx,
-                phase_prod_smi_nomap[rxn_idx],
-                rcts_smi_nomap, # tasks[rxn_idx][1],
+                prod_smi_nomap,
+                phase_reac_smi_nomap[rxn_idx],
                 template, 
                 template_idx,
             ])
@@ -416,10 +419,10 @@ if __name__ == '__main__':
 
     logging.info(args)
 
-    if not (args.data_folder / f"{args.output_file_prefix}_prod_fps_valid.npz").exists():
+    if not (args.data_folder / f"{args.output_file_prefix}_reac_fps_valid.npz").exists():
         # ~2 min on 40k train prod_smi on 16 cores for 32681-dim
-        gen_prod_fps(args)
-    if not (args.data_folder / f"{args.output_file_prefix}_to_{args.final_fp_size}_prod_fps_valid.npz").exists():
+        gen_reac_fps(args)
+    if not (args.data_folder / f"{args.output_file_prefix}_to_{args.final_fp_size}_reac_fps_valid.npz").exists():
         # for training dataset (40k rxn_smi):
         # ~1 min to do log(x+1) transformation on 16 cores, and then
         # ~2 min to gather variance statistics across 1 million indices on 16 cores, and then

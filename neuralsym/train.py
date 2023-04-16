@@ -469,6 +469,9 @@ if __name__ == '__main__':
     logger.addHandler(sh)
     
     logging.info(args)
+
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
     if args.do_train:
         model = train(args)
     else:
