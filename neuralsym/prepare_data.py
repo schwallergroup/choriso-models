@@ -62,6 +62,12 @@ def gen_reac_fps(args):
     for phase in ['train', 'val', 'test']:
         logging.info(f'Processing {phase}')
 
+        save_path_smi = f"{processed_dir}/{args.output_file_prefix}_to_{args.final_fp_size}_reac_smis_nomap_{phase}.smi"
+        save_path_fps = f"{processed_dir}/{args.output_file_prefix}_reac_fps_{phase}.npz"
+        if os.path.exists(save_path_smi) and os.path.exists(save_path_fps):
+            logging.info(f"Skipping gen_reac_fps for {phase} because it already exists")
+            continue
+
         """with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
             clean_rxnsmi_phase = pickle.load(f)"""
 
@@ -85,11 +91,11 @@ def gen_reac_fps(args):
         # these are the input data into the network
         phase_rxn_reac_fps = sparse.vstack(phase_rxn_reac_fps)
         sparse.save_npz(
-            args.data_folder / f"{args.output_file_prefix}_reac_fps_{phase}.npz",
+            save_path_fps,
             phase_rxn_reac_fps
         )
 
-        with open(processed_dir / f"{args.output_file_prefix}_to_{args.final_fp_size}_reac_smis_nomap_{phase}.smi", 'wb') as f:
+        with open(save_path_smi, 'wb') as f:
             pickle.dump(phase_reac_smi_nomap, f, protocol=4)
         # to csv?
 
@@ -105,6 +111,7 @@ def variance_cutoff(args):
         os.makedirs(processed_dir)
 
     for phase in ['train', 'val', 'test']:
+
         reac_fps = sparse.load_npz(processed_dir / f"{args.output_file_prefix}_reac_fps_{phase}.npz")
 
         num_cores = len(os.sched_getaffinity(0))
