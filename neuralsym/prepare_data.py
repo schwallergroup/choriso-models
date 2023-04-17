@@ -191,51 +191,56 @@ def get_train_templates(args):
     if not os.path.exists(processed_dir):
         os.makedirs(processed_dir)
 
-    phase = 'train'
-    """with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
-        clean_rxnsmi_phase = pickle.load(f)"""
-    clean_rxnsmi_phase = pd.read_csv(os.path.join(args.data_folder, args.dataset, f"{phase}.tsv"), sep="\t")
-    clean_rxnsmi_phase = clean_rxnsmi_phase["rxnmapper_aam"].values
+    templates_path = f"{processed_dir}/ {args.templates_file}"
+    if os.path.exists(templates_path):
+        pass
 
-    templates = {}
-    rxns = []
-    for idx, rxn_smi in enumerate(clean_rxnsmi_phase):
-        r = rxn_smi.split('>>')[0]
-        p = rxn_smi.split('>>')[-1]
-        rxns.append((idx, r, p))
-    logging.info(f'Total training rxns: {len(rxns)}')
+    else:
+        phase = 'train'
+        """with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
+            clean_rxnsmi_phase = pickle.load(f)"""
+        clean_rxnsmi_phase = pd.read_csv(os.path.join(args.data_folder, args.dataset, f"{phase}.tsv"), sep="\t")
+        clean_rxnsmi_phase = clean_rxnsmi_phase["rxnmapper_aam"].values
 
-    num_cores = len(os.sched_getaffinity(0))
-    logging.info(f'Parallelizing over {num_cores} cores')
-    pool = multiprocessing.Pool(num_cores)
-    invalid_temp = 0
-    # here the order doesn't matter since we just want a dictionary of templates
-    for result in tqdm(pool.imap_unordered(get_tpl, rxns),
-                        total=len(rxns)):
-        idx, template = result
-        if 'reaction_smarts' not in template:
-            invalid_temp += 1
-            logging.info(f'At {idx}, could not extract template')
-            continue # no template could be extracted
+        templates = {}
+        rxns = []
+        for idx, rxn_smi in enumerate(clean_rxnsmi_phase):
+            r = rxn_smi.split('>>')[0]
+            p = rxn_smi.split('>>')[-1]
+            rxns.append((idx, r, p))
+        logging.info(f'Total training rxns: {len(rxns)}')
 
-        # canonicalize template (needed, bcos q a number of templates are equivalent, 10247 --> 10198)
-        p_temp = cano_smarts(template['products'])
-        r_temp = cano_smarts(template['reactants'])
-        cano_temp = r_temp + '>>' + p_temp
+        num_cores = len(os.sched_getaffinity(0))
+        logging.info(f'Parallelizing over {num_cores} cores')
+        pool = multiprocessing.Pool(num_cores)
+        invalid_temp = 0
+        # here the order doesn't matter since we just want a dictionary of templates
+        for result in tqdm(pool.imap_unordered(get_tpl, rxns),
+                            total=len(rxns)):
+            idx, template = result
+            if 'reaction_smarts' not in template:
+                invalid_temp += 1
+                logging.info(f'At {idx}, could not extract template')
+                continue # no template could be extracted
 
-        # NOTE: 'reaction_smarts' is actually: p_temp >> r_temp !!!!! But only for retrosynthesis!
+            # canonicalize template (needed, bcos q a number of templates are equivalent, 10247 --> 10198)
+            p_temp = cano_smarts(template['products'])
+            r_temp = cano_smarts(template['reactants'])
+            cano_temp = r_temp + '>>' + p_temp
 
-        if cano_temp not in templates:
-            templates[cano_temp] = 1
-        else:
-            templates[cano_temp] += 1
+            # NOTE: 'reaction_smarts' is actually: p_temp >> r_temp !!!!! But only for retrosynthesis!
 
-    logging.info(f'No of rxn where template extraction failed: {invalid_temp}')
+            if cano_temp not in templates:
+                templates[cano_temp] = 1
+            else:
+                templates[cano_temp] += 1
 
-    templates = sorted(templates.items(), key=lambda x: x[1], reverse=True)
-    templates = ['{}: {}\n'.format(p[0], p[1]) for p in templates]
-    with open(f"{processed_dir}/ {args.templates_file}", 'w') as f:
-        f.writelines(templates)
+        logging.info(f'No of rxn where template extraction failed: {invalid_temp}')
+
+        templates = sorted(templates.items(), key=lambda x: x[1], reverse=True)
+        templates = ['{}: {}\n'.format(p[0], p[1]) for p in templates]
+        with open(f"{processed_dir}/ {args.templates_file}", 'w') as f:
+            f.writelines(templates)
 
 def get_template_idx(temps_dict, task):
     rxn_idx, r, p = task    
@@ -323,6 +328,13 @@ def match_templates(args):
     logging.info('Matching against extracted templates')
     for phase in ['train', 'val', 'test']:
         logging.info(f'Processing {phase}')
+
+        labels_path = f"{processed_dir}/{args.output_file_prefix}_labels_{phase}"
+        csv_path = f"{processed_dir}/{args.output_file_prefix}_csv_{phase}.csv"
+
+        if os.path.exists(labels_path) and os.path.exists(csv_path):
+            continue
+
         with open(f"{processed_dir}/{args.output_file_prefix}_reac_smis_nomap_{phase}.smi", 'rb') as f:
             phase_reac_smi_nomap = pickle.load(f)
 
@@ -387,11 +399,11 @@ def match_templates(args):
         logging.info(f'Template coverage: {found / len(tasks) * 100:.2f}%')
         labels = np.array(labels)
         np.save(
-            f"{processed_dir}/{args.output_file_prefix}_labels_{phase}",
+            labels_path,
             labels
         )
         with open(
-            f"{processed_dir}/{args.output_file_prefix}_csv_{phase}.csv", 'w'
+            csv_path, 'w'
         ) as out_csv:
             writer = csv.writer(out_csv)
             writer.writerow(col_names)  # header
