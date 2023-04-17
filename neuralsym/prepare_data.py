@@ -55,7 +55,11 @@ def gen_reac_fps_helper(args, rxn_smi):
 
 def gen_reac_fps(args):
     # parallelizing makes it very slow for some reason
-    for phase in ['train', 'valid', 'test']:
+    processed_dir = "processed"
+    if not os.path.exists(processed_dir):
+        os.makedirs(processed_dir)
+
+    for phase in ['train', 'val', 'test']:
         logging.info(f'Processing {phase}')
 
         """with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
@@ -85,7 +89,7 @@ def gen_reac_fps(args):
             phase_rxn_reac_fps
         )
 
-        with open(args.data_folder / f"{args.output_file_prefix}_to_{args.final_fp_size}_reac_smis_nomap_{phase}.smi", 'wb') as f:
+        with open(processed_dir / f"{args.output_file_prefix}_to_{args.final_fp_size}_reac_smis_nomap_{phase}.smi", 'wb') as f:
             pickle.dump(phase_reac_smi_nomap, f, protocol=4)
         # to csv?
 
@@ -96,8 +100,12 @@ def var_col(col):
     return np.var(col.toarray())
 
 def variance_cutoff(args):
-    for phase in ['train', 'valid', 'test']:
-        reac_fps = sparse.load_npz(args.data_folder / f"{args.output_file_prefix}_reac_fps_{phase}.npz")
+    processed_dir = "processed"
+    if not os.path.exists(processed_dir):
+        os.makedirs(processed_dir)
+
+    for phase in ['train', 'val', 'test']:
+        reac_fps = sparse.load_npz(processed_dir / f"{args.output_file_prefix}_reac_fps_{phase}.npz")
 
         num_cores = len(os.sched_getaffinity(0))
         logging.info(f'Parallelizing over {num_cores} cores')
@@ -140,7 +148,7 @@ def variance_cutoff(args):
             )
         thresholded = sparse.vstack(thresholded)
         sparse.save_npz(
-            args.data_folder / f"{args.output_file_prefix}_to_{args.final_fp_size}_reac_fps_{phase}.npz",
+            processed_dir / f"{args.output_file_prefix}_to_{args.final_fp_size}_reac_fps_{phase}.npz",
             thresholded
         )
         
@@ -172,6 +180,10 @@ def get_train_templates(args):
     52% and 79% of all chemical reactions from 2015 and after, respectively.
     '''
     logging.info('Extracting templates from training data')
+    processed_dir = "processed"
+    if not os.path.exists(processed_dir):
+        os.makedirs(processed_dir)
+
     phase = 'train'
     """with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
         clean_rxnsmi_phase = pickle.load(f)"""
@@ -215,7 +227,7 @@ def get_train_templates(args):
 
     templates = sorted(templates.items(), key=lambda x: x[1], reverse=True)
     templates = ['{}: {}\n'.format(p[0], p[1]) for p in templates]
-    with open(args.data_folder / args.templates_file, 'w') as f:
+    with open(processed_dir / args.templates_file, 'w') as f:
         f.writelines(templates)
 
 def get_template_idx(temps_dict, task):
@@ -284,6 +296,10 @@ def get_template_idx(temps_dict, task):
 
 def match_templates(args):
     logging.info(f'Loading templates from file: {args.templates_file}')
+    processed_dir = "processed"
+    if not os.path.exists(processed_dir):
+        os.makedirs(processed_dir)
+
     with open(args.data_folder / args.templates_file, 'r') as f:
         lines = f.readlines()
     temps_filtered = []
@@ -298,9 +314,9 @@ def match_templates(args):
     logging.info(f'Total number of template patterns: {len(temps_filtered)}')
 
     logging.info('Matching against extracted templates')
-    for phase in ['train', 'valid', 'test']:
+    for phase in ['train', 'val', 'test']:
         logging.info(f'Processing {phase}')
-        with open(args.data_folder / f"{args.output_file_prefix}_reac_smis_nomap_{phase}.smi", 'rb') as f:
+        with open(processed_dir / f"{args.output_file_prefix}_reac_smis_nomap_{phase}.smi", 'rb') as f:
             phase_reac_smi_nomap = pickle.load(f)
 
         """with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
@@ -364,15 +380,15 @@ def match_templates(args):
         logging.info(f'Template coverage: {found / len(tasks) * 100:.2f}%')
         labels = np.array(labels)
         np.save(
-            args.data_folder / f"{args.output_file_prefix}_labels_{phase}",
+            processed_dir / f"{args.output_file_prefix}_labels_{phase}",
             labels
         )
         with open(
-            args.data_folder /
+            processed_dir /
             f"{args.output_file_prefix}_csv_{phase}.csv", 'w'
         ) as out_csv:
             writer = csv.writer(out_csv)
-            writer.writerow(col_names) # header
+            writer.writerow(col_names)  # header
             for row in rows:
                 writer.writerow(row)
 
@@ -382,7 +398,7 @@ def parse_args():
     parser.add_argument("--log_file", help="log_file", type=str, default="prepare_data")
     parser.add_argument("--data_folder", help="Path to data folder (do not change)", type=str, default="../data")
     parser.add_argument("--dataset", help="dataset", type=str, default="cjhif")
-    parser.add_argument("--rxnsmi_file_prefix", help="Prefix of the 3 csv files containing the train/valid/test "
+    parser.add_argument("--rxnsmi_file_prefix", help="Prefix of the 3 csv files containing the train/val/test "
                                                      "reaction SMILES strings (do not change)", type=str, default='')
     parser.add_argument("--output_file_prefix", help="Prefix of output files", type=str)
     parser.add_argument("--templates_file", help="Filename of templates extracted from training data", 
@@ -415,14 +431,14 @@ if __name__ == '__main__':
         args.data_folder = Path(args.data_folder)
 
     if args.output_file_prefix is None:
-        args.output_file_prefix = f'50k_{args.fp_size}dim_{args.radius}rad'
+        args.output_file_prefix = f'cjhif_{args.fp_size}dim_{args.radius}rad'
 
     logging.info(args)
 
-    if not (args.data_folder / f"{args.output_file_prefix}_reac_fps_valid.npz").exists():
+    if not (args.data_folder / f"{args.output_file_prefix}_reac_fps_val.npz").exists():
         # ~2 min on 40k train prod_smi on 16 cores for 32681-dim
         gen_reac_fps(args)
-    if not (args.data_folder / f"{args.output_file_prefix}_to_{args.final_fp_size}_reac_fps_valid.npz").exists():
+    if not (args.data_folder / f"{args.output_file_prefix}_to_{args.final_fp_size}_reac_fps_val.npz").exists():
         # for training dataset (40k rxn_smi):
         # ~1 min to do log(x+1) transformation on 16 cores, and then
         # ~2 min to gather variance statistics across 1 million indices on 16 cores, and then
