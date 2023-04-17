@@ -13,6 +13,8 @@ import torch.nn as nn
 import torch.optim as optim
 import pandas as pd
 from rdchiral.main import rdchiralReaction, rdchiralReactants, rdchiralRun
+import wandb
+from codecarbon import EmissionsTracker
 
 from torch.utils.data import DataLoader
 from datetime import datetime
@@ -107,8 +109,13 @@ def train(args):
     train_accs, val_accs = defaultdict(list), defaultdict(list)
     max_valid_acc = float('-inf')
     wait = 0 # early stopping patience counter
+
+    wandb.init(project="NeuralSym")
+    tracker = EmissionsTracker()
+
     start = time.time()
     for epoch in range(args.epochs):
+        tracker.start()
         train_loss, train_correct, train_seen = 0, defaultdict(int), 0
         train_loader = tqdm(train_loader, desc='training')
         model.train()
@@ -131,6 +138,7 @@ def train(args):
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
+            wandb.log({"train_loss": loss.item()})
 
             train_loss += loss.item()
             train_seen += labels.shape[0]
@@ -150,6 +158,9 @@ def train(args):
         train_losses.append(train_loss/train_seen)
         for k in k_to_calc:
             train_accs[k].append(train_correct[k]/train_seen)
+
+        train_accs_df = pd.DataFrame(train_accs, columns=[f"train top-{k}" for k in k_to_calc])
+        wandb.Table(dataframe=train_accs_df)
 
         model.eval()
         with torch.no_grad():
@@ -179,6 +190,8 @@ def train(args):
                     batch_preds = torch.topk(outputs, k=k, dim=1)[1]
                     # logging.info(f'batch_preds: {batch_preds.shape}, labels: {labels.shape}')
                     valid_correct[k] += torch.where(batch_preds == labels.view(-1,1).expand_as(batch_preds))[0].shape[0]
+
+
 
                 valid_loader.set_description(f"validating: top-1 acc={valid_correct[1]/valid_seen:.4f}") # loss={valid_loss/valid_seen:.4f}, 
                 valid_loader.refresh()
@@ -230,6 +243,9 @@ def train(args):
         # valid_losses.append(valid_loss/valid_seen)
         for k in k_to_calc:
             val_accs[k].append(valid_correct[k]/valid_seen)
+
+        val_accs_df = pd.DataFrame(val_accs, columns=[f"val top-{k}" for k in k_to_calc])
+        wandb.Table(dataframe=val_accs_df)
 
         lr_scheduler.step(val_accs[1][-1])
         logging.info(f'\nCalled a step of ReduceLROnPlateau, current LR: {optimizer.param_groups[0]["lr"]}')
@@ -288,6 +304,9 @@ def train(args):
                 \nvalid top-100 acc: {val_accs[100][-1]:.4f} \
             \n" # {valid_losses[-1]:.4f}
         logging.info(message)
+
+        epoch_emission = tracker.stop()
+        wandb.log({"CO2 emission (in Kg)": epoch_emission})
 
     logging.info(f'Finished training, total time (minutes): {(time.time() - start) / 60}')
     return model

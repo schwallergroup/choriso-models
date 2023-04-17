@@ -243,7 +243,7 @@ def get_train_templates(args):
 
         templates = sorted(templates.items(), key=lambda x: x[1], reverse=True)
         templates = ['{}: {}\n'.format(p[0], p[1]) for p in templates]
-        with open(f"{processed_dir}/ {args.templates_file}", 'w') as f:
+        with open(templates_path, 'w') as f:
             f.writelines(templates)
 
 def get_template_idx(temps_dict, task):
