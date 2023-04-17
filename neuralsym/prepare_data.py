@@ -112,7 +112,7 @@ def variance_cutoff(args):
 
     for phase in ['train', 'val', 'test']:
 
-        reac_fps = sparse.load_npz(processed_dir / f"{args.output_file_prefix}_reac_fps_{phase}.npz")
+        reac_fps = sparse.load_npz(f"{processed_dir}/{args.output_file_prefix}_reac_fps_{phase}.npz")
 
         num_cores = len(os.sched_getaffinity(0))
         logging.info(f'Parallelizing over {num_cores} cores')
@@ -155,7 +155,7 @@ def variance_cutoff(args):
             )
         thresholded = sparse.vstack(thresholded)
         sparse.save_npz(
-            processed_dir / f"{args.output_file_prefix}_to_{args.final_fp_size}_reac_fps_{phase}.npz",
+            f"{processed_dir}/{args.output_file_prefix}_to_{args.final_fp_size}_reac_fps_{phase}.npz",
             thresholded
         )
         
@@ -234,7 +234,7 @@ def get_train_templates(args):
 
     templates = sorted(templates.items(), key=lambda x: x[1], reverse=True)
     templates = ['{}: {}\n'.format(p[0], p[1]) for p in templates]
-    with open(processed_dir / args.templates_file, 'w') as f:
+    with open(f"{processed_dir}/ {args.templates_file}", 'w') as f:
         f.writelines(templates)
 
 def get_template_idx(temps_dict, task):
@@ -323,7 +323,7 @@ def match_templates(args):
     logging.info('Matching against extracted templates')
     for phase in ['train', 'val', 'test']:
         logging.info(f'Processing {phase}')
-        with open(processed_dir / f"{args.output_file_prefix}_reac_smis_nomap_{phase}.smi", 'rb') as f:
+        with open(f"{processed_dir}/{args.output_file_prefix}_reac_smis_nomap_{phase}.smi", 'rb') as f:
             phase_reac_smi_nomap = pickle.load(f)
 
         """with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
@@ -387,12 +387,11 @@ def match_templates(args):
         logging.info(f'Template coverage: {found / len(tasks) * 100:.2f}%')
         labels = np.array(labels)
         np.save(
-            processed_dir / f"{args.output_file_prefix}_labels_{phase}",
+            f"{processed_dir}/{args.output_file_prefix}_labels_{phase}",
             labels
         )
         with open(
-            processed_dir /
-            f"{args.output_file_prefix}_csv_{phase}.csv", 'w'
+            f"{processed_dir}/{args.output_file_prefix}_csv_{phase}.csv", 'w'
         ) as out_csv:
             writer = csv.writer(out_csv)
             writer.writerow(col_names)  # header
