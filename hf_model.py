@@ -6,7 +6,6 @@ import pandas as pd
 import tempfile
 from functools import reduce
 from fnmatch import fnmatch
-from sklearn.metrics import top_k_accuracy_score
 
 import evaluate
 from tokenizers import models as tokenizer_models
@@ -337,7 +336,7 @@ if __name__ == "__main__":
         # training setup
         "max_steps": 150000,  # total number of training steps
         "evaluation_strategy": "steps",
-        "eval_steps": 5000,
+        "eval_steps": 1000,
         "save_strategy": "steps",
         "save_steps": 5000,
 
