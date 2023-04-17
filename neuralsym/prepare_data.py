@@ -111,7 +111,11 @@ def variance_cutoff(args):
         os.makedirs(processed_dir)
 
     for phase in ['train', 'val', 'test']:
-
+        reac_fps_path = f"{processed_dir}/{args.output_file_prefix}_to_{args.final_fp_size}_reac_fps_{phase}.npz"
+        if not os.path.exists(reac_fps_path):
+            logging.info(f"Skipping variance_cutoff for {phase} because it doesn't exist")
+            continue
+            
         reac_fps = sparse.load_npz(f"{processed_dir}/{args.output_file_prefix}_reac_fps_{phase}.npz")
 
         num_cores = len(os.sched_getaffinity(0))
@@ -155,7 +159,7 @@ def variance_cutoff(args):
             )
         thresholded = sparse.vstack(thresholded)
         sparse.save_npz(
-            f"{processed_dir}/{args.output_file_prefix}_to_{args.final_fp_size}_reac_fps_{phase}.npz",
+            reac_fps_path,
             thresholded
         )
         
