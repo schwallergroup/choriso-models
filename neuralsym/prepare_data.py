@@ -224,7 +224,7 @@ def get_train_templates(args):
         for result in tqdm(pool.imap_unordered(get_tpl, rxns),
                             total=len(rxns)):
         """
-        for rxn in rxns:
+        for rxn in tqdm(rxns, total=len(rxns)):
             result = get_tpl(rxn)
             idx, template = result
             if 'reaction_smarts' not in template:

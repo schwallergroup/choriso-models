@@ -99,10 +99,9 @@ class HuggingFaceTransformer(ReactionModel):
                                                          model_max_length=2048,
                                                          padding_side="right")
 
-                tokenizer_postprocess = AutoTokenizer.from_pretrained(model_architecture, add_prefix_space=True)
-                tokenizer_postprocess = tokenizer_postprocess.get_post_processor()
-
-                chem_tokenizer.post_processor = tokenizer_postprocess
+                chem_tokenizer.post_processor = processors.RobertaProcessing(cls=("[CLS]", chem_tokenizer.cls_token_id),
+                                                                             sep=("[SEP]", chem_tokenizer.sep_token_id),
+                                                                             add_prefix_space=True)
 
                 chem_tokenizer.save_pretrained(chem_tokenizer_path)
 
