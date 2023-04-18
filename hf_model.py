@@ -9,7 +9,7 @@ from fnmatch import fnmatch
 
 import evaluate
 from tokenizers import models as tokenizer_models
-from tokenizers.trainers import WordLevelTrainer
+from tokenizers.trainers import WordLevelTrainer, BpeTrainer
 from tokenizers import Regex, Tokenizer, pre_tokenizers, processors
 from transformers.integrations import WandbCallback, CodeCarbonCallback
 from transformers import AutoConfig, AutoTokenizer, EncoderDecoderConfig, PreTrainedTokenizerFast, BertConfig, \
@@ -72,11 +72,11 @@ class HuggingFaceTransformer(ReactionModel):
 
             chem_tokenizer.pre_tokenizer = pre_tokenizers.Split(pattern, "isolated")
             special_tokens = ["[UNK]", "[PAD]", "[CLS]", "[SEP]", "[MASK]"]
-            chem_tokenizer.post_processor = processors.RobertaProcessing(cls=("[CLS]", special_tokens.index("[CLS]")),
-                                                                         sep=("[SEP]", special_tokens.index("[SEP]")),
-                                                                         add_prefix_space=True)
 
-            trainer = WordLevelTrainer(special_tokens=special_tokens)
+            chem_tokenizer_trainer = WordLevelTrainer(special_tokens=special_tokens)
+
+            pretrained_tokenizer = AutoTokenizer.from_pretrained(model_architecture)
+            pretrained_tokenizer.pat = pattern
 
             # get data for tokenizer training --> for building the vocab!
             root_dir = os.path.dirname(self.model_dir)
@@ -93,26 +93,23 @@ class HuggingFaceTransformer(ReactionModel):
                 reactions.to_csv(tmp, sep="\t", index=False, header=False)
 
                 # do training and store the final tokenizer
-                chem_tokenizer.train([tmp.name], trainer)
-                """chem_tokenizer = PreTrainedTokenizerFast(tokenizer_object=chem_tokenizer,
-                                                         unk_token="[UNK]",
-                                                         pad_token="[PAD]",
-                                                         cls_token="[CLS]",
-                                                         sep_token="[SEP]",
-                                                         mask_token="[MASK]",
-                                                         model_max_length=2048,
-                                                         padding_side="right")"""
+                chem_tokenizer.train([tmp.name], chem_tokenizer_trainer)
 
-                chem_tokenizer.save_pretrained(chem_tokenizer_path)
+                # TODO trainer is hardcoded for BART now, make flexible for future models
+                final_tokenizer_trainer = BpeTrainer(vocab_size=len(chem_tokenizer), special_tokens=special_tokens)
+                pretrained_tokenizer.train([tmp.name], final_tokenizer_trainer)
+
+            pretrained_tokenizer.save_pretrained(chem_tokenizer_path)
 
         else:
             # use pre-trained tokenizer
-            chem_tokenizer = AutoTokenizer.from_pretrained(chem_tokenizer_path)
+            pretrained_tokenizer = AutoTokenizer.from_pretrained(chem_tokenizer_path)
 
-        chem_tokenizer.bos_token = chem_tokenizer.cls_token
-        chem_tokenizer.eos_token = chem_tokenizer.sep_token
+        # TODO this is also not necessarily correct for all models, make it more flexible
+        pretrained_tokenizer.bos_token = pretrained_tokenizer.cls_token
+        pretrained_tokenizer.eos_token = pretrained_tokenizer.sep_token
 
-        self.tokenizer = chem_tokenizer
+        self.tokenizer = pretrained_tokenizer
 
         # if we already have saved a model config, load it
         config_path = os.path.join(self.model_dir, "config")
