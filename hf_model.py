@@ -167,17 +167,16 @@ class HuggingFaceTransformer(ReactionModel):
         train_args["logging_dir"] = os.path.join(self.model_dir, train_args["logging_dir"])
         self.train_args = Seq2SeqTrainingArguments(**train_args)
 
-        test_mol = "[CLS]CC(=O)OC1C=CC2C3CC4=C5C2(C1OC5=C(C=C4)OC(=O)C)CCN3C[SEP]"
+        test_mol = "CC(=O)OC1C=CC2C3CC4=C5C2(C1OC5=C(C=C4)OC(=O)C)CCN3C"
         print(test_mol)
-        test_reactant_encoding = self.tokenizer(test_mol)["input_ids"]
+        test_target_mol = "CN1C2CCC1C(C(C2)OC(=O)C3=CC=CC=C3)C(=O)OC"
+        test_reactant_encoding = self.tokenizer(test_mol, text_target=test_target_mol)
         print(test_reactant_encoding)
-        test_reactant_decoding = self.tokenizer.decode(test_reactant_encoding)
+        test_reactant_decoding = self.tokenizer.decode(test_reactant_encoding["input_ids"])
         print(test_reactant_decoding)
-
-        test_product_encoding = self.tokenizer(text_target=test_mol)["input_ids"]
-        print(test_product_encoding)
-        test_product_decoding = self.tokenizer.decode(test_product_encoding)
+        test_product_decoding = self.tokenizer.decode(test_reactant_encoding["labels"])
         print(test_product_decoding)
+
         breakpoint()
 
     def preprocess(self, dataset: str = "cjhif"):
