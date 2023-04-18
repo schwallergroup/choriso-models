@@ -77,7 +77,10 @@ class HuggingFaceTransformer(ReactionModel):
 
             pretrained_tokenizer = AutoTokenizer.from_pretrained(model_architecture)
             pretrained_tokenizer.pat = pattern
-
+            with tempfile.NamedTemporaryFile() as tmp_tokenizer:
+                pretrained_tokenizer.save_pretrained(tmp_tokenizer.name)
+                pretrained_tokenizer = Tokenizer.from_file(tmp_tokenizer.name)
+            
             # get data for tokenizer training --> for building the vocab!
             root_dir = os.path.dirname(self.model_dir)
             data_dir = os.path.join(root_dir, "data", dataset)
