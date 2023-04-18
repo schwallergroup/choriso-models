@@ -214,9 +214,9 @@ def get_train_templates(args):
             rxns.append((idx, r, p))
         logging.info(f'Total training rxns: {len(rxns)}')
 
-        num_cores = len(os.sched_getaffinity(0))
+        """num_cores = len(os.sched_getaffinity(0))
         logging.info(f'Parallelizing over {num_cores} cores')
-        pool = multiprocessing.Pool(num_cores)
+        pool = multiprocessing.Pool(num_cores)"""
         invalid_temp = 0
         # here the order doesn't matter since we just want a dictionary of templates
         """
