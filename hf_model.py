@@ -71,6 +71,9 @@ class HuggingFaceTransformer(ReactionModel):
             chem_tokenizer = Tokenizer(tokenizer_models.WordLevel(unk_token="[UNK]"))
 
             chem_tokenizer.pre_tokenizer = pre_tokenizers.Split(pattern, "isolated")
+            chem_tokenizer.post_processor = processors.RobertaProcessing(cls=("[CLS]", chem_tokenizer.cls_token_id),
+                                                                         sep=("[SEP]", chem_tokenizer.sep_token_id),
+                                                                         add_prefix_space=True)
 
             trainer = WordLevelTrainer(special_tokens=["[UNK]", "[PAD]", "[CLS]", "[SEP]", "[MASK]"])
 
@@ -90,18 +93,14 @@ class HuggingFaceTransformer(ReactionModel):
 
                 # do training and store the final tokenizer
                 chem_tokenizer.train([tmp.name], trainer)
-                chem_tokenizer = PreTrainedTokenizerFast(tokenizer_object=chem_tokenizer,
+                """chem_tokenizer = PreTrainedTokenizerFast(tokenizer_object=chem_tokenizer,
                                                          unk_token="[UNK]",
                                                          pad_token="[PAD]",
                                                          cls_token="[CLS]",
                                                          sep_token="[SEP]",
                                                          mask_token="[MASK]",
                                                          model_max_length=2048,
-                                                         padding_side="right")
-
-                chem_tokenizer.post_processor = processors.RobertaProcessing(cls=("[CLS]", chem_tokenizer.cls_token_id),
-                                                                             sep=("[SEP]", chem_tokenizer.sep_token_id),
-                                                                             add_prefix_space=True)
+                                                         padding_side="right")"""
 
                 chem_tokenizer.save_pretrained(chem_tokenizer_path)
 
