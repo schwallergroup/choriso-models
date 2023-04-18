@@ -229,9 +229,10 @@ def get_train_templates(args):
         def handler(signum, frame):
             raise Exception("Timeout")
 
+        signal.signal(signal.SIGALRM, handler)
+        signal.alarm(20)
+
         for rxn in tqdm(rxns, total=len(rxns)):
-            signal.signal(signal.SIGALRM, handler)
-            signal.alarm(30)
             try:
                 result = get_tpl(rxn)
                 idx, template = result
@@ -251,11 +252,18 @@ def get_train_templates(args):
                     templates[cano_temp] = 1
                 else:
                     templates[cano_temp] += 1
-                    
-            except:
+            except TimeoutError:
                 invalid_temp += 1
                 logging.info(f'Could not extract template, timeout')
                 continue
+                
+            except Exception as e:
+                invalid_temp += 1
+                logging.info(f'Could not extract template: {e}')
+                continue
+
+            finally:
+                signal.alarm(0)  # reset the alarm after each iteration
 
         logging.info(f'No of rxn where template extraction failed: {invalid_temp}')
 
