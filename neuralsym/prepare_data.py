@@ -219,8 +219,13 @@ def get_train_templates(args):
         pool = multiprocessing.Pool(num_cores)
         invalid_temp = 0
         # here the order doesn't matter since we just want a dictionary of templates
+        """
+        below didn't work, was stuck 
         for result in tqdm(pool.imap_unordered(get_tpl, rxns),
                             total=len(rxns)):
+        """
+        for rxn in rxns:
+            result = get_tpl(rxn)
             idx, template = result
             if 'reaction_smarts' not in template:
                 invalid_temp += 1
