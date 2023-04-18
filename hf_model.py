@@ -72,7 +72,12 @@ class HuggingFaceTransformer(ReactionModel):
 
             chem_tokenizer.pre_tokenizer = pre_tokenizers.Split(pattern, "isolated")
 
-            trainer = WordLevelTrainer(special_tokens=["[UNK]", "[PAD]", "[CLS]", "[SEP]", "[MASK]"])
+            special_tokens = ["[UNK]", "[PAD]", "[CLS]", "[SEP]", "[MASK]"]
+
+            chem_tokenizer.post_processor = processors.BertProcessing(cls=("[CLS]", special_tokens.index("[CLS]")),
+                                                                      sep=("[SEP]", special_tokens.index("[SEP]")))
+
+            trainer = WordLevelTrainer(special_tokens=special_tokens)
 
             # get data for tokenizer training --> for building the vocab!
             root_dir = os.path.dirname(self.model_dir)
@@ -98,9 +103,6 @@ class HuggingFaceTransformer(ReactionModel):
                                                          mask_token="[MASK]",
                                                          model_max_length=2048,
                                                          padding_side="right")
-
-                chem_tokenizer.post_processor = processors.BertProcessing(cls=("[CLS]", chem_tokenizer.cls_token_id),
-                                                                          sep=("[SEP]", chem_tokenizer.sep_token_id))
 
                 chem_tokenizer.save_pretrained(chem_tokenizer_path)
 
