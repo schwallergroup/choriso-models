@@ -9,6 +9,7 @@ import pandas as pd
 import rdkit
 import scipy
 import multiprocessing
+import signal
 
 from functools import partial
 from datetime import datetime
@@ -224,25 +225,37 @@ def get_train_templates(args):
         for result in tqdm(pool.imap_unordered(get_tpl, rxns),
                             total=len(rxns)):
         """
+
+        def handler(signum, frame):
+            raise Exception("Timeout")
+
         for rxn in tqdm(rxns, total=len(rxns)):
-            result = get_tpl(rxn)
-            idx, template = result
-            if 'reaction_smarts' not in template:
+            signal.signal(signal.SIGALRM, handler)
+            signal.alarm(30)
+            try:
+                result = get_tpl(rxn)
+                idx, template = result
+                if 'reaction_smarts' not in template:
+                    invalid_temp += 1
+                    logging.info(f'At {idx}, could not extract template')
+                    continue # no template could be extracted
+
+                # canonicalize template (needed, bcos q a number of templates are equivalent, 10247 --> 10198)
+                p_temp = cano_smarts(template['products'])
+                r_temp = cano_smarts(template['reactants'])
+                cano_temp = r_temp + '>>' + p_temp
+
+                # NOTE: 'reaction_smarts' is actually: p_temp >> r_temp !!!!! But only for retrosynthesis!
+
+                if cano_temp not in templates:
+                    templates[cano_temp] = 1
+                else:
+                    templates[cano_temp] += 1
+                    
+            except:
                 invalid_temp += 1
-                logging.info(f'At {idx}, could not extract template')
-                continue # no template could be extracted
-
-            # canonicalize template (needed, bcos q a number of templates are equivalent, 10247 --> 10198)
-            p_temp = cano_smarts(template['products'])
-            r_temp = cano_smarts(template['reactants'])
-            cano_temp = r_temp + '>>' + p_temp
-
-            # NOTE: 'reaction_smarts' is actually: p_temp >> r_temp !!!!! But only for retrosynthesis!
-
-            if cano_temp not in templates:
-                templates[cano_temp] = 1
-            else:
-                templates[cano_temp] += 1
+                logging.info(f'Could not extract template, timeout')
+                continue
 
         logging.info(f'No of rxn where template extraction failed: {invalid_temp}')
 
