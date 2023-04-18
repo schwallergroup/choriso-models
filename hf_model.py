@@ -170,6 +170,19 @@ class HuggingFaceTransformer(ReactionModel):
         train_args["logging_dir"] = os.path.join(self.model_dir, train_args["logging_dir"])
         self.train_args = Seq2SeqTrainingArguments(**train_args)
 
+        test_mol = "[CLS]CC(=O)OC1C=CC2C3CC4=C5C2(C1OC5=C(C=C4)OC(=O)C)CCN3C[SEP]"
+        print(test_mol)
+        test_reactant_encoding = self.tokenizer(test_mol)["input_ids"]
+        print(test_reactant_encoding)
+        test_reactant_decoding = self.tokenizer.decode(test_reactant_encoding)
+        print(test_reactant_decoding)
+
+        test_product_encoding = self.tokenizer(text_target=test_mol)["input_ids"]
+        print(test_product_encoding)
+        test_product_decoding = self.tokenizer.decode(test_product_encoding)
+        print(test_product_decoding)
+        breakpoint()
+
     def preprocess(self, dataset: str = "cjhif"):
         """Do data preprocessing. Skip if preprocessed data already exists"""
         root_dir = os.path.dirname(self.model_dir)
@@ -337,9 +350,9 @@ if __name__ == "__main__":
         # training setup
         "max_steps": 150000,  # total number of training steps
         "evaluation_strategy": "steps",
-        "eval_steps": 1000,
+        "eval_steps": 10000,
         "save_strategy": "steps",
-        "save_steps": 5000,
+        "save_steps": 10000,
 
         # model and optimizer params
         "learning_rate": 5.5e-4,
