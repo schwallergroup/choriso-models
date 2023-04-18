@@ -71,11 +71,12 @@ class HuggingFaceTransformer(ReactionModel):
             chem_tokenizer = Tokenizer(tokenizer_models.WordLevel(unk_token="[UNK]"))
 
             chem_tokenizer.pre_tokenizer = pre_tokenizers.Split(pattern, "isolated")
-            chem_tokenizer.post_processor = processors.RobertaProcessing(cls=("[CLS]", chem_tokenizer.cls_token_id),
-                                                                         sep=("[SEP]", chem_tokenizer.sep_token_id),
+            special_tokens = ["[UNK]", "[PAD]", "[CLS]", "[SEP]", "[MASK]"]
+            chem_tokenizer.post_processor = processors.RobertaProcessing(cls=("[CLS]", special_tokens.index("[CLS]")),
+                                                                         sep=("[SEP]", special_tokens.index("[SEP]")),
                                                                          add_prefix_space=True)
 
-            trainer = WordLevelTrainer(special_tokens=["[UNK]", "[PAD]", "[CLS]", "[SEP]", "[MASK]"])
+            trainer = WordLevelTrainer(special_tokens=special_tokens)
 
             # get data for tokenizer training --> for building the vocab!
             root_dir = os.path.dirname(self.model_dir)
