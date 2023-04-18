@@ -168,11 +168,13 @@ def variance_cutoff(args):
 def get_tpl(task):
     idx, react, prod = task
     reaction = {'_id': idx, 'reactants': react, 'products': prod}
+    logging.info(f'Extracting template from {reaction}')
     template = extract_from_reaction(reaction)
     # https://github.com/connorcoley/rdchiral/blob/master/rdchiral/template_extractor.py
     return idx, template
 
 def cano_smarts(smarts):
+    logging.info(f'Canonicalizing {smarts}')
     tmp = Chem.MolFromSmarts(smarts)
     if tmp is None:
         logging.info(f'Could not parse {smarts}')
@@ -256,7 +258,7 @@ def get_train_templates(args):
                 invalid_temp += 1
                 logging.info(f'Could not extract template, timeout')
                 continue
-                
+
             except Exception as e:
                 invalid_temp += 1
                 logging.info(f'Could not extract template: {e}')
