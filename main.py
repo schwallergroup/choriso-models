@@ -12,7 +12,7 @@ def get_base_parsers():
     parser = argparse.ArgumentParser(description='Conditional arguments example')
 
     # Define the subparsers for each model
-    subparsers = parser.add_subparsers(title='Models', dest='model')
+    subparsers = parser.add_subparsers(title='Models', dest='model', required=True)
 
     parser_g2s = subparsers.add_parser('Graph2SMILES', aliases=['G2S', 'g2s', 'graph2smiles'], help='Graph2SMILES model')
     parser_onmt = subparsers.add_parser('OpenNMT', aliases=['ONMT', 'onmt', 'opennmt'], help='OpenNMT model')
@@ -33,8 +33,8 @@ def get_base_parsers():
 def add_mode_subparser(model_parser):
     mode_subparser = model_parser.add_subparsers(title="Run mode", dest="mode", required=True)
 
-    train_mode_parser = mode_subparser.add_parser('--train', aliases=['-t'], help='Training mode')
-    predict_mode_parser = mode_subparser.add_parser('--predict', aliases=['-p', '--pred'], help='Prediction mode')
+    train_mode_parser = mode_subparser.add_parser('--train', aliases=['-t'], help='Training mode', action='store_true')
+    predict_mode_parser = mode_subparser.add_parser('--predict', aliases=['-p', '--pred'], help='Prediction mode', action='store_true')
 
     return train_mode_parser, predict_mode_parser
 
@@ -49,8 +49,13 @@ def build_parser():
 
         train_parser, predict_parser = add_mode_subparser(model_base_parser)
 
-        train_parser.add_subparsers(title='train_args', help='Training args', parser_class=model_args.training_args(), action='store_true')
-        predict_parser.add_subparsers(title='pred_args', help='Prediction args', parser_class=model_args.predict_args(), action='store_true')
+        train_parser.add_subparsers(title='train_args', help='Training args')
+        for train_arg in model_args.training_args()._actions:
+            train_parser._add_action(train_arg)
+
+        predict_parser.add_subparsers(title='pred_args', help='Prediction args')
+        for pred_arg in model_args.predict_args()._actions:
+            predict_parser._add_action(pred_arg)
 
         parser_dict[model]["train_parser"] = train_parser
         parser_dict[model]["predict_parser"] = predict_parser
