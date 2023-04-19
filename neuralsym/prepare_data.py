@@ -384,11 +384,10 @@ def match_templates(args):
         # make CSV file to save labels (template_idx) & rxn data for monitoring training
         col_names = ['rxn_idx', 'prod_smi', 'reac_smi', 'temp_idx', 'template']
         rows = []
-        labels = []
         found = 0
         get_template_partial = partial(get_template_idx, temps_dict)
         # don't use imap_unordered!!!! it doesn't guarantee the order, or we can use it and then sort by rxn_idx
-        for result in tqdm(pool.imap(get_template_partial, tasks), 
+        for result in tqdm(pool.imap_unordered(get_template_partial, tasks),
                        total=len(tasks)):
             rxn_idx, template_idx = result
 
@@ -407,13 +406,15 @@ def match_templates(args):
                 template, 
                 template_idx,
             ])
-            labels.append(template_idx)
+            # labels.append(template_idx)
             found += (template_idx != len(temps_filtered))
 
             if phase == 'train' and template_idx == len(temps_filtered):
                 logging.info(f'At {rxn_idx} of train, could not recall template for some reason')
         
         logging.info(f'Template coverage: {found / len(tasks) * 100:.2f}%')
+        rows.sort(key=lambda x: x[0])  # sort by rxn_idx
+        labels = rows[:, -1]
         labels = np.array(labels)
         np.save(
             labels_path,
