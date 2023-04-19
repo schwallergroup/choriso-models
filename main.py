@@ -33,8 +33,8 @@ def get_base_parsers():
 def add_mode_subparser(model_parser):
     mode_subparser = model_parser.add_subparsers(title="Run mode", dest="mode", required=True)
 
-    train_mode_parser = mode_subparser.add_parser('--train', aliases=['-t'], help='Training mode', action='store_true')
-    predict_mode_parser = mode_subparser.add_parser('--predict', aliases=['-p', '--pred'], help='Prediction mode', action='store_true')
+    train_mode_parser = mode_subparser.add_parser('train', aliases=['t'], help='Training mode') # action='store_true')
+    predict_mode_parser = mode_subparser.add_parser('predict', aliases=['p', 'pred'], help='Prediction mode') # action='store_true')
 
     return train_mode_parser, predict_mode_parser
 
@@ -49,13 +49,19 @@ def build_parser():
 
         train_parser, predict_parser = add_mode_subparser(model_base_parser)
 
-        train_parser.add_subparsers(title='train_args', help='Training args')
+        # train_subparser = train_parser.add_subparsers(title='train_args', help='Training args')
         for train_arg in model_args.training_args()._actions:
-            train_parser._add_action(train_arg)
+            try:
+                train_parser._add_action(train_arg)
+            except:
+                continue
 
-        predict_parser.add_subparsers(title='pred_args', help='Prediction args')
+        # predict_subparser = predict_parser.add_subparsers(title='pred_args', help='Prediction args')
         for pred_arg in model_args.predict_args()._actions:
-            predict_parser._add_action(pred_arg)
+            try:
+                predict_parser._add_action(pred_arg)
+            except:
+                continue
 
         parser_dict[model]["train_parser"] = train_parser
         parser_dict[model]["predict_parser"] = predict_parser
