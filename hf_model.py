@@ -165,12 +165,14 @@ class HuggingFaceTransformer(ReactionModel):
         """# resize the token length to fit the tokenizer
         self.model.encoder.resize_token_embeddings(len(self.tokenizer))
         self.model.decoder.resize_token_embeddings(len(self.tokenizer))"""
+        self.model.resize_token_embeddings(len(self.tokenizer))
 
         # route the given dir to the model dir
         train_args["output_dir"] = os.path.join(self.model_dir, train_args["output_dir"])
         train_args["logging_dir"] = os.path.join(self.model_dir, train_args["logging_dir"])
         self.train_args = Seq2SeqTrainingArguments(**train_args)
 
+        """
         test_mol = "CC(=O)OC1C=CC2C3CC4=C5C2(C1OC5=C(C=C4)OC(=O)C)CCN3C"
         print(test_mol)
         test_target_mol = "CN1C2CCC1C(C(C2)OC(=O)C3=CC=CC=C3)C(=O)OC"
@@ -182,6 +184,7 @@ class HuggingFaceTransformer(ReactionModel):
         print(test_product_decoding)
 
         breakpoint()
+        """
 
     def preprocess(self, dataset: str = "cjhif"):
         """Do data preprocessing. Skip if preprocessed data already exists"""
@@ -273,13 +276,14 @@ class HuggingFaceTransformer(ReactionModel):
         data_collator = DataCollatorForSeq2Seq(tokenizer=self.tokenizer, model=self.model)
 
         trainer = Seq2SeqTrainer(model=self.model,
+                                 tokenizer=self.tokenizer,
                                  args=self.train_args,
                                  train_dataset=self.train_dataset,
                                  eval_dataset=self.val_dataset,
                                  data_collator=data_collator,
                                  # compute_metrics=self.compute_metrics,
                                  callbacks=[WandbCallback, CodeCarbonCallback])
-        trainer.train()
+        trainer.train(resume_from_checkpoint=True)
 
     def predict(self, dataset: str = "cjhif", num_seq: int = 5):
         """Predict provided data with the reaction model"""
@@ -301,7 +305,7 @@ class HuggingFaceTransformer(ReactionModel):
         # check if there are saved models in the dir
         for dir in os.listdir(checkpoint_dir):
             dir = os.path.join(checkpoint_dir, dir)
-            if "checkpoint-5000" in dir and os.path.isdir(dir):
+            if "checkpoint-40000" in dir and os.path.isdir(dir):
                 model = AutoModelForSeq2SeqLM.from_pretrained(dir)
                 input_ids = self.tokenizer(inputs[:10], padding=True, truncation=True, return_tensors="pt")["input_ids"]
                 target_ids = self.tokenizer(targets[:10], padding=True, truncation=True, return_tensors="pt")["input_ids"]
@@ -322,7 +326,7 @@ class HuggingFaceTransformer(ReactionModel):
                                               num_return_sequences=num_seq,
                                               early_stopping=True)
 
-                pred_smiles = self.tokenizer.batch_decode(beam_outputs.tolist(), skip_special_tokens=False, clean_up_tokenization_spaces=True)
+                pred_smiles = self.tokenizer.batch_decode(beam_outputs.tolist(), skip_special_tokens=True, clean_up_tokenization_spaces=True)
                 pred_smiles = np.array(pred_smiles).reshape(-1, num_seq)
                 pred_smiles = np.vectorize(remove_spaces)(pred_smiles)
                 print("pred_smiles.shape: ", pred_smiles.shape)
@@ -333,10 +337,11 @@ class HuggingFaceTransformer(ReactionModel):
                     print("Prediction: ", temp_smiles)
                     print("\n")
 
+                """
                 top_k_acc = top_k_accuracy(pred_smiles.tolist(), targets[:10], k=5)
                 print("top_k_acc: ", top_k_acc)
                 preds.append(pred_smiles)
-
+                """
         # print("preds: ", preds)
 
         # top_k_accs = top_k_accuracy(preds, targets, k=5)

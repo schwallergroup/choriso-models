@@ -167,14 +167,16 @@ def variance_cutoff(args):
 
 def get_tpl(task):
     idx, react, prod = task
+    if idx in [95666, 383664, 525029, 591966]:
+        return idx, " "
     reaction = {'_id': idx, 'reactants': react, 'products': prod}
-    logging.info(f'Extracting template from {reaction}')
+    # logging.info(f'Extracting template from {reaction}')
     template = extract_from_reaction(reaction)
     # https://github.com/connorcoley/rdchiral/blob/master/rdchiral/template_extractor.py
     return idx, template
 
 def cano_smarts(smarts):
-    logging.info(f'Canonicalizing {smarts}')
+    # logging.info(f'Canonicalizing {smarts}')
     tmp = Chem.MolFromSmarts(smarts)
     if tmp is None:
         logging.info(f'Could not parse {smarts}')
@@ -217,9 +219,9 @@ def get_train_templates(args):
             rxns.append((idx, r, p))
         logging.info(f'Total training rxns: {len(rxns)}')
 
-        """num_cores = len(os.sched_getaffinity(0))
+        num_cores = len(os.sched_getaffinity(0))
         logging.info(f'Parallelizing over {num_cores} cores')
-        pool = multiprocessing.Pool(num_cores)"""
+        pool = multiprocessing.Pool(num_cores)
         invalid_temp = 0
         # here the order doesn't matter since we just want a dictionary of templates
         """
@@ -228,44 +230,26 @@ def get_train_templates(args):
                             total=len(rxns)):
         """
 
-        def handler(signum, frame):
-            raise Exception("Timeout")
-
-        signal.signal(signal.SIGALRM, handler)
-        signal.alarm(20)
-
         for rxn in tqdm(rxns, total=len(rxns)):
-            try:
-                result = get_tpl(rxn)
-                idx, template = result
-                if 'reaction_smarts' not in template:
-                    invalid_temp += 1
-                    logging.info(f'At {idx}, could not extract template')
-                    continue # no template could be extracted
-
-                # canonicalize template (needed, bcos q a number of templates are equivalent, 10247 --> 10198)
-                p_temp = cano_smarts(template['products'])
-                r_temp = cano_smarts(template['reactants'])
-                cano_temp = r_temp + '>>' + p_temp
-
-                # NOTE: 'reaction_smarts' is actually: p_temp >> r_temp !!!!! But only for retrosynthesis!
-
-                if cano_temp not in templates:
-                    templates[cano_temp] = 1
-                else:
-                    templates[cano_temp] += 1
-            except TimeoutError:
+            result = get_tpl(rxn)
+            idx, template = result
+            if 'reaction_smarts' not in template:
                 invalid_temp += 1
-                logging.info(f'Could not extract template, timeout')
-                continue
+                logging.info(f'At {idx}, could not extract template')
+                continue # no template could be extracted
 
-            except Exception as e:
-                invalid_temp += 1
-                logging.info(f'Could not extract template: {e}')
-                continue
+            # canonicalize template (needed, bcos q a number of templates are equivalent, 10247 --> 10198)
+            p_temp = cano_smarts(template['products'])
+            r_temp = cano_smarts(template['reactants'])
+            cano_temp = r_temp + '>>' + p_temp
 
-            finally:
-                signal.alarm(0)  # reset the alarm after each iteration
+            # NOTE: 'reaction_smarts' is actually: p_temp >> r_temp !!!!! But only for retrosynthesis!
+
+            if cano_temp not in templates:
+                templates[cano_temp] = 1
+            else:
+                templates[cano_temp] += 1
+
 
         logging.info(f'No of rxn where template extraction failed: {invalid_temp}')
 
