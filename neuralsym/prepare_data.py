@@ -200,7 +200,8 @@ def get_train_templates(args):
     if not os.path.exists(processed_dir):
         os.makedirs(processed_dir)
 
-    templates_path = f"{processed_dir}/ {args.templates_file}"
+    templates_path = f"{processed_dir}/{args.templates_file}"
+    print("Templates_path: ", templates_path)
     if os.path.exists(templates_path):
         pass
 
