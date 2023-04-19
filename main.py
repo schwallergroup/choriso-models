@@ -3,6 +3,8 @@ from model_args import ReactionModelArgs
 from g2s_model import G2SArgs, G2S
 from onmt_model import OpenNMTArgs, OpenNMT
 from hf_model import HuggingFaceArgs, HuggingFaceTransformer
+from neuralsym_model import NeuralsymArgs, Neuralsym
+from benchmark_models import BenchmarkPipeline
 
 
 def get_base_parsers():
@@ -16,11 +18,14 @@ def get_base_parsers():
     parser_onmt = subparsers.add_parser('OpenNMT', aliases=['ONMT', 'onmt', 'opennmt'], help='OpenNMT model')
     parser_hf = subparsers.add_parser('HuggingFace', aliases=['HF', 'hf', 'huggingface', 'Huggingface'],
                                       help='Huggingface model')
+    parser_ns = subparsers.add_parser('Neuralsym', aliases=['NS', 'ns', 'neuralsym', 'NeuralSym'], help='Neuralsym model')
 
     return parser, {"G2S": {"base_parser": parser_g2s,
                             "args_class": G2SArgs()},
                     "ONMT": {"base_parser": parser_onmt,
-                             "args_class": OpenNMTArgs()},}
+                             "args_class": OpenNMTArgs()},
+                    "NeuralSym": {"base_parser": parser_ns,
+                                  "args_class": NeuralsymArgs()},}
                     # "HF": {"base_parser": parser_hf,
                     #       "args_class": HuggingFaceArgs()}}
 
@@ -64,17 +69,17 @@ def main(parser):
     elif args.model == "HuggingFace":
         reaction_model = HuggingFaceTransformer()
     else:
-        raise NotImplementedError()
+        raise NotImplementedError("The model does not yet exist.")
 
     # instantiate the pipeline with the model
-    """
+
     pipeline = BenchmarkPipeline(model=reaction_model)
-    """
 
     # call pipeline function based on args
-    """
-    
-    """
+    if args.train:
+        pipeline.run_train_pipeline()
+    elif args.predict:
+        pipeline.predict(dataset=args.dataset)
 
 
 if __name__ == "__main__":
