@@ -26,7 +26,7 @@ def get_base_parsers():
 
 
 def add_mode_subparser(model_parser):
-    mode_subparser = model_parser.add_subparsers(title="Run mode")
+    mode_subparser = model_parser.add_subparsers(title="Run mode", dest="mode", required=True)
 
     train_mode_parser = mode_subparser.add_parser('--train', aliases=['-t'], help='Training mode')
     predict_mode_parser = mode_subparser.add_parser('--predict', aliases=['-p', '--pred'], help='Prediction mode')
@@ -44,8 +44,8 @@ def build_parser():
 
         train_parser, predict_parser = add_mode_subparser(model_base_parser)
 
-        train_parser.add_subparsers(title='train_args', help='Training args', parser_class=model_args.training_args())
-        predict_parser.add_subparsers(title='pred_args', help='Prediction args', parser_class=model_args.predict_args())
+        train_parser.add_subparsers(title='train_args', help='Training args', parser_class=model_args.training_args(), action='store_true')
+        predict_parser.add_subparsers(title='pred_args', help='Prediction args', parser_class=model_args.predict_args(), action='store_true')
 
         parser_dict[model]["train_parser"] = train_parser
         parser_dict[model]["predict_parser"] = predict_parser
@@ -56,7 +56,7 @@ def build_parser():
 def main(parser):
     args = parser.parse_args()
     # instantiate model depending on args
-
+    print(args)
     if args.model == "Graph2SMILES":
         reaction_model = G2S()
     elif args.model == "OpenNMT":
