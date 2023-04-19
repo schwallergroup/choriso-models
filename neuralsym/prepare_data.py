@@ -328,7 +328,7 @@ def match_templates(args):
     if not os.path.exists(processed_dir):
         os.makedirs(processed_dir)
 
-    with open(args.data_folder / args.templates_file, 'r') as f:
+    with open(f"{processed_dir}/{args.templates_file}", 'r') as f:
         lines = f.readlines()
     temps_filtered = []
     temps_dict = {} # build mapping from temp to idx for O(1) find
@@ -436,7 +436,7 @@ def parse_args():
                                                      "reaction SMILES strings (do not change)", type=str, default='')
     parser.add_argument("--output_file_prefix", help="Prefix of output files", type=str)
     parser.add_argument("--templates_file", help="Filename of templates extracted from training data", 
-                        type=str, default='training_templates')
+                        type=str, default='training_templates.txt')
     parser.add_argument("--min_freq", help="Minimum frequency of template in training data to be retained", type=int,
                         default=1)
     parser.add_argument("--radius", help="Fingerprint radius", type=int, default=2)
