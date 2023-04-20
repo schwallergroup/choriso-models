@@ -432,7 +432,7 @@ def parse_args():
     parser.add_argument("--model", help="['Highway', 'FC']", type=str, default='Highway')
     # file names
     parser.add_argument("--log_file", help="log_file", type=str, default="train")
-    parser.add_argument("--templates_file", help="templates_file", type=str, default="50k_training_templates")
+    parser.add_argument("--templates_file", help="templates_file", type=str, default="templates_file.txt")
     parser.add_argument("--reacfps_prefix",
                         help="npz file of reactant fingerprints",
                         type=str)
