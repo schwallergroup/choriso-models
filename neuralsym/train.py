@@ -28,7 +28,7 @@ from rdkit import RDLogger
 from neuralsym.model import TemplateNN_Highway, TemplateNN_FC
 from neuralsym.dataset import FingerprintDataset
 
-DATA_FOLDER = Path(__file__).resolve().parent / 'data'
+DATA_FOLDER = Path(__file__).resolve().parent / 'processed'  # 'data'
 CHECKPOINT_FOLDER = Path(__file__).resolve().parent / 'checkpoint'
 
 def seed_everything(seed: Optional[int] = 0) -> None:
