@@ -20,7 +20,7 @@ class FingerprintDataset(Dataset):
         root: Optional[str] = None,
     ):
         if root is None:
-            root = Path(__file__).resolve().parent / 'data'
+            root = Path(__file__).resolve().parent / 'processed'
         else:
             root = Path(root)
         if (root / reacfps_filename).exists():
