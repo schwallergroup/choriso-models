@@ -12,9 +12,9 @@ python train.py \
     --log_file 'Highway_77777777_depth0_dim300_lr1e3_stop2_fac30_pat1' \
     --do_train \
     --do_test \
-    --prodfps_prefix 50k_1000000dim_2rad_to_32681_prod_fps \
-    --labels_prefix 50k_1000000dim_2rad_to_32681_labels \
-    --csv_prefix 50k_1000000dim_2rad_to_32681_csv \
+    --reacfps_prefix cjhif_reac_fps \
+    --labels_prefix cjhif_to_32681_labels \
+    --csv_prefix cjhif_to_32681_csv \
     --bs 300 \
     --bs_eval 300 \
     --random_seed 77777777 \

@@ -356,7 +356,7 @@ def match_templates(args):
         labels_path = f"{processed_dir}/{args.output_file_prefix}_labels_{phase}"
         csv_path = f"{processed_dir}/{args.output_file_prefix}_csv_{phase}.csv"
 
-        if os.path.exists(labels_path) and os.path.exists(csv_path):
+        if os.path.exists(labels_path + ".npy") and os.path.exists(csv_path):
             continue
 
         with open(f"{processed_dir}/{args.output_file_prefix}_reac_smis_nomap_{phase}.smi", 'rb') as f:
@@ -398,11 +398,11 @@ def match_templates(args):
             rxn_idx, template_idx = result
 
             prod_smi_map = clean_rxnsmi_phase[rxn_idx].split('>>')[-1]
-            """prod_mol = Chem.MolFromSmiles(prod_smi_map)
+            prod_mol = Chem.MolFromSmiles(prod_smi_map)
             [atom.ClearProp('molAtomMapNumber') for atom in prod_mol.GetAtoms()]
             prod_smi_nomap = Chem.MolToSmiles(prod_mol, True)
             # Sometimes stereochem takes another canonicalization...
-            prod_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(prod_smi_nomap), True)"""
+            prod_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(prod_smi_nomap), True)
 
             template = temps_filtered[template_idx] if template_idx != len(temps_filtered) else ''
             rows.append([
@@ -417,13 +417,6 @@ def match_templates(args):
 
             if phase == 'train' and template_idx == len(temps_filtered):
                 logging.info(f'At {rxn_idx} of train, could not recall template for some reason')
-
-        all_prod_smi_nomap = []
-        remove_map_partial = partial(remove_atom_map)
-        for prod_smi_nomap in tqdm(pool.imap(remove_map_partial, rows[:, 1]), total=len(rows), desc="Removing atom maps"):
-            all_prod_smi_nomap.append(prod_smi_nomap)
-
-        rows[:, 1] = all_prod_smi_nomap
 
         logging.info(f'Template coverage: {found / len(tasks) * 100:.2f}%')
         rows.sort(key=lambda x: x[0])  # sort by rxn_idx
