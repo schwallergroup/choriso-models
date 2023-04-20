@@ -251,7 +251,6 @@ def get_train_templates(args):
             else:
                 templates[cano_temp] += 1
 
-
         logging.info(f'No of rxn where template extraction failed: {invalid_temp}')
 
         templates = sorted(templates.items(), key=lambda x: x[1], reverse=True)
@@ -323,6 +322,14 @@ def get_template_idx(temps_dict, task):
     #     return rxn_idx, len(temps_dict) # no template matching
     # return rxn_idx, len(temps_dict) # no template matching
 
+def remove_atom_map(prod_smi_map):
+    prod_mol = Chem.MolFromSmiles(prod_smi_map)
+    [atom.ClearProp('molAtomMapNumber') for atom in prod_mol.GetAtoms()]
+    prod_smi_nomap = Chem.MolToSmiles(prod_mol, True)
+    # Sometimes stereochem takes another canonicalization...
+    prod_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(prod_smi_nomap), True)
+    return prod_smi_nomap
+
 def match_templates(args):
     logging.info(f'Loading templates from file: {args.templates_file}')
     processed_dir = "processed"
@@ -387,21 +394,20 @@ def match_templates(args):
         found = 0
         get_template_partial = partial(get_template_idx, temps_dict)
         # don't use imap_unordered!!!! it doesn't guarantee the order, or we can use it and then sort by rxn_idx
-        for result in tqdm(pool.imap_unordered(get_template_partial, tasks),
-                       total=len(tasks)):
+        for result in tqdm(pool.imap_unordered(get_template_partial, tasks), total=len(tasks), desc="Matching templates"):
             rxn_idx, template_idx = result
 
             prod_smi_map = clean_rxnsmi_phase[rxn_idx].split('>>')[-1]
-            prod_mol = Chem.MolFromSmiles(prod_smi_map)
+            """prod_mol = Chem.MolFromSmiles(prod_smi_map)
             [atom.ClearProp('molAtomMapNumber') for atom in prod_mol.GetAtoms()]
             prod_smi_nomap = Chem.MolToSmiles(prod_mol, True)
             # Sometimes stereochem takes another canonicalization...
-            prod_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(prod_smi_nomap), True)
+            prod_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(prod_smi_nomap), True)"""
 
             template = temps_filtered[template_idx] if template_idx != len(temps_filtered) else ''
             rows.append([
                 rxn_idx,
-                prod_smi_nomap,
+                prod_smi_map,
                 phase_reac_smi_nomap[rxn_idx],
                 template, 
                 template_idx,
@@ -411,7 +417,14 @@ def match_templates(args):
 
             if phase == 'train' and template_idx == len(temps_filtered):
                 logging.info(f'At {rxn_idx} of train, could not recall template for some reason')
-        
+
+        all_prod_smi_nomap = []
+        remove_map_partial = partial(remove_atom_map)
+        for prod_smi_nomap in tqdm(pool.imap(remove_map_partial, rows[:, 1]), total=len(rows), desc="Removing atom maps"):
+            all_prod_smi_nomap.append(prod_smi_nomap)
+
+        rows[:, 1] = all_prod_smi_nomap
+
         logging.info(f'Template coverage: {found / len(tasks) * 100:.2f}%')
         rows.sort(key=lambda x: x[0])  # sort by rxn_idx
         labels = rows[:, -1]
