@@ -407,7 +407,7 @@ def match_templates(args):
             template = temps_filtered[template_idx] if template_idx != len(temps_filtered) else ''
             rows.append([
                 rxn_idx,
-                prod_smi_map,
+                prod_smi_nomap,
                 phase_reac_smi_nomap[rxn_idx],
                 template, 
                 template_idx,

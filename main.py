@@ -1,5 +1,4 @@
 import argparse
-from model_args import ReactionModelArgs
 from g2s_model import G2SArgs, G2S
 from onmt_model import OpenNMTArgs, OpenNMT
 from hf_model import HuggingFaceArgs, HuggingFaceTransformer
@@ -11,14 +10,19 @@ def get_base_parsers():
     # Define the main parser
     parser = argparse.ArgumentParser(description='Conditional arguments example')
 
+    parser.add_argument('--dataset', aliases=['--ds'], type=str, default='cjhif',
+                        help='Dataset to use for training and evaluation')
+
     # Define the subparsers for each model
     subparsers = parser.add_subparsers(title='Models', dest='model', required=True)
 
-    parser_g2s = subparsers.add_parser('Graph2SMILES', aliases=['G2S', 'g2s', 'graph2smiles'], help='Graph2SMILES model')
+    parser_g2s = subparsers.add_parser('Graph2SMILES', aliases=['G2S', 'g2s', 'graph2smiles'],
+                                       help='Graph2SMILES model')
     parser_onmt = subparsers.add_parser('OpenNMT', aliases=['ONMT', 'onmt', 'opennmt'], help='OpenNMT model')
     parser_hf = subparsers.add_parser('HuggingFace', aliases=['HF', 'hf', 'huggingface', 'Huggingface'],
                                       help='Huggingface model')
-    parser_ns = subparsers.add_parser('Neuralsym', aliases=['NS', 'ns', 'neuralsym', 'NeuralSym'], help='Neuralsym model')
+    parser_ns = subparsers.add_parser('Neuralsym', aliases=['NS', 'ns', 'neuralsym', 'NeuralSym'],
+                                      help='Neuralsym model')
 
     return parser, {"G2S": {"base_parser": parser_g2s,
                             "args_class": G2SArgs()},
@@ -33,8 +37,8 @@ def get_base_parsers():
 def add_mode_subparser(model_parser):
     mode_subparser = model_parser.add_subparsers(title="Run mode", dest="mode", required=True)
 
-    train_mode_parser = mode_subparser.add_parser('train', aliases=['t'], help='Training mode') # action='store_true')
-    predict_mode_parser = mode_subparser.add_parser('predict', aliases=['p', 'pred'], help='Prediction mode') # action='store_true')
+    train_mode_parser = mode_subparser.add_parser('train', aliases=['t'], help='Training mode')
+    predict_mode_parser = mode_subparser.add_parser('predict', aliases=['p', 'pred'], help='Prediction mode')
 
     return train_mode_parser, predict_mode_parser
 
@@ -49,14 +53,12 @@ def build_parser():
 
         train_parser, predict_parser = add_mode_subparser(model_base_parser)
 
-        # train_subparser = train_parser.add_subparsers(title='train_args', help='Training args')
         for train_arg in model_args.training_args()._actions:
             try:
                 train_parser._add_action(train_arg)
             except:
                 continue
 
-        # predict_subparser = predict_parser.add_subparsers(title='pred_args', help='Prediction args')
         for pred_arg in model_args.predict_args()._actions:
             try:
                 predict_parser._add_action(pred_arg)
@@ -71,19 +73,20 @@ def build_parser():
 
 def main(parser):
     args = parser.parse_args()
+    # TODO this is quite static, make more dynamic
     # instantiate model depending on args
-    print(args)
-    if args.model == "Graph2SMILES":
+    if args.model in ["Graph2SMILES", 'G2S', 'g2s', 'graph2smiles']:
         reaction_model = G2S()
-    elif args.model == "OpenNMT":
+    elif args.model in ["OpenNMT", 'ONMT', 'onmt', 'opennmt']:
         reaction_model = OpenNMT()
-    elif args.model == "HuggingFace":
+    elif args.model in ["HuggingFace", 'HF', 'hf', 'huggingface', 'Huggingface']:
         reaction_model = HuggingFaceTransformer()
+    elif args.model in ["Neuralsym", 'NS', 'ns', 'neuralsym', 'NeuralSym']:
+        reaction_model = Neuralsym()
     else:
         raise NotImplementedError("The model does not yet exist.")
 
     # instantiate the pipeline with the model
-
     pipeline = BenchmarkPipeline(model=reaction_model)
 
     # call pipeline function based on args
