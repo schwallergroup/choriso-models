@@ -135,6 +135,8 @@ def train(args):
             labels = torch.where(
                 (labels < len(templates_filtered)), labels, torch.tensor([0.], device=labels.device).long()
             )
+            labels = torch.where((labels != -1), labels, torch.tensor([0.], device=labels.device).long())
+
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
@@ -329,6 +331,9 @@ def test(model, args):
                             args.reacfps_prefix+'_test.npz',
                             args.labels_prefix+'_test.npy'
                         )
+    test_dataset.labels = test_dataset.labels.astype(int)
+    print(test_dataset.labels)
+
     test_size = len(test_dataset)
     test_loader = DataLoader(test_dataset, batch_size=args.bs_eval, shuffle=False)
     del test_dataset
@@ -467,8 +472,8 @@ def parse_args():
     parser.add_argument("--lr_cooldown", help="epochs to wait before resuming normal operation (ReduceLROnPlateau)",
                         type=int, default=0)
     # model params
-    parser.add_argument("--hidden_size", help="hidden size", type=int, default=512)
-    parser.add_argument("--depth", help="depth", type=int, default=5)
+    parser.add_argument("--hidden_size", help="hidden size", type=int, default=300)
+    parser.add_argument("--depth", help="depth", type=int, default=0)
 
     return parser.parse_args()
 
@@ -490,10 +495,20 @@ if __name__ == '__main__':
     logging.info(args)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
+    if not os.path.exists(CHECKPOINT_FOLDER):
+        os.mkdir(CHECKPOINT_FOLDER)
     if args.do_train:
         model = train(args)
     else:
+        logging.info(f'Loading templates from file: {args.templates_file}')
+        with open(DATA_FOLDER / args.templates_file, 'r') as f:
+            templates = f.readlines()
+        templates_filtered = []
+        for p in templates:
+            pa, cnt = p.strip().split(': ')
+            if int(cnt) >= args.min_freq:
+                templates_filtered.append(pa)
+        logging.info(f'Total number of template patterns: {len(templates_filtered)}')
         # load model from saved checkpoint
         checkpoint = torch.load(
             CHECKPOINT_FOLDER / f"{args.expt_name}.pth.tar",

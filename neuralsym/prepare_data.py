@@ -397,12 +397,15 @@ def match_templates(args):
         for result in tqdm(pool.imap_unordered(get_template_partial, tasks), total=len(tasks), desc="Matching templates"):
             rxn_idx, template_idx = result
 
-            prod_smi_map = clean_rxnsmi_phase[rxn_idx].split('>>')[-1]
-            prod_mol = Chem.MolFromSmiles(prod_smi_map)
-            [atom.ClearProp('molAtomMapNumber') for atom in prod_mol.GetAtoms()]
-            prod_smi_nomap = Chem.MolToSmiles(prod_mol, True)
-            # Sometimes stereochem takes another canonicalization...
-            prod_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(prod_smi_nomap), True)
+            try:
+                prod_smi_map = clean_rxnsmi_phase[rxn_idx].split('>>')[-1]
+                prod_mol = Chem.MolFromSmiles(prod_smi_map)
+                [atom.ClearProp('molAtomMapNumber') for atom in prod_mol.GetAtoms()]
+                prod_smi_nomap = Chem.MolToSmiles(prod_mol, True)
+                # Sometimes stereochem takes another canonicalization...
+                prod_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(prod_smi_nomap), True)
+            except:
+                continue
 
             template = temps_filtered[template_idx] if template_idx != len(temps_filtered) else ''
             rows.append([
@@ -420,8 +423,8 @@ def match_templates(args):
 
         logging.info(f'Template coverage: {found / len(tasks) * 100:.2f}%')
         rows.sort(key=lambda x: x[0])  # sort by rxn_idx
-        labels = rows[:, -1]
-        labels = np.array(labels)
+        labels = np.array(rows)[:, -1]
+        # labels = np.array(labels)
         np.save(
             labels_path,
             labels

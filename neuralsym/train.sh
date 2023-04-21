@@ -1,18 +1,19 @@
-source /cm/shared/engaging/anaconda/2018.12/etc/profile.d/conda.sh
-conda activate neuralsym
+export PYTHONPATH=$PYTHONPATH:~/reaction_forward
+export PATH=~/anaconda3/envs/reaction_prediction/bin:$PATH
+# conda env
+source activate reaction_prediction
 
 # cannot use too high LR, will diverge slowly (loss increases > 20)
 # higher bs --> faster training (using CPU)
 # 8 sec/epoch on 1 RTX2080
 
 # Highway, repeat with seed 77777777
-python train.py \
+CUDA_LAUNCH_BLOCKING=1 python train.py \
     --model 'Highway' \
     --expt_name 'Highway_77777777_depth0_dim300_lr1e3_stop2_fac30_pat1' \
     --log_file 'Highway_77777777_depth0_dim300_lr1e3_stop2_fac30_pat1' \
-    --do_train \
     --do_test \
-    --reacfps_prefix cjhif_reac_fps \
+    --reacfps_prefix cjhif_to_32681_reac_fps \
     --labels_prefix cjhif_to_32681_labels \
     --csv_prefix cjhif_to_32681_csv \
     --bs 300 \
