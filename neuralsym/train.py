@@ -105,7 +105,7 @@ def train(args):
                 )
     
     train_losses, valid_losses = [], []
-    k_to_calc = [1, 2, 3, 5, 10, 20, 50, 100]
+    k_to_calc = [1, 2, 3, 4, 5, 10, 20, 50, 100]
     train_accs, val_accs = defaultdict(list), defaultdict(list)
     max_valid_acc = float('-inf')
     wait = 0 # early stopping patience counter
@@ -162,7 +162,8 @@ def train(args):
             train_accs[k].append(train_correct[k]/train_seen)
 
         train_accs_df = pd.DataFrame(train_accs, columns=[f"train top-{k}" for k in k_to_calc])
-        wandb.Table(dataframe=train_accs_df)
+        train_accs_table = wandb.Table(dataframe=train_accs_df)
+        wandb.log({"table_key": train_accs_table})
 
         model.eval()
         with torch.no_grad():
@@ -247,7 +248,8 @@ def train(args):
             val_accs[k].append(valid_correct[k]/valid_seen)
 
         val_accs_df = pd.DataFrame(val_accs, columns=[f"val top-{k}" for k in k_to_calc])
-        wandb.Table(dataframe=val_accs_df)
+        val_accs_table = wandb.Table(dataframe=val_accs_df)
+        wandb.log({"table_key": val_accs_table})
 
         lr_scheduler.step(val_accs[1][-1])
         logging.info(f'\nCalled a step of ReduceLROnPlateau, current LR: {optimizer.param_groups[0]["lr"]}')
@@ -277,6 +279,7 @@ def train(args):
                 \ntrain top-20 acc: {train_accs[20][-1]:.4f}, train top-50 acc: {train_accs[50][-1]:.4f}, \
                 \nvalid loss: N/A, valid top-1 acc: {val_accs[1][-1]:.4f} \
                 \nvalid top-2 acc: {val_accs[2][-1]:.4f}, valid top-3 acc: {val_accs[3][-1]:.4f}, \
+                \nvalid top-4 acc: {val_accs[4][-1]:.4f}, \
                 \nvalid top-5 acc: {val_accs[5][-1]:.4f}, valid top-10 acc: {val_accs[10][-1]:.4f}, \
                 \nvalid top-20 acc: {val_accs[20][-1]:.4f}, valid top-50 acc: {val_accs[50][-1]:.4f}, \
                 \nvalid top-100 acc: {val_accs[100][-1]:.4f} \
@@ -301,6 +304,7 @@ def train(args):
                 \ntrain top-20 acc: {train_accs[20][-1]:.4f}, train top-50 acc: {train_accs[50][-1]:.4f}, \
                 \nvalid loss: N/A, valid top-1 acc: {val_accs[1][-1]:.4f} \
                 \nvalid top-2 acc: {val_accs[2][-1]:.4f}, valid top-3 acc: {val_accs[3][-1]:.4f}, \
+                \nvalid top-4 acc: {val_accs[4][-1]:.4f}, \
                 \nvalid top-5 acc: {val_accs[5][-1]:.4f}, valid top-10 acc: {val_accs[10][-1]:.4f}, \
                 \nvalid top-20 acc: {val_accs[20][-1]:.4f}, valid top-50 acc: {val_accs[50][-1]:.4f}, \
                 \nvalid top-100 acc: {val_accs[100][-1]:.4f} \

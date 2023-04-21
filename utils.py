@@ -126,6 +126,23 @@ class ReactionForwardDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.tokenizer_outs["labels"])
 
+
+def csv_to_txt(data_dir: str):
+    """Converts a train, val and test files to src and tgt txt files."""
+    file_names = ["test", "val", "train"]
+
+    for file_name in file_names:
+        reactions = pd.read_csv(os.path.join(data_dir, f"{file_name}.tsv"), sep="\t", error_bad_lines=False)
+
+        split_reactions = prepare_data(reactions, rsmiles_col="canonic_rxn")
+
+        reactant_data = split_reactions["reactants"].apply(lambda smi: tokenize_smiles(smi))
+        product_data = split_reactions["products"].apply(lambda smi: tokenize_smiles(smi))
+
+        reactant_data.to_csv(os.path.join(data_dir, f"src-{file_name}.txt"), sep="\t", index=False, header=False)
+        product_data.to_csv(os.path.join(data_dir, f"tgt-{file_name}.txt"), sep="\t", index=False, header=False)
+
+
 if __name__ == "__main__":
 
     preds = pd.read_csv('OpenNMT_Transformer/runs/models/cjhif_model_step_200000_test_predictions.txt', sep="\t",
@@ -143,18 +160,7 @@ if __name__ == "__main__":
 
     print(acc)
 
-    """file_names = ["test", "val", "train"]
-
+    """
     data_dir = "data/cjhif/"
-
-    for file_name in file_names:
-
-        reactions = pd.read_csv(os.path.join(data_dir, f"{file_name}.tsv"), sep="\t", error_bad_lines=False)
-
-        split_reactions = prepare_data(reactions, rsmiles_col="canonic_rxn")
-
-        reactant_data = split_reactions["reactants"].apply(lambda smi: tokenize_smiles(smi))
-        product_data = split_reactions["products"].apply(lambda smi: tokenize_smiles(smi))
-
-        reactant_data.to_csv(os.path.join(data_dir, f"src-{file_name}.txt"), sep="\t", index=False, header=False)
-        product_data.to_csv(os.path.join(data_dir, f"tgt-{file_name}.txt"), sep="\t", index=False, header=False)"""
+    csv_to_txt(data_dir)
+    """
