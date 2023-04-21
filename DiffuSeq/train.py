@@ -5,10 +5,10 @@ Train a diffusion model on images.
 import argparse
 import json, torch, os
 import numpy as np
-from diffuseq.utils import dist_util, logger
-from diffuseq.text_datasets import load_data_text
-from diffuseq.step_sample import create_named_schedule_sampler
-from basic_utils import (
+from DiffuSeq.diffuseq.utils import dist_util, logger
+from DiffuSeq.diffuseq.text_datasets import load_data_text
+from DiffuSeq.diffuseq.step_sample import create_named_schedule_sampler
+from DiffuSeq.basic_utils import (
     load_defaults_config,
     create_model_and_diffusion,
     args_to_dict,
@@ -16,7 +16,7 @@ from basic_utils import (
     load_model_emb,
     load_tokenizer
 )
-from train_util import TrainLoop
+from DiffuSeq.train_util import TrainLoop
 from transformers import set_seed
 import wandb
 

@@ -3,9 +3,9 @@ import torch
 import json, os
 import time
 
-from diffuseq import gaussian_diffusion as gd
-from diffuseq.gaussian_diffusion import SpacedDiffusion, space_timesteps
-from diffuseq.transformer_model import TransformerNetModel
+from DiffuSeq.diffuseq import gaussian_diffusion as gd
+from DiffuSeq.diffuseq.gaussian_diffusion import SpacedDiffusion, space_timesteps
+from DiffuSeq.diffuseq.transformer_model import TransformerNetModel
 from transformers import AutoTokenizer, PreTrainedTokenizerFast
 
 class myTokenizer():

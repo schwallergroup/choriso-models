@@ -8,7 +8,7 @@ import torch as th
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .utils.nn import (
+from DiffuSeq.diffuseq.utils.nn import (
     SiLU,
     linear,
     timestep_embedding,

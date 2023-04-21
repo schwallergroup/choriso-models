@@ -15,8 +15,8 @@ sys.path.append('.')
 
 import torch.nn.functional as F
 
-from .utils.nn import mean_flat
-from .utils.losses import normal_kl, discretized_gaussian_log_likelihood
+from DiffuSeq.diffuseq.utils.nn import mean_flat
+from DiffuSeq.diffuseq.utils.losses import normal_kl, discretized_gaussian_log_likelihood
 
 def get_named_beta_schedule(schedule_name, num_diffusion_timesteps):
     """

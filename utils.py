@@ -1,4 +1,5 @@
 import os
+import json
 import pandas as pd
 import numpy as np
 import torch
@@ -141,6 +142,33 @@ def csv_to_txt(data_dir: str):
 
         reactant_data.to_csv(os.path.join(data_dir, f"src-{file_name}.txt"), sep="\t", index=False, header=False)
         product_data.to_csv(os.path.join(data_dir, f"tgt-{file_name}.txt"), sep="\t", index=False, header=False)
+
+
+def csv_to_jsonl(data_dir: str, target_dir: str):
+    """Converts a train, val and test files to jsonl files with the following format:
+    train.jsonl: [{"src": "reac1", "trg": "prod1"}, {"src": "reac2", "tgt": "prod2"}]
+    Required for DiffuSeq"""
+
+    file_names = ["test", "val", "train"]
+
+    for file_name in file_names:
+        final_file = os.path.join(target_dir, f"{file_name}.jsonl")
+        if os.path.exists(final_file):
+            print(f"File {final_file} already exists. Skipping.")
+            continue
+        reactions = pd.read_csv(os.path.join(data_dir, f"{file_name}.tsv"), sep="\t", error_bad_lines=False)
+
+        split_reactions = prepare_data(reactions, rsmiles_col="canonic_rxn")
+
+        reactant_data = split_reactions["reactants"].apply(lambda smi: tokenize_smiles(smi))
+        product_data = split_reactions["products"].apply(lambda smi: tokenize_smiles(smi))
+
+        data = [{"src": reactant, "trg": product} for reactant, product in zip(reactant_data.values, product_data.values)]
+
+        with open(final_file, "w") as f:
+            for src_trg_dict in data:
+                json.dump(src_trg_dict, f)
+                f.write('\n')
 
 
 if __name__ == "__main__":

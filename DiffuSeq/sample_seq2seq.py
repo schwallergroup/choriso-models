@@ -11,15 +11,15 @@ import numpy as np
 import torch as th
 import torch.distributed as dist
 from transformers import set_seed
-from diffuseq.rounding import denoised_fn_round
-from diffuseq.text_datasets import load_data_text
+from DiffuSeq.diffuseq.rounding import denoised_fn_round
+from DiffuSeq.diffuseq.text_datasets import load_data_text
 
 # from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 
 import time
-from diffuseq.utils import dist_util, logger
+from DiffuSeq.diffuseq.utils import dist_util, logger
 from functools import partial
-from basic_utils import (
+from DiffuSeq.basic_utils import (
     load_defaults_config,
     create_model_and_diffusion,
     add_dict_to_argparser,
