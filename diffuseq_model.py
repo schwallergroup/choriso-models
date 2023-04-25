@@ -3,9 +3,11 @@ import os
 import wandb
 import tempfile
 import pandas as pd
+import json
 from tokenizers import models as tokenizer_models
 from tokenizers import Regex, Tokenizer, pre_tokenizers
 from tokenizers.trainers import WordLevelTrainer
+from transformers import PreTrainedTokenizerFast
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from model_args import ReactionModelArgs
@@ -76,8 +78,12 @@ class DiffuSeq(ReactionModel):
 
                 chem_tokenizer.train([tmp.name], trainer)
 
+                chem_tokenizer = PreTrainedTokenizerFast(tokenizer_object=chem_tokenizer)
                 # save the vocabulary
-                chem_tokenizer.save_vocabulary(vocab_file)
+                vocab_dict = chem_tokenizer.vocab
+                with open(vocab_file, "w") as f:
+                    json.dump(vocab_dict, f)
+                # chem_tokenizer.save_vocabulary(vocab_file)
 
     def train(self, dataset="cjhif"):
         """Train the reaction model. Should also contain validation and test steps"""
@@ -85,9 +91,10 @@ class DiffuSeq(ReactionModel):
         processed_dir = os.path.join(self.model_dir, "processed")
         data_dir = os.path.join(processed_dir, dataset)
         vocab_file = os.path.join(data_dir, "vocab.json")
-
-        os.system(f"cd DiffuSeq/scripts \
-                    python -m torch.distributed.launch --nproc_per_node=4 --master_port=12233 --use_env run_train.py \
+        # os.chdir(os.path.join(self.model_dir, "scripts"))
+        os.chdir(self.model_dir)
+        os.system("export MKL_SERVICE_FORCE_INTEL=1")
+        os.system(f"python -m torch.distributed.launch --nproc_per_node=4 --master_port=12233 --use_env run_train.py \
                     --diff_steps 2000 \
                     --lr 0.0001 \
                     --learning_steps 80000 \
