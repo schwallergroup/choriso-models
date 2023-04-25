@@ -39,6 +39,8 @@ class TransformerNetModel(nn.Module):
         init_pretrained='no',
         logits_mode=1,
         num_hidden_layers=4,
+        intermediate_size=1024,
+        hidden_size=384,
     ):
         super().__init__()
 
@@ -46,6 +48,8 @@ class TransformerNetModel(nn.Module):
             config = AutoConfig.from_pretrained(config_name)
             config.hidden_dropout_prob = dropout
             config.num_hidden_layers = num_hidden_layers
+            config.intermediate_size = intermediate_size
+            config.hidden_size = hidden_size
 
         self.input_dims = input_dims
         self.hidden_t_dim = hidden_t_dim
