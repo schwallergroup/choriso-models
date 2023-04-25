@@ -160,12 +160,12 @@ class HuggingFaceTransformer(ReactionModel):
         # choose model based on config
         self.model = AutoModelForSeq2SeqLM.from_config(config)
 
-        self.model.vocab_size = len(self.tokenizer)
+        self.model.vocab_size = self.tokenizer.vocab_size
 
         """# resize the token length to fit the tokenizer
         self.model.encoder.resize_token_embeddings(len(self.tokenizer))
         self.model.decoder.resize_token_embeddings(len(self.tokenizer))"""
-        self.model.resize_token_embeddings(len(self.tokenizer))
+        self.model.resize_token_embeddings(self.tokenizer.vocab_size)
 
         # route the given dir to the model dir
         train_args["output_dir"] = os.path.join(self.model_dir, train_args["output_dir"])

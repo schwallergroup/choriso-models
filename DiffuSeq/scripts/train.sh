@@ -14,7 +14,7 @@ python -m torch.distributed.launch --nproc_per_node=4 --master_port=12233 --use_
 --noise_schedule sqrt \
 --hidden_dim 128 \
 --bsz 2048 \
---dataset qqp \
+--dataset cjhif \
 --data_dir ./processed/cjhif \
 --vocab bert \
 --seq_len 128 \
