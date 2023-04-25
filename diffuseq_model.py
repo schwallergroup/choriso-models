@@ -79,6 +79,7 @@ class DiffuSeq(ReactionModel):
                 chem_tokenizer.train([tmp.name], trainer)
 
                 chem_tokenizer = PreTrainedTokenizerFast(tokenizer_object=chem_tokenizer)
+
                 # save the vocabulary
                 vocab_dict = chem_tokenizer.vocab
                 with open(vocab_file, "w") as f:
@@ -93,22 +94,13 @@ class DiffuSeq(ReactionModel):
         vocab_file = os.path.join(data_dir, "vocab.json")
         # os.chdir(os.path.join(self.model_dir, "scripts"))
         os.chdir(self.model_dir)
-        os.system("export MKL_SERVICE_FORCE_INTEL=1")
-        os.system(f"python -m torch.distributed.launch --nproc_per_node=4 --master_port=12233 --use_env run_train.py \
-                    --diff_steps 2000 \
-                    --lr 0.0001 \
-                    --learning_steps 80000 \
-                    --save_interval 10000 \
-                    --seed 102 \
-                    --noise_schedule sqrt \
-                    --hidden_dim 128 \
-                    --bsz 2048 \
-                    --dataset {dataset} \
-                    --data_dir {data_dir} \
-                    --vocab {vocab_file} \
-                    --seq_len 128 \
-                    --schedule_sampler lossaware \
-                    --notes {dataset}")
+        cmd = f"export MKL_SERVICE_FORCE_INTEL=1 " \
+              f"python -m torch.distributed.launch --nproc_per_node=4 --master_port=12233 --use_env run_train.py " \
+              f"--diff_steps 2000 --lr 0.0001 --learning_steps 80000 --save_interval 10000 --seed 102 " \
+              f"--noise_schedule sqrt --hidden_dim 128 --bsz 2048 --dataset {dataset} --data_dir {data_dir} " \
+              f"--vocab {vocab_file} --seq_len 128 --schedule_sampler lossaware --notes {dataset} "
+
+        os.system(cmd)
 
     def predict(self, dataset="cjhif"):
         """Predict provided data with the reaction model"""
