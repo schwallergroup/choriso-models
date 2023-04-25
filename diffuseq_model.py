@@ -1,3 +1,4 @@
+import sys
 import argparse
 import os
 import wandb
@@ -92,13 +93,15 @@ class DiffuSeq(ReactionModel):
         processed_dir = os.path.join(self.model_dir, "processed")
         data_dir = os.path.join(processed_dir, dataset)
         vocab_file = os.path.join(data_dir, "vocab.json")
-        # os.chdir(os.path.join(self.model_dir, "scripts"))
-        os.chdir(self.model_dir)
-        cmd = f"export MKL_SERVICE_FORCE_INTEL=1 " \
+        os.chdir(os.path.join(self.model_dir, "scripts"))
+        # os.chdir(self.model_dir)
+        cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n " \
               f"python -m torch.distributed.launch --nproc_per_node=4 --master_port=12233 --use_env run_train.py " \
               f"--diff_steps 2000 --lr 0.0001 --learning_steps 80000 --save_interval 10000 --seed 102 " \
               f"--noise_schedule sqrt --hidden_dim 128 --bsz 2048 --dataset {dataset} --data_dir {data_dir} " \
               f"--vocab {vocab_file} --seq_len 128 --schedule_sampler lossaware --notes {dataset} "
+
+        print(cmd)
 
         os.system(cmd)
 
@@ -108,6 +111,18 @@ class DiffuSeq(ReactionModel):
 
 
 if __name__ == "__main__":
+    # Get the current value of PYTHONPATH (if it exists)
+    pythonpath = os.getenv('PYTHONPATH', '')
+
+    # Add ~/reaction_forward to PYTHONPATH
+    pythonpath += ':' + os.getcwd()
+
+    # Set the updated PYTHONPATH
+    os.environ['PYTHONPATH'] = pythonpath
+    sys.path.append(pythonpath)
+
+    os.chdir("DiffuSeq")
+
     reaction_model = DiffuSeq()
     pipeline = BenchmarkPipeline(model=reaction_model)
     pipeline.run_train_pipeline()

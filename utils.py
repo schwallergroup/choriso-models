@@ -149,7 +149,7 @@ def csv_to_jsonl(data_dir: str, target_dir: str):
     train.jsonl: [{"src": "reac1", "trg": "prod1"}, {"src": "reac2", "tgt": "prod2"}]
     Required for DiffuSeq"""
 
-    file_names = ["test", "val", "train"]
+    file_names = ["test", "valid", "train"]
 
     for file_name in file_names:
         final_file = os.path.join(target_dir, f"{file_name}.jsonl")
