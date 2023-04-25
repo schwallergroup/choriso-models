@@ -38,12 +38,14 @@ class TransformerNetModel(nn.Module):
         vocab_size=None,
         init_pretrained='no',
         logits_mode=1,
+        num_hidden_layers=4,
     ):
         super().__init__()
 
         if config is None:
             config = AutoConfig.from_pretrained(config_name)
             config.hidden_dropout_prob = dropout
+            config.num_hidden_layers = num_hidden_layers
 
         self.input_dims = input_dims
         self.hidden_t_dim = hidden_t_dim
