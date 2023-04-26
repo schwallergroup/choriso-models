@@ -97,7 +97,7 @@ class DiffuSeq(ReactionModel):
 
         # TODO make more flexible for different parameters
         cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n " \
-              f"python -m torch.distributed.launch --nproc_per_node=4 --master_port=12233 --use_env run_train.py " \
+              f"python -m torch.distributed.launch --nproc_per_node=1 --master_port=12233 --use_env run_train.py " \
               f"--diff_steps 2000 --lr 0.0001 --learning_steps 80000 --save_interval 10000 --seed 102 " \
               f"--noise_schedule sqrt --hidden_dim 128 --bsz 2048 --dataset {dataset} --data_dir {data_dir} " \
               f"--vocab {vocab_file} --seq_len 128 --schedule_sampler lossaware --notes {dataset} "
