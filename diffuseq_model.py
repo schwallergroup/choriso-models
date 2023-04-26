@@ -94,7 +94,8 @@ class DiffuSeq(ReactionModel):
         data_dir = os.path.join(processed_dir, dataset)
         vocab_file = os.path.join(data_dir, "vocab.json")
         os.chdir(os.path.join(self.model_dir, "scripts"))
-        # os.chdir(self.model_dir)
+
+        # TODO make more flexible for different parameters
         cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n " \
               f"python -m torch.distributed.launch --nproc_per_node=4 --master_port=12233 --use_env run_train.py " \
               f"--diff_steps 2000 --lr 0.0001 --learning_steps 80000 --save_interval 10000 --seed 102 " \
@@ -105,9 +106,16 @@ class DiffuSeq(ReactionModel):
 
         os.system(cmd)
 
-    def predict(self, dataset="cjhif"):
+    def predict(self, dataset="cjhif", model_checkpoint=70000):
         """Predict provided data with the reaction model"""
-        os.system("sh DiffuSeq/scripts/run_decode.sh")
+
+        cmd = f"python -u run_decode.py " \
+              f"--model_dir diffusion_models/diffuseq_final_model/ema_0.9999_0{model_checkpoint}.pt " \
+              f"--seed 123 --split test"
+
+        print(cmd)
+
+        os.system(cmd)
 
 
 if __name__ == "__main__":
@@ -125,5 +133,5 @@ if __name__ == "__main__":
 
     reaction_model = DiffuSeq()
     pipeline = BenchmarkPipeline(model=reaction_model)
-    pipeline.run_train_pipeline()
-    # pipeline.predict(dataset="cjhif")
+    # pipeline.run_train_pipeline()
+    pipeline.predict(dataset="cjhif")
