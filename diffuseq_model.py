@@ -13,6 +13,7 @@ from transformers import PreTrainedTokenizerFast
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from model_args import ReactionModelArgs
 from utils import csv_to_jsonl
+import torch.multiprocessing
 
 
 class DiffuSeqArgs(ReactionModelArgs):
@@ -106,11 +107,15 @@ class DiffuSeq(ReactionModel):
 
         os.system(cmd)
 
-    def predict(self, dataset="cjhif", model_checkpoint=70000):
+    def predict(self, dataset="cjhif"):
         """Predict provided data with the reaction model"""
+        torch.multiprocessing.set_sharing_strategy('file_system')
 
-        cmd = f"python -u run_decode.py " \
-              f"--model_dir diffusion_models/diffuseq_final_model/ema_0.9999_0{model_checkpoint}.pt " \
+        os.chdir(os.path.join(self.model_dir, "scripts"))
+
+        cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n " \
+              f"python -u run_decode.py " \
+              f"--model_dir diffusion_models/diffuseq_final_model " \
               f"--seed 123 --split test"
 
         print(cmd)
