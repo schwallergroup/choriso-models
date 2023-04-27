@@ -4,14 +4,14 @@ import pandas as pd
 import numpy as np
 import torch
 from rdkit import Chem
-
+import sys
 from typing import List
 
 from Graph2SMILES.utils.data_utils import tokenize_smiles
 
 
 def add_mode_parser(parser):
-    parser.add_argument('--mode', aliases=['-m'], type=str, default='train', choices=['t', 'p'],
+    parser.add_argument('--mode', '-m', type=str, default='train', choices=['t', 'p'],
                         help='Mode to run the model in. Either train(t) or predict(p)')
 
 
@@ -25,10 +25,22 @@ def overwrite_config_with_tokenizer(config, tokenizer):
 
 def transfer_data(origin_folder, destination):
     files = ["train.tsv", "val.tsv", "test.tsv"]
-    files_origin = [os.path.join(origin_folder, file) for file in files]
-    files_origin = " ".join(files_origin)
+    files_to_copy = [os.path.join(origin_folder, file) for file in files if not os.path.exists(os.path.join(destination, file))]
+    if len(files_to_copy) > 0:
+        files_to_copy = " ".join(files_to_copy)
+        os.system(f"cp {files_to_copy} {destination}")
 
-    os.system(f"cp -r {files_origin} {destination}")
+
+def set_pythonpath(path):
+    # Get the current value of PYTHONPATH (if it exists)
+    pythonpath = os.getenv('PYTHONPATH', '')
+
+    # Add ~/reaction_forward to PYTHONPATH
+    pythonpath += ':' + path
+
+    # Set the updated PYTHONPATH
+    os.environ['PYTHONPATH'] = pythonpath
+    sys.path.append(pythonpath)
 
 
 def remove_spaces(spaced_str: str):
@@ -146,6 +158,14 @@ def csv_to_txt(data_dir: str):
     file_names = ["test", "val", "train"]
 
     for file_name in file_names:
+        src_file = os.path.join(data_dir, f"src-{file_name}.txt")
+        tgt_file = os.path.join(data_dir, f"tgt-{file_name}.txt")
+
+        # skip if files already exist
+        if os.path.exists(src_file) and os.path.exists(tgt_file):
+            print(f"Files {src_file} and {tgt_file} already exist. Skipping...")
+            continue
+
         reactions = pd.read_csv(os.path.join(data_dir, f"{file_name}.tsv"), sep="\t", error_bad_lines=False)
 
         split_reactions = prepare_data(reactions, rsmiles_col="canonic_rxn")
@@ -153,8 +173,8 @@ def csv_to_txt(data_dir: str):
         reactant_data = split_reactions["reactants"].apply(lambda smi: tokenize_smiles(smi))
         product_data = split_reactions["products"].apply(lambda smi: tokenize_smiles(smi))
 
-        reactant_data.to_csv(os.path.join(data_dir, f"src-{file_name}.txt"), sep="\t", index=False, header=False)
-        product_data.to_csv(os.path.join(data_dir, f"tgt-{file_name}.txt"), sep="\t", index=False, header=False)
+        reactant_data.to_csv(src_file, sep="\t", index=False, header=False)
+        product_data.to_csv(tgt_file, sep="\t", index=False, header=False)
 
 
 def csv_to_jsonl(data_dir: str, target_dir: str):
@@ -169,7 +189,7 @@ def csv_to_jsonl(data_dir: str, target_dir: str):
         if os.path.exists(final_file):
             print(f"File {final_file} already exists. Skipping.")
             continue
-        # tsv is val, diffuseq requires valid
+        # tsv is named val.tsv, diffuseq requires valid.jsonl
         tsv_name = file_name if file_name != "valid" else "val"
         reactions = pd.read_csv(os.path.join(data_dir, f"{tsv_name}.tsv"), sep="\t", error_bad_lines=False)
 

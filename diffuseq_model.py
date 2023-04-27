@@ -12,7 +12,7 @@ from transformers import PreTrainedTokenizerFast
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from model_args import ReactionModelArgs
-from utils import csv_to_jsonl, add_mode_parser
+from utils import csv_to_jsonl, add_mode_parser, set_pythonpath
 import torch.multiprocessing
 
 
@@ -53,7 +53,9 @@ class DiffuSeq(ReactionModel):
         target_dir_dataset = os.path.join(target_dir, dataset)
         if not os.path.exists(target_dir_dataset):
             os.makedirs(target_dir_dataset)
-
+        
+        # transfer the tsv files, if not yet done. Please set clone_name to the name of your git clone of the dataset
+        self.setup_tsv(dataset=dataset, clone_name="cjhif-dataset")
         csv_to_jsonl(data_dir, target_dir_dataset)
 
         vocab_file = os.path.join(target_dir_dataset, "vocab.txt")
@@ -134,15 +136,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # Get the current value of PYTHONPATH (if it exists)
-    pythonpath = os.getenv('PYTHONPATH', '')
-
-    # Add ~/reaction_forward to PYTHONPATH
-    pythonpath += ':' + os.getcwd()
-
-    # Set the updated PYTHONPATH
-    os.environ['PYTHONPATH'] = pythonpath
-    sys.path.append(pythonpath)
+    set_pythonpath(path=os.getcwd())
 
     os.chdir("DiffuSeq")
 

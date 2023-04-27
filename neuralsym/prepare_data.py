@@ -167,8 +167,6 @@ def variance_cutoff(args):
 
 def get_tpl(task):
     idx, react, prod = task
-    if idx in [95666, 383664, 525029, 591966]:
-        return idx, " "
     reaction = {'_id': idx, 'reactants': react, 'products': prod}
     # logging.info(f'Extracting template from {reaction}')
     template = extract_from_reaction(reaction)
@@ -476,7 +474,7 @@ if __name__ == '__main__':
         args.data_folder = Path(args.data_folder)
 
     if args.output_file_prefix is None:
-        args.output_file_prefix = f'cjhif_{args.fp_size}dim_{args.radius}rad'
+        args.output_file_prefix = f'{args.dataset}/{args.fp_size}dim_{args.radius}rad'
 
     logging.info(args)
 
