@@ -56,7 +56,7 @@ class DiffuSeq(ReactionModel):
 
         csv_to_jsonl(data_dir, target_dir_dataset)
 
-        vocab_file = os.path.join(target_dir_dataset, "vocab.json")
+        vocab_file = os.path.join(target_dir_dataset, "vocab.txt")
         if not os.path.exists(vocab_file):
             # For obtaining vocabulary
             pattern = Regex(
@@ -84,16 +84,20 @@ class DiffuSeq(ReactionModel):
 
                 # save the vocabulary
                 vocab_dict = chem_tokenizer.vocab
+
+                # we only need the key for diffuseq, index is handled in the code
+                vocab_list = [key for key in vocab_dict.keys()]
+
                 with open(vocab_file, "w") as f:
-                    json.dump(vocab_dict, f)
-                # chem_tokenizer.save_vocabulary(vocab_file)
+                    for element in vocab_list:
+                        f.write(element + "\n")
 
     def train(self, dataset="cjhif"):
         """Train the reaction model. Should also contain validation and test steps"""
 
         processed_dir = os.path.join(self.model_dir, "processed")
         data_dir = os.path.join(processed_dir, dataset)
-        vocab_file = os.path.join(data_dir, "vocab.json")
+        vocab_file = os.path.join(data_dir, "vocab.txt")
         os.chdir(os.path.join(self.model_dir, "scripts"))
 
         # TODO make more flexible for different parameters
