@@ -156,7 +156,9 @@ def csv_to_jsonl(data_dir: str, target_dir: str):
         if os.path.exists(final_file):
             print(f"File {final_file} already exists. Skipping.")
             continue
-        reactions = pd.read_csv(os.path.join(data_dir, f"{file_name}.tsv"), sep="\t", error_bad_lines=False)
+        # tsv is val, diffuseq requires valid
+        tsv_name = file_name if file_name != "valid" else "val"
+        reactions = pd.read_csv(os.path.join(data_dir, f"{tsv_name}.tsv"), sep="\t", error_bad_lines=False)
 
         split_reactions = prepare_data(reactions, rsmiles_col="canonic_rxn")
 
