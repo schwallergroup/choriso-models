@@ -163,6 +163,10 @@ def csv_to_jsonl(data_dir: str, target_dir: str):
         reactant_data = split_reactions["reactants"].apply(lambda smi: tokenize_smiles(smi))
         product_data = split_reactions["products"].apply(lambda smi: tokenize_smiles(smi))
 
+        # TODO test if this is necessary
+        reactant_data = reactant_data.apply(lambda x: remove_spaces(x))
+        product_data = product_data.apply(lambda x: remove_spaces(x))
+
         data = [{"src": reactant, "trg": product} for reactant, product in zip(reactant_data.values, product_data.values)]
 
         with open(final_file, "w") as f:
