@@ -39,6 +39,7 @@ def create_argparser():
 
 @th.no_grad()
 def main():
+    th.multiprocessing.set_sharing_strategy('file_system')
     args = create_argparser().parse_args()
 
     dist_util.setup_dist()
