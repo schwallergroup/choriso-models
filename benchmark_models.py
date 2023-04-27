@@ -54,3 +54,8 @@ class BenchmarkPipeline:
 
     def predict(self, dataset):
         self.model.predict(dataset=dataset)
+
+    def run_pipeline(self):
+        self.model.preprocess()
+        self.model.train()
+        self.model.predict(dataset="cjhif")

@@ -4,6 +4,7 @@ import wandb
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from model_args import ReactionModelArgs
+from utils import add_mode_parser
 
 from onmt.opts import train_opts, translate_opts, dynamic_prepare_opts, config_opts
 
@@ -59,7 +60,17 @@ class OpenNMT(ReactionModel):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='ONMT parser')
+
+    add_mode_parser(parser)
+
+    args = parser.parse_args()
+
     reaction_model = OpenNMT()
     pipeline = BenchmarkPipeline(model=reaction_model)
-    # pipeline.run_train_pipeline()
-    pipeline.predict(dataset="cjhif")
+
+    if args.mode == "t":
+        pipeline.run_train_pipeline()
+
+    elif args.mode == "p":
+        pipeline.predict(dataset="cjhif")

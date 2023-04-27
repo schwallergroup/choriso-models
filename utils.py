@@ -10,12 +10,25 @@ from typing import List
 from Graph2SMILES.utils.data_utils import tokenize_smiles
 
 
+def add_mode_parser(parser):
+    parser.add_argument('--mode', aliases=['-m'], type=str, default='train', choices=['t', 'p'],
+                        help='Mode to run the model in. Either train(t) or predict(p)')
+
+
 def overwrite_config_with_tokenizer(config, tokenizer):
     config.decoder_start_token_id = tokenizer.cls_token_id
     config.pad_token_id = tokenizer.pad_token_id
     config.eos_token_id = tokenizer.eos_token_id
     config.vocab_size = tokenizer.vocab_size
     return config
+
+
+def transfer_data(origin_folder, destination):
+    files = ["train.tsv", "val.tsv", "test.tsv"]
+    files_origin = [os.path.join(origin_folder, file) for file in files]
+    files_origin = " ".join(files_origin)
+
+    os.system(f"cp -r {files_origin} {destination}")
 
 
 def remove_spaces(spaced_str: str):

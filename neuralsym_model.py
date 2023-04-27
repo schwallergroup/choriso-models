@@ -4,6 +4,7 @@ import wandb
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from model_args import ReactionModelArgs
+from utils import add_mode_parser
 
 
 class NeuralsymArgs(ReactionModelArgs):
@@ -40,7 +41,6 @@ class Neuralsym(ReactionModel):
         """Do data preprocessing. Skip if preprocessed data already exists"""
         os.system("python neuralsym/prepare_data.py")  # TODO add args
 
-
     def train(self):
         """Train the reaction model. Should also contain validation and test steps"""
         wandb.init(project="Neuralsym", sync_tensorboard=True)
@@ -53,7 +53,17 @@ class Neuralsym(ReactionModel):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='ONMT parser')
+
+    add_mode_parser(parser)
+
+    args = parser.parse_args()
+
     reaction_model = Neuralsym()
     pipeline = BenchmarkPipeline(model=reaction_model)
-    # pipeline.run_train_pipeline()
-    pipeline.predict(dataset="cjhif")
+
+    if args.mode == "t":
+        pipeline.run_train_pipeline()
+
+    elif args.mode == "p":
+        pipeline.predict(dataset="cjhif")

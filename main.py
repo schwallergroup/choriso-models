@@ -8,7 +8,7 @@ from benchmark_models import BenchmarkPipeline
 
 def get_base_parsers():
     # Define the main parser
-    parser = argparse.ArgumentParser(description='Conditional arguments example')
+    parser = argparse.ArgumentParser(description='Model benchmarking')
 
     parser.add_argument('--dataset', aliases=['--ds'], type=str, default='cjhif',
                         help='Dataset to use for training and evaluation')

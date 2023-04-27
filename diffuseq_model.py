@@ -12,7 +12,7 @@ from transformers import PreTrainedTokenizerFast
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from model_args import ReactionModelArgs
-from utils import csv_to_jsonl
+from utils import csv_to_jsonl, add_mode_parser
 import torch.multiprocessing
 
 
@@ -128,6 +128,12 @@ class DiffuSeq(ReactionModel):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='DiffuSeq parser')
+
+    add_mode_parser(parser)
+
+    args = parser.parse_args()
+
     # Get the current value of PYTHONPATH (if it exists)
     pythonpath = os.getenv('PYTHONPATH', '')
 
@@ -142,5 +148,9 @@ if __name__ == "__main__":
 
     reaction_model = DiffuSeq()
     pipeline = BenchmarkPipeline(model=reaction_model)
-    # pipeline.run_train_pipeline()
-    pipeline.predict(dataset="cjhif")
+
+    if args.mode == "t":
+        pipeline.run_train_pipeline()
+
+    elif args.mode == "p":
+        pipeline.predict(dataset="cjhif")
