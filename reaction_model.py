@@ -31,7 +31,7 @@ class ReactionModel(abc.ABC):
         """Do data preprocessing. Skip if preprocessed data already exists"""
         pass
 
-    def train(self):
+    def train(self, dataset="cjhif"):
         """Train the reaction model. Should also contain validation and test steps"""
         pass
 

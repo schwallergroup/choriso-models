@@ -3,7 +3,7 @@ import argparse
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from model_args import ReactionModelArgs
-from utils import add_mode_parser, csv_to_txt, set_pythonpath, transfer_data
+from utils import prepare_parser, csv_to_txt, set_pythonpath, transfer_data
 
 from Graph2SMILES.preprocess import get_preprocess_parser
 from Graph2SMILES.train import get_train_parser
@@ -198,7 +198,7 @@ class G2S(ReactionModel):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='G2S parser')
 
-    add_mode_parser(parser)
+    prepare_parser(parser)
 
     args = parser.parse_args()
 
@@ -213,4 +213,4 @@ if __name__ == "__main__":
         pipeline.run_train_pipeline()
 
     elif args.mode == "p":
-        pipeline.predict(dataset="cjhif")
+        pipeline.predict(dataset=args.dataset)

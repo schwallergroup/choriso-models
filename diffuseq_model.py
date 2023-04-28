@@ -12,7 +12,7 @@ from transformers import PreTrainedTokenizerFast
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from model_args import ReactionModelArgs
-from utils import csv_to_jsonl, add_mode_parser, set_pythonpath
+from utils import csv_to_jsonl, prepare_parser, set_pythonpath
 import torch.multiprocessing
 
 
@@ -53,7 +53,7 @@ class DiffuSeq(ReactionModel):
         target_dir_dataset = os.path.join(target_dir, dataset)
         if not os.path.exists(target_dir_dataset):
             os.makedirs(target_dir_dataset)
-        
+
         # transfer the tsv files, if not yet done. Please set clone_name to the name of your git clone of the dataset
         self.setup_tsv(dataset=dataset, clone_name="cjhif-dataset")
         csv_to_jsonl(data_dir, target_dir_dataset)
@@ -104,10 +104,23 @@ class DiffuSeq(ReactionModel):
 
         # TODO make more flexible for different parameters
         cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n " \
-              f"python -m torch.distributed.launch --nproc_per_node=1 --master_port=12233 --use_env run_train.py " \
-              f"--diff_steps 2000 --lr 0.0001 --learning_steps 80000 --save_interval 10000 --seed 102 " \
-              f"--noise_schedule sqrt --hidden_dim 128 --bsz 2048 --dataset {dataset} --data_dir {data_dir} " \
-              f"--vocab {vocab_file} --seq_len 128 --schedule_sampler lossaware --notes {dataset} "
+              f"python -m torch.distributed.launch " \
+              f"--nproc_per_node=1 " \
+              f"--master_port=12233 " \
+              f"--use_env run_train.py " \
+              f"--diff_steps 2000 " \
+              f"--lr 0.0001 " \
+              f"--learning_steps 80000 " \
+              f"--save_interval 10000 " \
+              f"--seed 102 " \
+              f"--noise_schedule sqrt " \
+              f"--hidden_dim 128 " \
+              f"--bsz 2048 " \
+              f"--dataset {dataset} " \
+              f"--data_dir {data_dir} " \
+              f"--vocab {vocab_file} " \
+              f"--seq_len 128 " \
+              f"--schedule_sampler lossaware "
 
         print(cmd)
 
@@ -116,6 +129,10 @@ class DiffuSeq(ReactionModel):
     def predict(self, dataset="cjhif"):
         """Predict provided data with the reaction model"""
         torch.multiprocessing.set_sharing_strategy('file_system')
+
+        model_file = f"diffuseq_{args.dataset}_h{args.hidden_dim}_lr{args.lr}" \
+                     f"_t{args.diff_steps}_{args.noise_schedule}_{args.schedule_sampler}" \
+                     f"_seed{args.seed}"
 
         os.chdir(os.path.join(self.model_dir, "scripts"))
 
@@ -132,7 +149,7 @@ class DiffuSeq(ReactionModel):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='DiffuSeq parser')
 
-    add_mode_parser(parser)
+    prepare_parser(parser)
 
     args = parser.parse_args()
 
@@ -147,4 +164,4 @@ if __name__ == "__main__":
         pipeline.run_train_pipeline()
 
     elif args.mode == "p":
-        pipeline.predict(dataset="cjhif")
+        pipeline.predict(dataset=args.dataset)
