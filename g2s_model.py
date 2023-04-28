@@ -57,23 +57,23 @@ class G2S(ReactionModel):
         task = "reaction_prediction"
 
         cmd = f"python preprocess.py " \
-              f"--model={self.model_name}" \
-              f"--data_name={dataset}" \
-              f"--task={task}" \
+              f"--model={self.model_name} " \
+              f"--data_name={dataset} " \
+              f"--task={task} " \
               f"--representation_start=smiles " \
               f"--representation_end=smiles " \
-              f"--train_src=../data/{dataset}/src-train.txt" \
-              f"--train_tgt=../data/{dataset}/tgt-train.txt" \
-              f"--val_src=../data/{dataset}/src-val.txt" \
-              f"--val_tgt=../data/{dataset}/tgt-val.txt" \
-              f"--test_src=../data/{dataset}/src-test.txt" \
-              f"--test_tgt=../data/{dataset}/tgt-test.txt" \
-              f"--log_file={prefix}.preprocess.log" \
-              f"--preprocess_output_path=./preprocessed/{prefix}/" \
+              f"--train_src=../data/{dataset}/src-train.txt " \
+              f"--train_tgt=../data/{dataset}/tgt-train.txt " \
+              f"--val_src=../data/{dataset}/src-val.txt " \
+              f"--val_tgt=../data/{dataset}/tgt-val.txt " \
+              f"--test_src=../data/{dataset}/src-test.txt " \
+              f"--test_tgt=../data/{dataset}/tgt-test.txt " \
+              f"--log_file={prefix}.preprocess.log " \
+              f"--preprocess_output_path=./preprocessed/{prefix}/ " \
               f"--seed=42 " \
               f"--max_src_len=1024 " \
               f"--max_tgt_len=1024 " \
-              f"--num_workers=8"
+              f"--num_workers=8 "
 
         os.system(cmd)
 
@@ -153,9 +153,9 @@ class G2S(ReactionModel):
               f"--predict_min_len=1 " \
               f"--predict_max_len=512 " \
               f"--log_iter=100 " \
-              f"--eval_iter=5000" \
-              f"--save_iter = 5000" \
-              f"--compute_graph_distance"
+              f"--eval_iter=5000 " \
+              f"--save_iter=5000 " \
+              f"--compute_graph_distance "
 
         os.system(cmd)
 
@@ -173,22 +173,22 @@ class G2S(ReactionModel):
               f"--do_score " \
               f"--model={self.model_name} " \
               f"--data_name={dataset} " \
-              f"--test_bin=./preprocessed/{prefix}/test_0.npz" \
+              f"--test_bin=./preprocessed/{prefix}/test_0.npz " \
               f"--test_tgt=../data/{dataset}/tgt-test.txt " \
-              f"--result_file=./results/{prefix}.{self.exp_no}.result.txt" \
-              f"--log_file={prefix}.predict.{self.exp_no}.log" \
-              f"--load_from={checkpoint}" \
-              f"--mpn_type={self.mpn_type}" \
-              f"--rel_pos={self.rel_pos}" \
-              f"--seed=42" \
+              f"--result_file=./results/{prefix}.{self.exp_no}.result.txt " \
+              f"--log_file={prefix}.predict.{self.exp_no}.log " \
+              f"--load_from={checkpoint} " \
+              f"--mpn_type={self.mpn_type} " \
+              f"--rel_pos={self.rel_pos} " \
+              f"--seed=42 " \
               f"--batch_type=tokens " \
               f"--predict_batch_size=4096 " \
-              f"--beam_size={self.bs}" \
-              f"--n_best={self.nbest}" \
-              f"--temperature={self.T}" \
+              f"--beam_size={self.bs} " \
+              f"--n_best={self.nbest} " \
+              f"--temperature={self.T} " \
               f"--predict_min_len=1 " \
               f"--predict_max_len=512 " \
-              f"--log_iter=100"
+              f"--log_iter=100 "
 
         os.system(cmd)
 
