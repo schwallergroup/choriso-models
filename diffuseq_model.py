@@ -160,8 +160,4 @@ if __name__ == "__main__":
     reaction_model = DiffuSeq()
     pipeline = BenchmarkPipeline(model=reaction_model)
 
-    if args.mode == "t":
-        pipeline.run_train_pipeline(dataset=args.dataset)
-
-    elif args.mode == "p":
-        pipeline.predict(dataset=args.dataset)
+    pipeline.run_mode_from_args(args)
