@@ -11,7 +11,7 @@ from Graph2SMILES.utils.data_utils import tokenize_smiles
 
 
 def prepare_parser(parser):
-    parser.add_argument('--mode', '-m', type=str, default='train', choices=['t', 'p'],
+    parser.add_argument('--mode', '-m', type=str, default='train', choices=['t', 'p', 'tp'],
                         help='Mode to run the model in. Either train(t) or predict(p)')
     parser.add_argument('--dataset', '-d', type=str, default='cjhif', help='Dataset to use.')
 
