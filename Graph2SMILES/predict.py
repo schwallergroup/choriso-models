@@ -3,6 +3,7 @@ import logging
 import numpy as np
 import os
 import sys
+import wandb
 import torch
 from Graph2SMILES.models.graph2seq_series_rel import Graph2SeqSeriesRel
 from Graph2SMILES.models.seq2seq import Seq2Seq
@@ -23,6 +24,8 @@ def get_predict_parser():
 
 
 def main(args):
+    wandb.init(project="Graph2SMILES")
+
     parsing.log_args(args)
 
     if not os.path.exists(os.path.dirname(args.result_file)):
@@ -90,7 +93,6 @@ def main(args):
 
         all_predictions = []
 
-
         with torch.no_grad():
             for test_idx, test_batch in enumerate(test_loader):
                 if test_idx % args.log_iter == 0:
@@ -157,6 +159,7 @@ def main(args):
         mean_accuracies = np.mean(accuracies, axis=0)
         for n in range(args.n_best):
             logging.info(f"Top {n+1} accuracy: {mean_accuracies[n] * 100: .2f} %")
+            wandb.log({f"top_{n+1}_accuracy": mean_accuracies[n] * 100})
 
 
 if __name__ == "__main__":

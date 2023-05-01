@@ -3,6 +3,7 @@ import os
 import wandb
 import yaml
 import tempfile
+import pandas as pd
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from model_args import ReactionModelArgs
@@ -106,15 +107,41 @@ class OpenNMT(ReactionModel):
         # TODO make best model configurable
         best_model = os.path.join(self.model_dir, "runs", dataset, f"{dataset}_step_{best_model_step}.pt")
         out_file = os.path.join(self.model_dir, "runs", dataset, "predictions.txt")
+        tgt_file = f"../data/{dataset}/tgt-test.txt"
 
+        n_outputs = 5
         cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n" \
               f"onmt_translate -model {best_model} -gpu 0 --src ../data/{dataset}/src-test.txt " \
-              f"--tgt ../data/{dataset}/tgt-test.txt --output {out_file} --n_best 5 --beam_size 10 --max_length 300 " \
-              f"--batch_size 64"
+              f"--tgt {tgt_file} --output {out_file} --n_best {n_outputs} --beam_size 10 " \
+              f"--max_length 300 --batch_size 64"
 
         os.system(cmd)
 
         # TODO implement evaluation, standardize output format
+        predictions = [result.replace(" ", "").replace("\n", "") for result in open(out_file, "r").readlines()]
+        predictions = [predictions[i:i + n_outputs] for i in range(0, len(predictions), n_outputs)]
+
+        targets = [target.replace(" ", "").replace("\n", "") for target in open(tgt_file, "r").readlines()]
+
+        reaction_file = os.path.join(os.path.dirname(tgt_file), "test.tsv")
+        reactions = pd.read_csv(reaction_file, sep="\t", error_bad_lines=False)["canonic_rxn"].tolist()
+
+        # Create a list of column names for the predictions
+        pred_cols = [f"pred_{i}" for i in range(len(predictions[0]))]
+
+        # Create a list of dictionaries representing each row of the DataFrame
+        rows = []
+        for rxn, prod, preds in zip(reactions, targets, predictions):
+            row = {"canonical_rxn": rxn, "target": prod}
+            row.update({pred_col: pred for pred_col, pred in zip(pred_cols, preds)})
+            rows.append(row)
+
+        # Create the DataFrame
+        df = pd.DataFrame(rows)
+
+        # Save the DataFrame to a CSV file
+        csv_file = f"./runs/{dataset}.all_results.csv"
+        df.to_csv(csv_file, index=False)
 
 
 if __name__ == "__main__":
