@@ -122,6 +122,7 @@ def main(args):
         for batch_idx, batch in enumerate(train_loader):
             if total_step > args.max_steps:
                 logging.info("Max steps reached, finish training")
+                tracker.stop()
                 exit(0)
 
             batch.to(device)
