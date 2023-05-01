@@ -1,5 +1,6 @@
 import os
 import argparse
+import pandas as pd
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from model_args import ReactionModelArgs
@@ -173,14 +174,17 @@ class G2S(ReactionModel):
         last_model = f"model.{self.max_steps}_{number_of_saves}.pt"
         checkpoint = f"./checkpoints/{prefix}.{self.exp_no}/{last_model}"
 
+        result_file = f"./results/{prefix}.{self.exp_no}.result.txt"
+        tgt_file = f"../data/{dataset}/tgt-test.txt"
+
         cmd = f"python predict.py " \
               f"--do_predict " \
               f"--do_score " \
               f"--model={self.model_name} " \
               f"--data_name={dataset} " \
               f"--test_bin=./preprocessed/{prefix}/test_0.npz " \
-              f"--test_tgt=../data/{dataset}/tgt-test.txt " \
-              f"--result_file=./results/{prefix}.{self.exp_no}.result.txt " \
+              f"--test_tgt={tgt_file} " \
+              f"--result_file={result_file} " \
               f"--log_file={prefix}.predict.{self.exp_no}.log " \
               f"--load_from={checkpoint} " \
               f"--mpn_type={self.mpn_type} " \
@@ -198,6 +202,31 @@ class G2S(ReactionModel):
         os.system(cmd)
 
         # TODO implement evaluation, standardize output format
+
+        # list of results, each result is a string separated by commas. split by comma, remove spaces and "\n"
+        predictions = [result.replace(" ", "").replace("\n", "").split(",") for result in open(result_file, "r").readlines()]
+
+        targets = [target.replace(" ", "").replace("\n", "") for target in open(tgt_file, "r").readlines()]
+
+        reaction_file = os.path.join(os.path.dirname(tgt_file), "test.tsv")
+        reactions = pd.read_csv(reaction_file, sep="\t", error_bad_lines=False)["canonic_rxn"].tolist()
+
+        # Create a list of column names for the predictions
+        pred_cols = [f"pred_{i}" for i in range(len(predictions[0]))]
+
+        # Create a list of dictionaries representing each row of the DataFrame
+        rows = []
+        for rxn, prod, preds in zip(reactions, targets, predictions):
+            row = {"canonical_rxn": rxn, "target": prod}
+            row.update({pred_col: pred for pred_col, pred in zip(pred_cols, preds)})
+            rows.append(row)
+
+        # Create the DataFrame
+        df = pd.DataFrame(rows)
+
+        # Save the DataFrame to a CSV file
+        csv_file = f"./results/{prefix}.{self.exp_no}.all_results.csv"
+        df.to_csv(csv_file, index=False)
 
 
 if __name__ == "__main__":
