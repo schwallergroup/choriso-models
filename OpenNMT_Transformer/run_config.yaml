@@ -2,12 +2,13 @@
 # https://opennmt.net/OpenNMT-py/quickstart.html
 # Examples in https://github.com/OpenNMT/OpenNMT-py/tree/master/config
 
+dataset_name: cjhif
 
 ## Where the samples will be written
 save_data: ./runs
 ## Where the vocab(s) will be written
-src_vocab: ./runs/cjhif/vocab.src
-tgt_vocab: ./runs/cjhif/vocab.src
+src_vocab: ./runs/${{dataset_name}}/vocab.src
+tgt_vocab: ./runs/${{dataset_name}}/vocab.src
 # Prevent overwriting existing files in the folder
 overwrite: true
 share_vocab: true
@@ -15,11 +16,11 @@ share_vocab: true
 # Corpus opts:
 data:
     corpus-1:
-        path_src: ../data/cjhif/src-train.txt
-        path_tgt: ../data/cjhif/tgt-train.txt
+        path_src: ../data/${{dataset_name}}/src-train.txt
+        path_tgt: ../data/${{dataset_name}}/tgt-train.txt
     valid:
-        path_src: ../data/cjhif/src-val.txt
-        path_tgt: ../data/cjhif/tgt-val.txt
+        path_src: ../data/${{dataset_name}}/src-val.txt
+        path_tgt: ../data/${{dataset_name}}/tgt-val.txt
 
 
 # Train on a single GPU
@@ -27,7 +28,7 @@ world_size: 1
 gpu_ranks: [0]
 
 # Where to save the checkpoints
-save_model: ./runs/cjhif
+save_model: ./runs/${{dataset_name}}
 save_checkpoint_steps: 5000
 keep_checkpoint: 3
 train_steps: 200000

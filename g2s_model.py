@@ -44,6 +44,9 @@ class G2S(ReactionModel):
 
         self.rel_pos = "emb_only"
 
+        self.max_steps = 40
+        self.save_iter = 40
+
     def preprocess(self, dataset="cjhif"):
         """Do data preprocessing. Skip if preprocessed data already exists"""
         data_dir = os.path.join(os.path.dirname(self.model_dir), "data", dataset)
@@ -91,7 +94,7 @@ class G2S(ReactionModel):
         enc_h = 256
         batch_size = 4096
         enc_emb_scale = "sqrt"
-        max_steps = 40
+
         enc_layer = 4
         enc_norm = "none"
         enc_sc = "none"
@@ -138,7 +141,7 @@ class G2S(ReactionModel):
               f"--max_relative_positions={max_rel_pos} " \
               f"--seed=42 " \
               f"--epoch=200000 " \
-              f"--max_steps={max_steps} " \
+              f"--max_steps={self.max_steps} " \
               f"--warmup_steps=8000 " \
               f"--lr={lr} " \
               f"--weight_decay=0.0 " \
@@ -154,7 +157,7 @@ class G2S(ReactionModel):
               f"--predict_max_len=512 " \
               f"--log_iter=100 " \
               f"--eval_iter=5000 " \
-              f"--save_iter=5000 " \
+              f"--save_iter={self.save_iter} " \
               f"--compute_graph_distance "
 
         os.system(cmd)
@@ -166,7 +169,9 @@ class G2S(ReactionModel):
         prefix = f"{dataset}_{self.model_name}"
 
         # TODO make this automatic
-        checkpoint = f"./checkpoints/{prefix}.{self.exp_no}/model.20000_3.pt"
+        number_of_saves = (self.max_steps // self.save_iter) - 1
+        last_model = f"model.{self.max_steps}_{number_of_saves}.pt"
+        checkpoint = f"./checkpoints/{prefix}.{self.exp_no}/{last_model}"
 
         cmd = f"python predict.py " \
               f"--do_predict " \

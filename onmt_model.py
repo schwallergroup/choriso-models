@@ -1,6 +1,8 @@
 import argparse
 import os
 import wandb
+import yaml
+import tempfile
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from model_args import ReactionModelArgs
@@ -47,31 +49,51 @@ class OpenNMT(ReactionModel):
         self.setup_tsv(dataset=dataset, clone_name="cjhif-dataset")
 
         csv_to_txt(data_dir)
+        with open("run_config.yaml", "r") as yaml_file:
+            yaml_content = yaml.full_load(yaml_file)
+            yaml_content["dataset_name"] = dataset
+            print(yaml_content)
+            breakpoint()
 
-        cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n" \
-              f"onmt_build_vocab -config run_config.yaml -src_seq_length 1000 -tgt_seq_length 1000 -src_vocab_size 1000 " \
-              f"-tgt_vocab_size 1000 -n_sample -1"
+        with tempfile.NamedTemporaryFile(suffix=".yaml") as tmp:
+            yaml.dump(yaml_content, tmp)
 
-        os.system(cmd)
+            cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n" \
+                  f"onmt_build_vocab -config {tmp.name} -src_seq_length 1000 -tgt_seq_length 1000 " \
+                  f"-src_vocab_size 1000 -tgt_vocab_size 1000 -n_sample -1"
 
-    def train(self):
+            os.system(cmd)
+
+    def train(self, dataset="cjhif"):
         """Train the reaction model. Should also contain validation and test steps"""
+        with open("run_config.yaml", "r") as yaml_file:
+            yaml_content = yaml.full_load(yaml_file)
+            yaml_content["dataset_name"] = dataset
+            print(yaml_content)
+            breakpoint()
 
-        cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n" \
-              f"onmt_train -config run_config.yaml -seed 42 -gpu_ranks 0 -param_init 0 -param_init_glorot " \
-              f"-max_generator_batches 32 -batch_type tokens -batch_size 6144 -normalization tokens -max_grad_norm 0  " \
-              f"-accum_count 4 -optim adam -adam_beta1 0.9 -adam_beta2 0.998 -decay_method noam -warmup_steps 8000 " \
-              f"-learning_rate 2 -label_smoothing 0.0 -layers 4 -hidden_size  384 -word_vec_size 384 " \
-              f"-encoder_type transformer -decoder_type transformer -dropout 0.1 -position_encoding -share_embeddings " \
-              f"-global_attention general -global_attention_function softmax -self_attn_type scaled-dot -heads 8 " \
-              f"-transformer_ff 2048"
+        with tempfile.NamedTemporaryFile(suffix=".yaml") as tmp:
+            yaml.dump(yaml_content, tmp)
 
-        os.system(cmd)
+            cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n" \
+                  f"onmt_train -config {tmp.name} -seed 42 -gpu_ranks 0 -param_init 0 -param_init_glorot " \
+                  f"-max_generator_batches 32 -batch_type tokens -batch_size 6144 -normalization tokens " \
+                  f"-max_grad_norm 0 -accum_count 4 -optim adam -adam_beta1 0.9 -adam_beta2 0.998 -decay_method noam " \
+                  f"-warmup_steps 8000 -learning_rate 2 -label_smoothing 0.0 -layers 4 -hidden_size  384 " \
+                  f"-word_vec_size 384 -encoder_type transformer -decoder_type transformer -dropout 0.1 " \
+                  f"-position_encoding -share_embeddings -global_attention general -global_attention_function softmax " \
+                  f"-self_attn_type scaled-dot -heads 8 -transformer_ff 2048"
+
+            os.system(cmd)
 
     def predict(self, dataset="cjhif"):
         """Predict provided data with the reaction model"""
+
+        with open("run_config.yaml", "r") as yaml_file:
+            yaml_content = yaml.full_load(yaml_file)
+        best_model_step = yaml_content["train_steps"]
         # TODO make best model configurable
-        best_model = os.path.join(self.model_dir, "runs", dataset, "step_200000.pt")
+        best_model = os.path.join(self.model_dir, "runs", dataset, f"step_{best_model_step}.pt")
         out_file = os.path.join(self.model_dir, "runs", dataset, "predictions.txt")
 
         cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n" \
