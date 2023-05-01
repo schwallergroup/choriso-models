@@ -11,6 +11,17 @@ from utils import prepare_parser, csv_to_txt, set_pythonpath
 from onmt.opts import train_opts, translate_opts, dynamic_prepare_opts, config_opts
 
 
+def substitute_dataset_name(d, dataset_name):
+    if isinstance(d, str):
+        return d.replace("${{dataset_name}}", dataset_name)
+    elif isinstance(d, dict):
+        return {k: substitute_dataset_name(v, dataset_name) for k, v in d.items()}
+    elif isinstance(d, list):
+        return [substitute_dataset_name(v, dataset_name) for v in d]
+    else:
+        return d
+
+
 class OpenNMTArgs(ReactionModelArgs):
 
     def __init__(self):
@@ -52,11 +63,11 @@ class OpenNMT(ReactionModel):
         with open("run_config.yaml", "r") as yaml_file:
             yaml_content = yaml.full_load(yaml_file)
             yaml_content["dataset_name"] = dataset
-            print(yaml_content)
-            breakpoint()
+            yaml_content = substitute_dataset_name(yaml_content, dataset)
 
         with tempfile.NamedTemporaryFile(suffix=".yaml") as tmp:
-            yaml.dump(yaml_content, tmp)
+            with open(tmp.name, "w") as tmp_yaml:
+                yaml.dump(yaml_content, tmp_yaml, default_flow_style=False, sort_keys=False, allow_unicode=True)
 
             cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n" \
                   f"onmt_build_vocab -config {tmp.name} -src_seq_length 1000 -tgt_seq_length 1000 " \
@@ -69,11 +80,11 @@ class OpenNMT(ReactionModel):
         with open("run_config.yaml", "r") as yaml_file:
             yaml_content = yaml.full_load(yaml_file)
             yaml_content["dataset_name"] = dataset
-            print(yaml_content)
-            breakpoint()
+            yaml_content = substitute_dataset_name(yaml_content, dataset)
 
         with tempfile.NamedTemporaryFile(suffix=".yaml") as tmp:
-            yaml.dump(yaml_content, tmp)
+            with open(tmp.name, "w") as tmp_yaml:
+                yaml.dump(yaml_content, tmp_yaml, default_flow_style=False, sort_keys=False, allow_unicode=True)
 
             cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n" \
                   f"onmt_train -config {tmp.name} -seed 42 -gpu_ranks 0 -param_init 0 -param_init_glorot " \
@@ -93,7 +104,7 @@ class OpenNMT(ReactionModel):
             yaml_content = yaml.full_load(yaml_file)
         best_model_step = yaml_content["train_steps"]
         # TODO make best model configurable
-        best_model = os.path.join(self.model_dir, "runs", dataset, f"step_{best_model_step}.pt")
+        best_model = os.path.join(self.model_dir, "runs", dataset, f"{dataset}_step_{best_model_step}.pt")
         out_file = os.path.join(self.model_dir, "runs", dataset, "predictions.txt")
 
         cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n" \

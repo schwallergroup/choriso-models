@@ -7,8 +7,8 @@ dataset_name: cjhif
 ## Where the samples will be written
 save_data: ./runs
 ## Where the vocab(s) will be written
-src_vocab: ./runs/${{dataset_name}}/vocab.src
-tgt_vocab: ./runs/${{dataset_name}}/vocab.src
+src_vocab: "./runs/${{dataset_name}}/vocab.src"
+tgt_vocab: "./runs/${{dataset_name}}/vocab.src"
 # Prevent overwriting existing files in the folder
 overwrite: true
 share_vocab: true
@@ -16,11 +16,11 @@ share_vocab: true
 # Corpus opts:
 data:
     corpus-1:
-        path_src: ../data/${{dataset_name}}/src-train.txt
-        path_tgt: ../data/${{dataset_name}}/tgt-train.txt
+        path_src: "../data/${{dataset_name}}/src-train.txt"
+        path_tgt: "../data/${{dataset_name}}/tgt-train.txt"
     valid:
-        path_src: ../data/${{dataset_name}}/src-val.txt
-        path_tgt: ../data/${{dataset_name}}/tgt-val.txt
+        path_src: "../data/${{dataset_name}}/src-val.txt"
+        path_tgt: "../data/${{dataset_name}}/tgt-val.txt"
 
 
 # Train on a single GPU
@@ -28,10 +28,10 @@ world_size: 1
 gpu_ranks: [0]
 
 # Where to save the checkpoints
-save_model: ./runs/${{dataset_name}}
-save_checkpoint_steps: 5000
+save_model: "./runs/${{dataset_name}}/${{dataset_name}}"
+save_checkpoint_steps: 200
 keep_checkpoint: 3
-train_steps: 200000
+train_steps: 200
 valid_steps: 10000
 report_every: 100
 
