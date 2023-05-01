@@ -1,6 +1,6 @@
 import os
 import argparse
-import subprocess
+
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from model_args import ReactionModelArgs
 from utils import prepare_parser, csv_to_txt, set_pythonpath, transfer_data
@@ -56,26 +56,26 @@ class G2S(ReactionModel):
         prefix = f"{dataset}_{self.model_name}"
         task = "reaction_prediction"
 
-        cmd = ["python", "preprocess.py",
-               f"--model={self.model_name}",
-               f"--data_name={dataset}",
-               f"--task={task}",
-               "--representation_start=smiles",
-               "--representation_end=smiles",
-               f"--train_src=../data/{dataset}/src-train.txt",
-               f"--train_tgt=../data/{dataset}/tgt-train.txt",
-               f"--val_src=../data/{dataset}/src-val.txt",
-               f"--val_tgt=../data/{dataset}/tgt-val.txt",
-               f"--test_src=../data/{dataset}/src-test.txt",
-               f"--test_tgt=../data/{dataset}/tgt-test.txt",
-               f"--log_file={prefix}.preprocess.log",
-               f"--preprocess_output_path=./preprocessed/{prefix}/",
-               "--seed=42",
-               "--max_src_len=1024",
-               "--max_tgt_len=1024",
-               "--num_workers=8"]
+        cmd = f"python preprocess.py " \
+              f"--model={self.model_name} " \
+              f"--data_name={dataset} " \
+              f"--task={task} " \
+              f"--representation_start=smiles " \
+              f"--representation_end=smiles " \
+              f"--train_src=../data/{dataset}/src-train.txt " \
+              f"--train_tgt=../data/{dataset}/tgt-train.txt " \
+              f"--val_src=../data/{dataset}/src-val.txt " \
+              f"--val_tgt=../data/{dataset}/tgt-val.txt " \
+              f"--test_src=../data/{dataset}/src-test.txt " \
+              f"--test_tgt=../data/{dataset}/tgt-test.txt " \
+              f"--log_file={prefix}.preprocess.log " \
+              f"--preprocess_output_path=./preprocessed/{prefix}/ " \
+              f"--seed=42 " \
+              f"--max_src_len=1024 " \
+              f"--max_tgt_len=1024 " \
+              f"--num_workers=8 "
 
-        subprocess.run(cmd)
+        os.system(cmd)
 
         # os.system("sh Graph2SMILES/scripts/preprocess.sh")
 
@@ -91,7 +91,7 @@ class G2S(ReactionModel):
         enc_h = 256
         batch_size = 4096
         enc_emb_scale = "sqrt"
-        max_steps = 40000
+        max_steps = 40
         enc_layer = 4
         enc_norm = "none"
         enc_sc = "none"
@@ -104,63 +104,60 @@ class G2S(ReactionModel):
 
         prefix = f"{dataset}_{self.model_name}"
 
-        cmd = [
-            "python",
-            "train.py",
-            f"--model={self.model_name}",
-            f"--data_name={dataset}",
-            f"--task={task}",
-            "--representation_end=smiles",
-            f"--load_from={load_from}",
-            f"--train_bin=./preprocessed/{prefix}/train_0.npz",
-            f"--valid_bin=./preprocessed/{prefix}/val_0.npz",
-            f"--log_file={prefix}.train.{self.exp_no}.log",
-            f"--vocab_file=./preprocessed/{prefix}/vocab_smiles.txt",
-            f"--save_dir=./checkpoints/{prefix}.{self.exp_no}",
-            "--embed_size=256",
-            f"--mpn_type={self.mpn_type}",
-            f"--encoder_num_layers={enc_layer}",
-            f"--encoder_hidden_size={enc_h}",
-            f"--encoder_norm={enc_norm}",
-            f"--encoder_skip_connection={enc_sc}",
-            f"--encoder_positional_encoding={enc_pe}",
-            f"--encoder_emb_scale={enc_emb_scale}",
-            f"--attn_enc_num_layers={attn_layer}",
-            "--attn_enc_hidden_size=256",
-            "--attn_enc_heads=8",
-            "--attn_enc_filter_size=2048",
-            f"--rel_pos={self.rel_pos}",
-            f"--rel_pos_buckets={rel_buckets}",
-            "--decoder_num_layers=6",
-            "--decoder_hidden_size=256",
-            "--decoder_attn_heads=8",
-            "--decoder_filter_size=2048",
-            f"--dropout={dropout}",
-            f"--attn_dropout={dropout}",
-            f"--max_relative_positions={max_rel_pos}",
-            "--seed=42",
-            "--epoch=200000",
-            f"--max_steps={max_steps}",
-            "--warmup_steps=8000",
-            f"--lr={lr}",
-            "--weight_decay=0.0",
-            "--clip_norm=20.0",
-            f"--batch_type={batch_type}",
-            f"--train_batch_size={batch_size}",
-            f"--valid_batch_size={batch_size}",
-            f"--predict_batch_size={batch_size}",
-            f"--accumulation_count={acc_count}",
-            "--num_workers=8",
-            "--beam_size=5",
-            "--predict_min_len=1",
-            "--predict_max_len=512",
-            "--log_iter=100",
-            "--eval_iter=5000",
-            "--save_iter=5000",
-            "--compute_graph_distance"
-        ]
+        cmd = f"python train.py " \
+              f"--model={self.model_name} " \
+              f"--data_name={dataset} " \
+              f"--task={task} " \
+              f"--representation_end=smiles " \
+              f"--load_from={load_from} " \
+              f"--train_bin=./preprocessed/{prefix}/train_0.npz " \
+              f"--valid_bin=./preprocessed/{prefix}/val_0.npz " \
+              f"--log_file={prefix}.train.{self.exp_no}.log " \
+              f"--vocab_file=./preprocessed/{prefix}/vocab_smiles.txt " \
+              f"--save_dir=./checkpoints/{prefix}.{self.exp_no} " \
+              f"--embed_size=256 " \
+              f"--mpn_type={self.mpn_type} " \
+              f"--encoder_num_layers={enc_layer} " \
+              f"--encoder_hidden_size={enc_h} " \
+              f"--encoder_norm={enc_norm} " \
+              f"--encoder_skip_connection={enc_sc} " \
+              f"--encoder_positional_encoding={enc_pe} " \
+              f"--encoder_emb_scale={enc_emb_scale} " \
+              f"--attn_enc_num_layers={attn_layer} " \
+              f"--attn_enc_hidden_size=256 " \
+              f"--attn_enc_heads=8 " \
+              f"--attn_enc_filter_size=2048 " \
+              f"--rel_pos={self.rel_pos} " \
+              f"--rel_pos_buckets={rel_buckets} " \
+              f"--decoder_num_layers=6 " \
+              f"--decoder_hidden_size=256 " \
+              f"--decoder_attn_heads=8 " \
+              f"--decoder_filter_size=2048 " \
+              f"--dropout={dropout} " \
+              f"--attn_dropout={dropout} " \
+              f"--max_relative_positions={max_rel_pos} " \
+              f"--seed=42 " \
+              f"--epoch=200000 " \
+              f"--max_steps={max_steps} " \
+              f"--warmup_steps=8000 " \
+              f"--lr={lr} " \
+              f"--weight_decay=0.0 " \
+              f"--clip_norm=20.0 " \
+              f"--batch_type={batch_type} " \
+              f"--train_batch_size={batch_size} " \
+              f"--valid_batch_size={batch_size} " \
+              f"--predict_batch_size={batch_size} " \
+              f"--accumulation_count={acc_count} " \
+              f"--num_workers=8 " \
+              f"--beam_size=5 " \
+              f"--predict_min_len=1 " \
+              f"--predict_max_len=512 " \
+              f"--log_iter=100 " \
+              f"--eval_iter=5000 " \
+              f"--save_iter=5000 " \
+              f"--compute_graph_distance "
 
-        subprocess.run(cmd)
+        os.system(cmd)
 
     def predict(self, dataset="cjhif"):
         """Predict provided data with the reaction model"""
@@ -171,32 +168,29 @@ class G2S(ReactionModel):
         # TODO make this automatic
         checkpoint = f"./checkpoints/{prefix}.{self.exp_no}/model.20000_3.pt"
 
-        cmd = [
-            'python',
-            'predict.py',
-            '--do_predict',
-            '--do_score',
-            f'--model={self.model_name}',
-            f'--data_name={dataset}',
-            f'--test_bin=./preprocessed/{prefix}/test_0.npz',
-            f'--test_tgt=../data/{dataset}/tgt-test.txt',
-            f'--result_file=./results/{prefix}.{self.exp_no}.result.txt',
-            f'--log_file={prefix}.predict.{self.exp_no}.log',
-            f'--load_from={checkpoint}',
-            f'--mpn_type={self.mpn_type}',
-            f'--rel_pos={self.rel_pos}',
-            f'--seed=42',
-            '--batch_type=tokens',
-            '--predict_batch_size=4096',
-            f'--beam_size={self.bs}',
-            f'--n_best={self.nbest}',
-            f'--temperature={self.T}',
-            '--predict_min_len=1',
-            '--predict_max_len=512',
-            '--log_iter=100',
-        ]
+        cmd = f"python predict.py " \
+              f"--do_predict " \
+              f"--do_score " \
+              f"--model={self.model_name} " \
+              f"--data_name={dataset} " \
+              f"--test_bin=./preprocessed/{prefix}/test_0.npz " \
+              f"--test_tgt=../data/{dataset}/tgt-test.txt " \
+              f"--result_file=./results/{prefix}.{self.exp_no}.result.txt " \
+              f"--log_file={prefix}.predict.{self.exp_no}.log " \
+              f"--load_from={checkpoint} " \
+              f"--mpn_type={self.mpn_type} " \
+              f"--rel_pos={self.rel_pos} " \
+              f"--seed=42 " \
+              f"--batch_type=tokens " \
+              f"--predict_batch_size=4096 " \
+              f"--beam_size={self.bs} " \
+              f"--n_best={self.nbest} " \
+              f"--temperature={self.T} " \
+              f"--predict_min_len=1 " \
+              f"--predict_max_len=512 " \
+              f"--log_iter=100 "
 
-        subprocess.run(cmd)
+        os.system(cmd)
 
         # TODO implement evaluation, standardize output format
 
