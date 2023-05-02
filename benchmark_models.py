@@ -1,4 +1,5 @@
 import eco2ai
+import os
 from reaction_model import *
 
 
@@ -8,10 +9,13 @@ class BenchmarkPipeline:
         self.model = model
 
     def run_train_pipeline(self, dataset):
+        tracker_path = f"{self.model.model_dir}/{dataset}/results"
+        if not os.path.exists(tracker_path):
+            os.makedirs(tracker_path)
         preprocess_tracker = eco2ai.Tracker(
             project_name=f"{self.model.name}_benchmark",
             experiment_description=f"preprocess {self.model.name} model",
-            file_name=f"{self.model.model_dir}/{dataset}/preprocess_emission.csv"
+            file_name=f"{tracker_path}/preprocess_emission.csv"
         )
         preprocess_tracker.start()
         self.model.preprocess(dataset=dataset)
@@ -20,7 +24,7 @@ class BenchmarkPipeline:
         train_tracker = eco2ai.Tracker(
             project_name=f"{self.model.name}_benchmark",
             experiment_description=f"train {self.model.name} model",
-            file_name=f"{self.model.model_dir}/{dataset}/train_emission.csv"
+            file_name=f"{tracker_path}/train_emission.csv"
         )
         train_tracker.start()
         self.model.train(dataset=dataset)
@@ -30,7 +34,7 @@ class BenchmarkPipeline:
         predict_tracker = eco2ai.Tracker(
             project_name=f"{self.model.name}_benchmark",
             experiment_description=f"predict {self.model.name} model",
-            file_name=f"{self.model.model_dir}/{dataset}/predict_emission.csv"
+            file_name=f"{self.model.model_dir}/{dataset}/results/predict_emission.csv"
         )
         predict_tracker.start()
         self.model.predict(dataset=dataset)

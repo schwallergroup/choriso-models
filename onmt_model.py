@@ -91,10 +91,10 @@ class OpenNMT(ReactionModel):
                   f"onmt_train -config {tmp.name} -seed 42 -gpu_ranks 0 -param_init 0 -param_init_glorot " \
                   f"-max_generator_batches 32 -batch_type tokens -batch_size 6144 -normalization tokens " \
                   f"-max_grad_norm 0 -accum_count 4 -optim adam -adam_beta1 0.9 -adam_beta2 0.998 -decay_method noam " \
-                  f"-warmup_steps 8000 -learning_rate 2 -label_smoothing 0.0 -layers 4 -hidden_size  384 " \
-                  f"-word_vec_size 384 -encoder_type transformer -decoder_type transformer -dropout 0.1 " \
+                  f"-warmup_steps 8000 -learning_rate 2 -label_smoothing 0.0 -layers 4 -hidden_size 8 " \
+                  f"-word_vec_size 8 -encoder_type transformer -decoder_type transformer -dropout 0.1 " \
                   f"-position_encoding -share_embeddings -global_attention general -global_attention_function softmax " \
-                  f"-self_attn_type scaled-dot -heads 8 -transformer_ff 2048"
+                  f"-self_attn_type scaled-dot -heads 8 -transformer_ff 20" # 48"
 
             os.system(cmd)
 
@@ -105,22 +105,26 @@ class OpenNMT(ReactionModel):
             yaml_content = yaml.full_load(yaml_file)
         best_model_step = yaml_content["train_steps"]
         # TODO make best model configurable
-        best_model = os.path.join(self.model_dir, "runs", dataset, f"{dataset}_step_{best_model_step}.pt")
-        out_file = os.path.join(self.model_dir, "runs", dataset, "predictions.txt")
+        best_model = os.path.join(self.model_dir, dataset, "checkpoints", f"{dataset}_step_{best_model_step}.pt")
+        out_file = os.path.join(self.model_dir, dataset, "results", "predictions.txt")
         tgt_file = f"../data/{dataset}/tgt-test.txt"
 
         n_outputs = 5
+        beams = 10
         cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n" \
               f"onmt_translate -model {best_model} -gpu 0 --src ../data/{dataset}/src-test.txt " \
-              f"--tgt {tgt_file} --output {out_file} --n_best {n_outputs} --beam_size 10 " \
-              f"--max_length 300 --batch_size 64"
+              f"--tgt {tgt_file} --output {out_file} --n_best {n_outputs} --beam_size {beams} " \
+              f"--max_length 3 --batch_size 64"
 
         os.system(cmd)
 
         # TODO implement evaluation, standardize output format
         predictions = [result.replace(" ", "").replace("\n", "") for result in open(out_file, "r").readlines()]
-        predictions = [predictions[i:i + n_outputs] for i in range(0, len(predictions), n_outputs)]
+        print(predictions)
+        print(len(predictions))
 
+        predictions = [predictions[i:i + n_outputs] for i in range(0, len(predictions), n_outputs)]
+        print(len(predictions))
         targets = [target.replace(" ", "").replace("\n", "") for target in open(tgt_file, "r").readlines()]
 
         reaction_file = os.path.join(os.path.dirname(tgt_file), "test.tsv")
@@ -140,7 +144,7 @@ class OpenNMT(ReactionModel):
         df = pd.DataFrame(rows)
 
         # Save the DataFrame to a CSV file
-        csv_file = f"./runs/{dataset}.all_results.csv"
+        csv_file = f"./{dataset}/results/all_results.csv"
         df.to_csv(csv_file, index=False)
 
 
