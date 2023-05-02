@@ -40,7 +40,7 @@ def main(args):
         # initialization ----------------- model
         assert os.path.exists(args.load_from), f"{args.load_from} does not exist!"
         device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-
+        print("Device: ", device)
         state = torch.load(args.load_from)
         pretrain_args = state["args"]
         pretrain_state_dict = state["state_dict"]

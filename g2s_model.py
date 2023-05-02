@@ -38,9 +38,9 @@ class G2S(ReactionModel):
 
         self.exp_no = 0
 
-        self.bs = 30
+        self.bs = 10
         self.T = 1.0
-        self.nbest = 30
+        self.nbest = 5
         self.mpn_type = "dgat"
 
         self.rel_pos = "emb_only"
@@ -118,7 +118,7 @@ class G2S(ReactionModel):
               f"--valid_bin=./preprocessed/{prefix}/val_0.npz " \
               f"--log_file={prefix}.train.{self.exp_no}.log " \
               f"--vocab_file=./preprocessed/{prefix}/vocab_smiles.txt " \
-              f"--save_dir=./checkpoints/{prefix}.{self.exp_no} " \
+              f"--save_dir=./checkpoints/{dataset}/{prefix}.{self.exp_no} " \
               f"--embed_size=256 " \
               f"--mpn_type={self.mpn_type} " \
               f"--encoder_num_layers={enc_layer} " \
@@ -172,9 +172,9 @@ class G2S(ReactionModel):
         # TODO make this automatic
         number_of_saves = (self.max_steps // self.save_iter) - 1
         last_model = f"model.{self.max_steps}_{number_of_saves}.pt"
-        checkpoint = f"./checkpoints/{prefix}.{self.exp_no}/{last_model}"
+        checkpoint = f"./checkpoints/{dataset}/{prefix}.{self.exp_no}/{last_model}"
 
-        result_file = f"./results/{prefix}.{self.exp_no}.result.txt"
+        result_file = f"./results/{dataset}/{prefix}.{self.exp_no}.result.txt"
         tgt_file = f"../data/{dataset}/tgt-test.txt"
 
         cmd = f"python predict.py " \
@@ -188,7 +188,7 @@ class G2S(ReactionModel):
               f"--log_file={prefix}.predict.{self.exp_no}.log " \
               f"--load_from={checkpoint} " \
               f"--mpn_type={self.mpn_type} " \
-              f"--rel_pos={self.rel_pos} " \
+              f"--rel_pos='$REL_POS' " \
               f"--seed=42 " \
               f"--batch_type=tokens " \
               f"--predict_batch_size=4096 " \
@@ -225,7 +225,7 @@ class G2S(ReactionModel):
         df = pd.DataFrame(rows)
 
         # Save the DataFrame to a CSV file
-        csv_file = f"./results/{prefix}.{self.exp_no}.all_results.csv"
+        csv_file = f"./results/{dataset}/all_results.csv"
         df.to_csv(csv_file, index=False)
 
 
