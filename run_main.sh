@@ -1,7 +1,7 @@
 ###!/usr/local_rwth/bin/zsh
 
 #SBATCH --cpus-per-task=2
-#SBATCH --mem-per-cpu=90G
+#SBATCH --mem-per-cpu=50G
 
 #request one volta gpus (CLAIX18)
 #SBATCH --gres=gpu:volta:1
