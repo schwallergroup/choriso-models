@@ -91,10 +91,10 @@ class OpenNMT(ReactionModel):
                   f"onmt_train -config {tmp.name} -seed 42 -gpu_ranks 0 -param_init 0 -param_init_glorot " \
                   f"-max_generator_batches 32 -batch_type tokens -batch_size 6144 -normalization tokens " \
                   f"-max_grad_norm 0 -accum_count 4 -optim adam -adam_beta1 0.9 -adam_beta2 0.998 -decay_method noam " \
-                  f"-warmup_steps 8000 -learning_rate 2 -label_smoothing 0.0 -layers 4 -hidden_size 8 " \
-                  f"-word_vec_size 8 -encoder_type transformer -decoder_type transformer -dropout 0.1 " \
+                  f"-warmup_steps 8000 -learning_rate 2 -label_smoothing 0.0 -layers 4 -hidden_size 384 " \
+                  f"-word_vec_size 384 -encoder_type transformer -decoder_type transformer -dropout 0.1 " \
                   f"-position_encoding -share_embeddings -global_attention general -global_attention_function softmax " \
-                  f"-self_attn_type scaled-dot -heads 8 -transformer_ff 20" # 48"
+                  f"-self_attn_type scaled-dot -heads 8 -transformer_ff 2048"
 
             os.system(cmd)
 
@@ -109,7 +109,7 @@ class OpenNMT(ReactionModel):
         out_file = os.path.join(self.model_dir, dataset, "results", "predictions.txt")
         tgt_file = f"../data/{dataset}/tgt-test.txt"
 
-        n_outputs = 5
+        n_outputs = 10
         beams = 10
         cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n" \
               f"onmt_translate -model {best_model} -gpu 0 --src ../data/{dataset}/src-test.txt " \

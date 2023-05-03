@@ -40,13 +40,13 @@ class G2S(ReactionModel):
 
         self.bs = 10
         self.T = 1.0
-        self.nbest = 5
+        self.nbest = 10
         self.mpn_type = "dgat"
 
         self.rel_pos = "emb_only"
 
-        self.max_steps = 40
-        self.save_iter = 40
+        self.max_steps = 200000
+        self.save_iter = 5000
 
     def preprocess(self, dataset="cjhif"):
         """Do data preprocessing. Skip if preprocessed data already exists"""
