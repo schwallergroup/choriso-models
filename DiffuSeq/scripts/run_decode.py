@@ -29,6 +29,10 @@ if __name__ == '__main__':
         print(lst)
         checkpoints = sorted(glob.glob(f"{lst}/{args.pattern}*.pt"))[::-1]
 
+        # ADDED
+        # predict only with the last checkpoint
+        checkpoints = [checkpoints[0]]
+
         out_dir = 'generation_outputs'
         if not os.path.isdir(out_dir):
             os.mkdir(out_dir)

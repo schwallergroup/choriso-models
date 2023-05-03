@@ -133,10 +133,8 @@ class DiffuSeq(ReactionModel):
 
         os.system(cmd)
 
-    def predict(self, dataset="cjhif"):
+    def predict_once(self, dataset="cjhif", seed=123):
         """Predict provided data with the reaction model"""
-        torch.multiprocessing.set_sharing_strategy('file_system')
-
         model_file = f"diffuseq_{dataset}_h{self.hidden_dim}_lr{self.lr}" \
                      f"_t{self.diff_steps}_{self.noise_schedule}_{self.schedule_sampler}" \
                      f"_seed{self.seed}"
@@ -146,11 +144,24 @@ class DiffuSeq(ReactionModel):
         cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n " \
               f"python -u run_decode.py " \
               f"--model_dir diffusion_models/{model_file} " \
-              f"--seed 123 --split test"
+              f"--seed {seed} --split test"
 
         print(cmd)
 
         os.system(cmd)
+
+    def predict(self, dataset="cjhif"):
+        """Predict provided data with the reaction model"""
+
+        preds = []
+        seeds = [1, 3, 5, 7, 9, 11, 13, 17, 19, 23]
+        for seed in seeds:
+            # predict with different seeds
+            self.predict_once(dataset=dataset, seed=seed)
+
+            # load predictions
+
+        # save predictions in csv file
 
 
 if __name__ == "__main__":
