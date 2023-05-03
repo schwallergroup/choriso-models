@@ -14,11 +14,11 @@
 module load cuda
 module load intel
 
-export PATH=~/anaconda3/envs/reaction_pred/bin:$PATH
+export PATH=~/anaconda3/envs/reaction_prediction/bin:$PATH
 # conda env
-source activate reaction_pred
+source activate reaction_prediction
 
 export PYTHONPATH=$PYTHONPATH:~/reaction_forward
 
 
-python main.py
+python main.py -model $model -m tp -d $dataset
