@@ -5,10 +5,10 @@
 dataset_name: cjhif
 
 ## Where the samples will be written
-save_data: ./runs
+save_data: "./${{dataset_name}}/results"
 ## Where the vocab(s) will be written
-src_vocab: "./runs/${{dataset_name}}/vocab.src"
-tgt_vocab: "./runs/${{dataset_name}}/vocab.src"
+src_vocab: "./${{dataset_name}}/preprocessed/vocab.src"
+tgt_vocab: "./${{dataset_name}}/preprocessed/vocab.src"
 # Prevent overwriting existing files in the folder
 overwrite: true
 share_vocab: true
@@ -28,7 +28,7 @@ world_size: 1
 gpu_ranks: [0]
 
 # Where to save the checkpoints
-save_model: "./runs/${{dataset_name}}/${{dataset_name}}"
+save_model: "./${{dataset_name}}/checkpoints/${{dataset_name}}"
 save_checkpoint_steps: 200
 keep_checkpoint: 3
 train_steps: 200
@@ -36,4 +36,4 @@ valid_steps: 10000
 report_every: 100
 
 tensorboard: true
-tensorboard_log_dir: ./log_dir
+tensorboard_log_dir: "./${{dataset_name}}/logs"

@@ -40,13 +40,13 @@ class G2S(ReactionModel):
 
         self.bs = 10
         self.T = 1.0
-        self.nbest = 5
+        self.nbest = 10
         self.mpn_type = "dgat"
 
         self.rel_pos = "emb_only"
 
-        self.max_steps = 40
-        self.save_iter = 40
+        self.max_steps = 200000
+        self.save_iter = 5000
 
     def preprocess(self, dataset="cjhif"):
         """Do data preprocessing. Skip if preprocessed data already exists"""
@@ -73,7 +73,7 @@ class G2S(ReactionModel):
               f"--test_src=../data/{dataset}/src-test.txt " \
               f"--test_tgt=../data/{dataset}/tgt-test.txt " \
               f"--log_file={prefix}.preprocess.log " \
-              f"--preprocess_output_path=./preprocessed/{prefix}/ " \
+              f"--preprocess_output_path=./{dataset}/preprocessed/{prefix}/ " \
               f"--seed=42 " \
               f"--max_src_len=1024 " \
               f"--max_tgt_len=1024 " \
@@ -114,11 +114,11 @@ class G2S(ReactionModel):
               f"--task={task} " \
               f"--representation_end=smiles " \
               f"--load_from={load_from} " \
-              f"--train_bin=./preprocessed/{prefix}/train_0.npz " \
-              f"--valid_bin=./preprocessed/{prefix}/val_0.npz " \
+              f"--train_bin=./{dataset}/preprocessed/{prefix}/train_0.npz " \
+              f"--valid_bin=./{dataset}/preprocessed/{prefix}/val_0.npz " \
               f"--log_file={prefix}.train.{self.exp_no}.log " \
-              f"--vocab_file=./preprocessed/{prefix}/vocab_smiles.txt " \
-              f"--save_dir=./checkpoints/{dataset}/{prefix}.{self.exp_no} " \
+              f"--vocab_file=./{dataset}/preprocessed/{prefix}/vocab_smiles.txt " \
+              f"--save_dir=./{dataset}/checkpoints/{prefix}.{self.exp_no} " \
               f"--embed_size=256 " \
               f"--mpn_type={self.mpn_type} " \
               f"--encoder_num_layers={enc_layer} " \
@@ -172,9 +172,9 @@ class G2S(ReactionModel):
         # TODO make this automatic
         number_of_saves = (self.max_steps // self.save_iter) - 1
         last_model = f"model.{self.max_steps}_{number_of_saves}.pt"
-        checkpoint = f"./checkpoints/{dataset}/{prefix}.{self.exp_no}/{last_model}"
+        checkpoint = f"./{dataset}/checkpoints/{prefix}.{self.exp_no}/{last_model}"
 
-        result_file = f"./results/{dataset}/{prefix}.{self.exp_no}.result.txt"
+        result_file = f"./{dataset}/results/{prefix}.{self.exp_no}.result.txt"
         tgt_file = f"../data/{dataset}/tgt-test.txt"
 
         cmd = f"python predict.py " \
@@ -182,7 +182,7 @@ class G2S(ReactionModel):
               f"--do_score " \
               f"--model={self.model_name} " \
               f"--data_name={dataset} " \
-              f"--test_bin=./preprocessed/{prefix}/test_0.npz " \
+              f"--test_bin=./{dataset}/preprocessed/{prefix}/test_0.npz " \
               f"--test_tgt={tgt_file} " \
               f"--result_file={result_file} " \
               f"--log_file={prefix}.predict.{self.exp_no}.log " \
@@ -225,7 +225,7 @@ class G2S(ReactionModel):
         df = pd.DataFrame(rows)
 
         # Save the DataFrame to a CSV file
-        csv_file = f"./results/{dataset}/all_results.csv"
+        csv_file = f"./{dataset}/results/all_results.csv"
         df.to_csv(csv_file, index=False)
 
 
