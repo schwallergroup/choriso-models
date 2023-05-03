@@ -88,6 +88,9 @@ def main(args):
     else:
         raise NotImplementedError("The model does not yet exist.")
 
+    # set pythonpath
+    set_pythonpath(path=os.getcwd())
+
     # change working dir
     os.chdir(reaction_model.name)
 
