@@ -23,4 +23,4 @@ source activate reaction_prediction
 export PYTHONPATH=$PYTHONPATH:~/reaction_forward
 
 
-python main.py -model $model -m tp -d $dataset
+python main.py -model $model -p tp -ds $dataset
