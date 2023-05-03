@@ -155,7 +155,7 @@ class G2S(ReactionModel):
               f"--num_workers=8 " \
               f"--beam_size=5 " \
               f"--predict_min_len=1 " \
-              f"--predict_max_len=512 " \
+              f"--predict_max_len=300 " \
               f"--log_iter=100 " \
               f"--eval_iter=5000 " \
               f"--save_iter={self.save_iter} " \
@@ -196,7 +196,7 @@ class G2S(ReactionModel):
               f"--n_best={self.nbest} " \
               f"--temperature={self.T} " \
               f"--predict_min_len=1 " \
-              f"--predict_max_len=512 " \
+              f"--predict_max_len=300 " \
               f"--log_iter=100 "
 
         os.system(cmd)

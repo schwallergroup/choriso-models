@@ -126,7 +126,7 @@ class DiffuSeq(ReactionModel):
               f"--dataset {dataset} " \
               f"--data_dir {data_dir} " \
               f"--vocab {vocab_file} " \
-              f"--seq_len 512 " \
+              f"--seq_len 300 " \
               f"--schedule_sampler {self.schedule_sampler} "
 
         print(cmd)

@@ -45,13 +45,13 @@ class BenchmarkPipeline:
         self.predict(dataset=dataset)
 
     def run_mode_from_args(self, args):
-        if args.mode == "t":
+        if args.phase == "t":
             self.run_train_pipeline(dataset=args.dataset)
 
-        elif args.mode == "p":
+        elif args.phase == "p":
             self.predict(dataset=args.dataset)
 
-        elif args.mode == "tp":
+        elif args.phase == "tp":
             self.run_pipeline(dataset=args.dataset)
 
         else:

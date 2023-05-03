@@ -114,7 +114,7 @@ class OpenNMT(ReactionModel):
         cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n" \
               f"onmt_translate -model {best_model} -gpu 0 --src ../data/{dataset}/src-test.txt " \
               f"--tgt {tgt_file} --output {out_file} --n_best {n_outputs} --beam_size {beams} " \
-              f"--max_length 3 --batch_size 64"
+              f"--max_length 300 --batch_size 64"
 
         os.system(cmd)
 
