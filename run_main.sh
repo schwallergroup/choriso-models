@@ -3,10 +3,12 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --mem-per-cpu=50G
 
-#request one volta gpus (CLAIX18)
-#SBATCH --gres=gpu:volta:1
+#request one gpu
+#SBATCH --gres=gpu:1
+#SBATCH --partition=gpu
+#SBATCH --qos=gpu
 
-#SBATCH --time=0-72:00:00
+#SBATCH --time=0-96:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=malte.franke@rwth-aachen.de
 
