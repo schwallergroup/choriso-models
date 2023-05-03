@@ -1,4 +1,5 @@
 import argparse
+from utils import set_pythonpath, prepare_parser
 from g2s_model import G2SArgs, G2S
 from onmt_model import OpenNMTArgs, OpenNMT
 from hf_model import HuggingFaceArgs, HuggingFaceTransformer
@@ -71,8 +72,8 @@ def build_parser():
     return parser
 
 
-def main(parser):
-    args = parser.parse_args()
+def main(args):
+
     # TODO this is quite static, make more dynamic
     # instantiate model depending on args
     if args.model in ["Graph2SMILES", 'G2S', 'g2s', 'graph2smiles']:
@@ -90,12 +91,14 @@ def main(parser):
     pipeline = BenchmarkPipeline(model=reaction_model)
 
     # call pipeline function based on args
-    if args.train:
-        pipeline.run_train_pipeline()
-    elif args.predict:
-        pipeline.predict(dataset=args.dataset)
+    pipeline.run_mode_from_args(args)
 
 
 if __name__ == "__main__":
-    argparser = build_parser()
-    main(argparser)
+    parser = argparse.ArgumentParser(description='Benchmark parser')
+
+    prepare_parser(parser)
+    parser.add_argument("-model", type=str, default="ONMT", help="Model to use for benchmarking")
+    args = parser.parse_args()
+
+    main(args)
