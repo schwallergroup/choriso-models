@@ -98,7 +98,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Benchmark parser')
 
     prepare_parser(parser)
-    parser.add_argument("-model", type=str, default="ONMT", help="Model to use for benchmarking")
+    parser.add_argument("--model", aliases=["-model"], type=str, default="ONMT", help="Model to use for benchmarking")
+    parser.add_argument('--dataset', aliases=['-ds', '-dataset'], type=str, default='cjhif',
+                        help='Dataset to use for training and evaluation')
     args = parser.parse_args()
 
     main(args)

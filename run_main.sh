@@ -1,4 +1,4 @@
-###!/usr/local_rwth/bin/zsh
+#!/bin/bash
 
 #SBATCH --cpus-per-task=2
 #SBATCH --mem-per-cpu=50G

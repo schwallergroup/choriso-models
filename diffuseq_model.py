@@ -43,6 +43,13 @@ class DiffuSeq(ReactionModel):
 
         self.args = DiffuSeqArgs()
 
+        self.hidden_dim = 128
+        self.lr = 0.0001
+        self.diff_steps = 2000
+        self.noise_schedule = "sqrt"
+        self.schedule_sampler = "lossaware"
+        self.seed = 42
+
     def preprocess(self, dataset="cjhif"):
         """Do data preprocessing. Skip if preprocessed data already exists"""
         # TODO make flexible for different datasets
@@ -108,19 +115,19 @@ class DiffuSeq(ReactionModel):
               f"--nproc_per_node=1 " \
               f"--master_port=12233 " \
               f"--use_env run_train.py " \
-              f"--diff_steps 2000 " \
-              f"--lr 0.0001 " \
+              f"--diff_steps {self.diff_steps} " \
+              f"--lr {self.lr} " \
               f"--learning_steps 80000 " \
               f"--save_interval 10000 " \
-              f"--seed 102 " \
-              f"--noise_schedule sqrt " \
-              f"--hidden_dim 128 " \
+              f"--seed {self.seed} " \
+              f"--noise_schedule {self.noise_schedule} " \
+              f"--hidden_dim {self.hidden_dim} " \
               f"--bsz 2048 " \
               f"--dataset {dataset} " \
               f"--data_dir {data_dir} " \
               f"--vocab {vocab_file} " \
-              f"--seq_len 128 " \
-              f"--schedule_sampler lossaware "
+              f"--seq_len 512 " \
+              f"--schedule_sampler {self.schedule_sampler} "
 
         print(cmd)
 
@@ -130,15 +137,15 @@ class DiffuSeq(ReactionModel):
         """Predict provided data with the reaction model"""
         torch.multiprocessing.set_sharing_strategy('file_system')
 
-        model_file = f"diffuseq_{args.dataset}_h{args.hidden_dim}_lr{args.lr}" \
-                     f"_t{args.diff_steps}_{args.noise_schedule}_{args.schedule_sampler}" \
-                     f"_seed{args.seed}"
+        model_file = f"diffuseq_{dataset}_h{self.hidden_dim}_lr{self.lr}" \
+                     f"_t{self.diff_steps}_{self.noise_schedule}_{self.schedule_sampler}" \
+                     f"_seed{self.seed}"
 
         os.chdir(os.path.join(self.model_dir, "scripts"))
 
         cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n " \
               f"python -u run_decode.py " \
-              f"--model_dir diffusion_models/diffuseq_final_model " \
+              f"--model_dir diffusion_models/{model_file} " \
               f"--seed 123 --split test"
 
         print(cmd)
