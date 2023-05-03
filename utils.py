@@ -11,9 +11,10 @@ from Graph2SMILES.utils.data_utils import tokenize_smiles
 
 
 def prepare_parser(parser):
-    parser.add_argument('--mode', '-m', type=str, default='train', choices=['t', 'p', 'tp'],
+    parser.add_argument('--phase', '-phase', '--p', '-p', type=str, default='train', choices=['t', 'p', 'tp'],
                         help='Mode to run the model in. Either train(t) or predict(p)')
-    parser.add_argument('--dataset', '-d', type=str, default='cjhif', help='Dataset to use.')
+    parser.add_argument('--dataset', '-dataset', '--ds', '-ds', '--d', '-d', type=str, default='cjhif',
+                        help='Dataset to use.')
 
 
 def overwrite_config_with_tokenizer(config, tokenizer):
