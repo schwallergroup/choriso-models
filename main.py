@@ -1,4 +1,5 @@
 import argparse
+import os
 from utils import set_pythonpath, prepare_parser
 from g2s_model import G2SArgs, G2S
 from onmt_model import OpenNMTArgs, OpenNMT
@@ -86,6 +87,9 @@ def main(args):
         reaction_model = Neuralsym()
     else:
         raise NotImplementedError("The model does not yet exist.")
+
+    # change working dir
+    os.chdir(reaction_model.name)
 
     # instantiate the pipeline with the model
     pipeline = BenchmarkPipeline(model=reaction_model)
