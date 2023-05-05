@@ -117,8 +117,8 @@ class DiffuSeq(ReactionModel):
               f"--use_env run_train.py " \
               f"--diff_steps {self.diff_steps} " \
               f"--lr {self.lr} " \
-              f"--learning_steps 80000 " \
-              f"--save_interval 10000 " \
+              f"--learning_steps 8 " \
+              f"--save_interval 8 " \
               f"--seed {self.seed} " \
               f"--noise_schedule {self.noise_schedule} " \
               f"--hidden_dim {self.hidden_dim} " \
@@ -153,13 +153,45 @@ class DiffuSeq(ReactionModel):
     def predict(self, dataset="cjhif"):
         """Predict provided data with the reaction model"""
 
-        preds = []
-        seeds = [1, 3, 5, 7, 9, 11, 13, 17, 19, 23]
+        model_file = f"diffuseq_{dataset}_h{self.hidden_dim}_lr{self.lr}" \
+                     f"_t{self.diff_steps}_{self.noise_schedule}_{self.schedule_sampler}_seed{self.seed}"
+
+        all_results = {}
+        seeds = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89]
         for seed in seeds:
             # predict with different seeds
             self.predict_once(dataset=dataset, seed=seed)
 
+            # result file location
+            model_base_name = os.path.basename(
+                os.path.split(model_file)[0]) + f'.{os.path.split(model_file)[1]}'
+            print(model_base_name)
+            out_dir = os.path.join("generation_outputs", f"{model_base_name.split('.ema')[0]}")
+            print(out_dir)
+            if not os.path.isdir(out_dir):
+                os.mkdir(out_dir)
+
+            out_path = os.path.join(out_dir, f"ema{model_base_name.split('.ema')[1]}.samples")
+            print(out_path)
+            if not os.path.isdir(out_path):
+                os.mkdir(out_path)
+            out_path = os.path.join(out_path, f"seed{seed}_step{args.clamp_step}.json")
+            print(out_path)
+
+            breakpoint()
             # load predictions
+            for idx, line in enumerate(open(out_path, "r")):
+                result_dict = json.loads(line)
+
+                products = result_dict["reference"]
+                pred = result_dict["recover"]
+                # TODO get rid of spaces and special tokens, then canonicalize
+
+                if not all_results[f"test_idx_{idx}"]:
+                    all_results[f"test_idx_{idx}"] = {"products": [], "pred": []}
+
+                all_results[f"test_idx_{idx}"]["products"].append(products)
+                all_results[f"test_idx_{idx}"]["pred"].append(pred)
 
         # save predictions in csv file
 
