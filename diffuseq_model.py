@@ -175,7 +175,7 @@ class DiffuSeq(ReactionModel):
             print(out_path)
             if not os.path.isdir(out_path):
                 os.mkdir(out_path)
-            out_path = os.path.join(out_path, f"seed{seed}_step{args.clamp_step}.json")
+            out_path = os.path.join(out_path, f"seed{seed}_step0.json")  # 0 is hardcoded, where to get clamp-step from?
             print(out_path)
 
             breakpoint()
