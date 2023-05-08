@@ -188,20 +188,18 @@ class DiffuSeq(ReactionModel):
             for idx, line in enumerate(open(out_path, "r")):
                 result_dict = json.loads(line)
 
-                products = result_dict["reference"].replace(" ", "")
-                for token in special_tokens:
-                    products = products.replace(token, "")
-                products = canonicalize_smiles(products)
+                if not f"test_idx_{idx}" in all_results.keys():
+
+                    targets = result_dict["reference"].replace(" ", "")
+                    for token in special_tokens:
+                        targets = targets.replace(token, "")
+                    targets = canonicalize_smiles(targets)
+                    all_results[f"test_idx_{idx}"] = {"targets": targets, "preds": []}
 
                 pred = result_dict["recover"].replace(" ", "")
                 pred = canonicalize_smiles(pred)
-                # TODO get rid of spaces and special tokens, then canonicalize
 
-                if not f"test_idx_{idx}" in all_results.keys():
-                    all_results[f"test_idx_{idx}"] = {"products": [], "pred": []}
-
-                all_results[f"test_idx_{idx}"]["products"].append(products)
-                all_results[f"test_idx_{idx}"]["pred"].append(pred)
+                all_results[f"test_idx_{idx}"]["preds"].append(pred)
 
         tgt_file = os.path.join(os.path.dirname(self.model_dir), "data", f"{dataset}", "tgt-test.txt")
         reaction_file = os.path.join(os.path.dirname(tgt_file), "test.tsv")
@@ -213,8 +211,8 @@ class DiffuSeq(ReactionModel):
         # Create a list of dictionaries representing each row of the DataFrame
         rows = []
         for rxn, test_idx in zip(reactions, all_results):
-            prod = all_results[test_idx]["products"]
-            preds = all_results[test_idx]["pred"]
+            prod = all_results[test_idx]["targets"]
+            preds = all_results[test_idx]["preds"]
             row = {"canonical_rxn": rxn, "target": prod}
             row.update({pred_col: pred for pred_col, pred in zip(pred_cols, preds)})
             rows.append(row)
