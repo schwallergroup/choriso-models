@@ -5,6 +5,7 @@ import wandb
 import tempfile
 import pandas as pd
 import json
+import csv
 from tokenizers import models as tokenizer_models
 from tokenizers import Regex, Tokenizer, pre_tokenizers
 from tokenizers.trainers import WordLevelTrainer
@@ -157,7 +158,7 @@ class DiffuSeq(ReactionModel):
                      f"_t{self.diff_steps}_{self.noise_schedule}_{self.schedule_sampler}_seed{self.seed}"
 
         all_results = {}
-        seeds = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89]
+        seeds = [1, 2, 3]  # , 5, 8, 13, 21, 34, 55, 89]
         for seed in seeds:
             # predict with different seeds
             self.predict_once(dataset=dataset, seed=seed)
@@ -183,7 +184,6 @@ class DiffuSeq(ReactionModel):
                 out_path = os.path.join(model_results, f"seed{seed}_step0.json")  # 0 is hardcoded, where to get clamp-step from?
                 print(out_path)
 
-            breakpoint()
             # load predictions
             for idx, line in enumerate(open(out_path, "r")):
                 result_dict = json.loads(line)
@@ -192,14 +192,19 @@ class DiffuSeq(ReactionModel):
                 pred = result_dict["recover"]
                 # TODO get rid of spaces and special tokens, then canonicalize
 
-                if not all_results[f"test_idx_{idx}"]:
+                if not f"test_idx_{idx}" in all_results.keys():
                     all_results[f"test_idx_{idx}"] = {"products": [], "pred": []}
 
                 all_results[f"test_idx_{idx}"]["products"].append(products)
                 all_results[f"test_idx_{idx}"]["pred"].append(pred)
 
         # save predictions in csv file
-
+        save_file = os.path.join(self.model_dir, f"{dataset}", "results", "temp_results.csv")
+        with open(save_file, "w") as f:
+            writer = csv.writer(f)
+            writer.writerow(["products", "pred"])
+            for key, value in all_results.items():
+                writer.writerow([value["products"], value["pred"]])
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='DiffuSeq parser')
