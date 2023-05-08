@@ -45,7 +45,7 @@ class DiffuSeq(ReactionModel):
 
         self.hidden_dim = 128
         self.lr = 0.0001
-        self.diff_steps = 2000
+        self.diff_steps = 1000
         self.noise_schedule = "sqrt"
         self.schedule_sampler = "lossaware"
         self.seed = 42
@@ -144,7 +144,7 @@ class DiffuSeq(ReactionModel):
         cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n " \
               f"python -u run_decode.py " \
               f"--model_dir diffusion_models/{model_file} " \
-              f"--seed {seed} --split test --bsz 30"
+              f"--seed {seed} --split test --bsz 30 --step {self.diff_steps}"
 
         print(cmd)
 
@@ -153,11 +153,12 @@ class DiffuSeq(ReactionModel):
     def predict(self, dataset="cjhif"):
         """Predict provided data with the reaction model"""
 
+        special_tokens = ['[START]', '[END]', '[UNK]', '[PAD]']
         model_file = f"diffuseq_{dataset}_h{self.hidden_dim}_lr{self.lr}" \
                      f"_t{self.diff_steps}_{self.noise_schedule}_{self.schedule_sampler}_seed{self.seed}"
 
         all_results = {}
-        seeds = [1, 2, 3]  # , 5, 8, 13, 21, 34, 55, 89]
+        seeds = [1, 2] #, 3, 5, 8, 13, 21, 34, 55, 89]
         for seed in seeds:
             # predict with different seeds
             self.predict_once(dataset=dataset, seed=seed)
@@ -187,8 +188,13 @@ class DiffuSeq(ReactionModel):
             for idx, line in enumerate(open(out_path, "r")):
                 result_dict = json.loads(line)
 
-                products = result_dict["reference"]
+                products = result_dict["reference"].replace(" ", "")
+                products = canonicalize_smiles(products)
+
                 pred = result_dict["recover"].replace(" ", "")
+                for token in special_tokens:
+                    pred = pred.replace(token, "")
+
                 pred = canonicalize_smiles(pred)
                 # TODO get rid of spaces and special tokens, then canonicalize
 
@@ -198,19 +204,18 @@ class DiffuSeq(ReactionModel):
                 all_results[f"test_idx_{idx}"]["products"].append(products)
                 all_results[f"test_idx_{idx}"]["pred"].append(pred)
 
-
-        tgt_file = f"../data/{dataset}/tgt-test.txt"
+        tgt_file = os.path.join(os.path.dirname(self.model_dir), "data", f"{dataset}", "tgt-test.txt")
         reaction_file = os.path.join(os.path.dirname(tgt_file), "test.tsv")
         reactions = pd.read_csv(reaction_file, sep="\t", error_bad_lines=False)["canonic_rxn"].tolist()
 
         # Create a list of column names for the predictions
-        pred_cols = [f"pred_{i}" for i in range(len(all_results["test_idx_0}"]["pred"]))]
+        pred_cols = [f"pred_{i}" for i in range(len(all_results["test_idx_0"]["pred"]))]
 
         # Create a list of dictionaries representing each row of the DataFrame
         rows = []
-        for idx, rxn, prod_preds_dict in enumerate(zip(reactions, all_results)):
-            prod = prod_preds_dict[f"test_idx_{idx}"]["products"]
-            preds = prod_preds_dict[f"test_idx_{idx}"]["pred"]
+        for rxn, test_idx in zip(reactions, all_results):
+            prod = all_results[test_idx]["products"]
+            preds = all_results[test_idx]["pred"]
             row = {"canonical_rxn": rxn, "target": prod}
             row.update({pred_col: pred for pred_col, pred in zip(pred_cols, preds)})
             rows.append(row)
@@ -219,7 +224,7 @@ class DiffuSeq(ReactionModel):
         df = pd.DataFrame(rows)
 
         # Save the DataFrame to a CSV file
-        csv_file = f"./{dataset}/results/all_results.csv"
+        csv_file = os.path.join(self.model_dir, dataset, "results", "all_results.csv")
         df.to_csv(csv_file, index=False)
 
 
