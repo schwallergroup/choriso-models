@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--notes', type=str, default='-', help='as training notes or specifical args')
     parser.add_argument('--app', type=str, default='', help='other input args')
-    
+
     args = parser.parse_args()
 
     # set working dir to the upper folder
@@ -49,9 +49,9 @@ if __name__ == '__main__':
     Model_FILE = f"diffuseq_{args.dataset}_h{args.hidden_dim}_lr{args.lr}" \
                 f"_t{args.diff_steps}_{args.noise_schedule}_{args.schedule_sampler}" \
                 f"_seed{args.seed}"
-    if args.notes:
+    """if args.notes:
         args.notes += time.strftime("%Y%m%d-%H:%M:%S")
-        Model_FILE = Model_FILE + f'_{args.notes}'
+        Model_FILE = Model_FILE + f'_{args.notes}'"""
     Model_FILE = os.path.join(folder_name, Model_FILE)
 
     if int(os.environ['LOCAL_RANK']) == 0:
