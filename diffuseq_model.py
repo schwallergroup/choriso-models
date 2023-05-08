@@ -5,6 +5,7 @@ import wandb
 import tempfile
 import pandas as pd
 import json
+import csv
 from tokenizers import models as tokenizer_models
 from tokenizers import Regex, Tokenizer, pre_tokenizers
 from tokenizers.trainers import WordLevelTrainer
@@ -183,7 +184,6 @@ class DiffuSeq(ReactionModel):
                 out_path = os.path.join(model_results, f"seed{seed}_step0.json")  # 0 is hardcoded, where to get clamp-step from?
                 print(out_path)
 
-            breakpoint()
             # load predictions
             for idx, line in enumerate(open(out_path, "r")):
                 result_dict = json.loads(line)
@@ -198,7 +198,28 @@ class DiffuSeq(ReactionModel):
                 all_results[f"test_idx_{idx}"]["products"].append(products)
                 all_results[f"test_idx_{idx}"]["pred"].append(pred)
 
-        # save predictions in csv file
+        tgt_file = f"../data/{dataset}/tgt-test.txt"
+        reaction_file = os.path.join(os.path.dirname(tgt_file), "test.tsv")
+        reactions = pd.read_csv(reaction_file, sep="\t", error_bad_lines=False)["canonic_rxn"].tolist()
+
+        # Create a list of column names for the predictions
+        pred_cols = [f"pred_{i}" for i in range(len(all_results["test_idx_0}"]["pred"]))]
+
+        # Create a list of dictionaries representing each row of the DataFrame
+        rows = []
+        for idx, rxn, prod_preds_dict in enumerate(zip(reactions, all_results)):
+            prod = prod_preds_dict[f"test_idx_{idx}"]["products"]
+            preds = prod_preds_dict[f"test_idx_{idx}"]["pred"]
+            row = {"canonical_rxn": rxn, "target": prod}
+            row.update({pred_col: pred for pred_col, pred in zip(pred_cols, preds)})
+            rows.append(row)
+
+        # Create the DataFrame
+        df = pd.DataFrame(rows)
+
+        # Save the DataFrame to a CSV file
+        csv_file = f"./{dataset}/results/all_results.csv"
+        df.to_csv(csv_file, index=False)
 
 
 if __name__ == "__main__":
