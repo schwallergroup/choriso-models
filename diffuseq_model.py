@@ -166,17 +166,22 @@ class DiffuSeq(ReactionModel):
             model_base_name = os.path.basename(
                 os.path.split(model_file)[0]) + f'{os.path.split(model_file)[1]}'
             print(model_base_name)
-            out_dir = os.path.join(self.model_dir, "generation_outputs", f"{model_base_name.split('.ema')[0]}")
+            out_dir = os.path.join(self.model_dir, "generation_outputs", f"{model_base_name}")
             print(out_dir)
             if not os.path.isdir(out_dir):
                 os.mkdir(out_dir)
 
-            out_path = os.path.join(out_dir, f"ema{model_base_name.split('.ema')[1]}.samples")
-            print(out_path)
-            if not os.path.isdir(out_path):
-                os.mkdir(out_path)
-            out_path = os.path.join(out_path, f"seed{seed}_step0.json")  # 0 is hardcoded, where to get clamp-step from?
-            print(out_path)
+            for model_results in os.listdir(out_dir):
+                if not "ema" in model_results:
+                    continue
+
+                model_results = os.path.join(out_dir, model_results)
+
+                print(model_results)
+                if not os.path.isdir(model_results):
+                    os.mkdir(model_results)
+                out_path = os.path.join(model_results, f"seed{seed}_step0.json")  # 0 is hardcoded, where to get clamp-step from?
+                print(out_path)
 
             breakpoint()
             # load predictions
