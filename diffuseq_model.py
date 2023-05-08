@@ -13,7 +13,7 @@ from transformers import PreTrainedTokenizerFast
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from model_args import ReactionModelArgs
-from utils import csv_to_jsonl, prepare_parser, set_pythonpath
+from utils import csv_to_jsonl, prepare_parser, set_pythonpath, canonicalize_smiles
 import torch.multiprocessing
 
 
@@ -189,7 +189,8 @@ class DiffuSeq(ReactionModel):
                 result_dict = json.loads(line)
 
                 products = result_dict["reference"]
-                pred = result_dict["recover"]
+                pred = result_dict["recover"].replace(" ", "")
+                pred = canonicalize_smiles(pred)
                 # TODO get rid of spaces and special tokens, then canonicalize
 
                 if not f"test_idx_{idx}" in all_results.keys():
