@@ -164,9 +164,9 @@ class DiffuSeq(ReactionModel):
 
             # result file location
             model_base_name = os.path.basename(
-                os.path.split(model_file)[0]) + f'.{os.path.split(model_file)[1]}'
+                os.path.split(model_file)[0]) + f'{os.path.split(model_file)[1]}'
             print(model_base_name)
-            out_dir = os.path.join("generation_outputs", f"{model_base_name.split('.ema')[0]}")
+            out_dir = os.path.join(self.model_dir, "generation_outputs", f"{model_base_name.split('.ema')[0]}")
             print(out_dir)
             if not os.path.isdir(out_dir):
                 os.mkdir(out_dir)

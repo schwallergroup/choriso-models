@@ -5,6 +5,7 @@ from g2s_model import G2SArgs, G2S
 from onmt_model import OpenNMTArgs, OpenNMT
 from hf_model import HuggingFaceArgs, HuggingFaceTransformer
 from neuralsym_model import NeuralsymArgs, Neuralsym
+from diffuseq_model import DiffuSeq
 from benchmark_models import BenchmarkPipeline
 
 
@@ -85,6 +86,8 @@ def main(args):
         reaction_model = HuggingFaceTransformer()
     elif args.model in ["Neuralsym", 'NS', 'ns', 'neuralsym', 'NeuralSym']:
         reaction_model = Neuralsym()
+    elif args.model in ["DiffuSeq", "diffuseq", "diffusion"]:
+        reaction_model = DiffuSeq()
     else:
         raise NotImplementedError("The model does not yet exist.")
 
