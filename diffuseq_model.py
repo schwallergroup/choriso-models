@@ -5,7 +5,6 @@ import wandb
 import tempfile
 import pandas as pd
 import json
-import csv
 from tokenizers import models as tokenizer_models
 from tokenizers import Regex, Tokenizer, pre_tokenizers
 from tokenizers.trainers import WordLevelTrainer
@@ -13,7 +12,7 @@ from transformers import PreTrainedTokenizerFast
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from model_args import ReactionModelArgs
-from utils import csv_to_jsonl, prepare_parser, set_pythonpath
+from utils import csv_to_jsonl, prepare_parser, set_pythonpath, canonicalize_smiles
 import torch.multiprocessing
 
 
@@ -158,7 +157,7 @@ class DiffuSeq(ReactionModel):
                      f"_t{self.diff_steps}_{self.noise_schedule}_{self.schedule_sampler}_seed{self.seed}"
 
         all_results = {}
-        seeds = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89]
+        seeds = [1, 2, 3]  # , 5, 8, 13, 21, 34, 55, 89]
         for seed in seeds:
             # predict with different seeds
             self.predict_once(dataset=dataset, seed=seed)
@@ -189,14 +188,16 @@ class DiffuSeq(ReactionModel):
                 result_dict = json.loads(line)
 
                 products = result_dict["reference"]
-                pred = result_dict["recover"]
+                pred = result_dict["recover"].replace(" ", "")
+                pred = canonicalize_smiles(pred)
                 # TODO get rid of spaces and special tokens, then canonicalize
 
-                if not all_results[f"test_idx_{idx}"]:
+                if not f"test_idx_{idx}" in all_results.keys():
                     all_results[f"test_idx_{idx}"] = {"products": [], "pred": []}
 
                 all_results[f"test_idx_{idx}"]["products"].append(products)
                 all_results[f"test_idx_{idx}"]["pred"].append(pred)
+
 
         tgt_file = f"../data/{dataset}/tgt-test.txt"
         reaction_file = os.path.join(os.path.dirname(tgt_file), "test.tsv")
