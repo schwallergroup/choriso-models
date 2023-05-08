@@ -136,8 +136,11 @@ def main():
     else:
         iterator = iter(all_test_data)
 
+    it = 0
     for cond in iterator:
-
+        if it == 2:
+            break
+        it += 1
         if not cond:  # Barrier for Remainder
             for i in range(world_size):
                 dist.barrier()
