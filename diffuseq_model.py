@@ -144,7 +144,7 @@ class DiffuSeq(ReactionModel):
         cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n " \
               f"python -u run_decode.py " \
               f"--model_dir diffusion_models/{model_file} " \
-              f"--seed {seed} --split test"
+              f"--seed {seed} --split test --bsz 30"
 
         print(cmd)
 
@@ -172,7 +172,7 @@ class DiffuSeq(ReactionModel):
                 os.mkdir(out_dir)
 
             for model_results in os.listdir(out_dir):
-                if not "ema" in model_results:
+                if not ".samples" in model_results:
                     continue
 
                 model_results = os.path.join(out_dir, model_results)
