@@ -31,10 +31,13 @@ class BenchmarkPipeline:
         train_tracker.stop()
 
     def predict(self, dataset):
+        tracker_path = f"{self.model.model_dir}/{dataset}/results"
+        if not os.path.exists(tracker_path):
+            os.makedirs(tracker_path)
         predict_tracker = eco2ai.Tracker(
             project_name=f"{self.model.name}_benchmark",
             experiment_description=f"predict {self.model.name} model",
-            file_name=f"{self.model.model_dir}/{dataset}/results/predict_emission.csv"
+            file_name=f"{tracker_path}/predict_emission.csv"
         )
         predict_tracker.start()
         self.model.predict(dataset=dataset)
