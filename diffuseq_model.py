@@ -189,12 +189,11 @@ class DiffuSeq(ReactionModel):
                 result_dict = json.loads(line)
 
                 products = result_dict["reference"].replace(" ", "")
+                for token in special_tokens:
+                    products = products.replace(token, "")
                 products = canonicalize_smiles(products)
 
                 pred = result_dict["recover"].replace(" ", "")
-                for token in special_tokens:
-                    pred = pred.replace(token, "")
-
                 pred = canonicalize_smiles(pred)
                 # TODO get rid of spaces and special tokens, then canonicalize
 
