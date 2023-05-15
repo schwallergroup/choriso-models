@@ -1,0 +1,2 @@
+id,project_name,experiment_description,epoch,start_time,duration(s),power_consumption(kWh),CO2_emissions(kg),CPU_name,GPU_name,OS,region/country,cost
+25db3eb3-cfa9-47aa-90ad-44abad4425b3,Graph2SMILES_benchmark,predict Graph2SMILES model,N/A,2023-05-14 11:29:37,545.8079471588135,0.03469220315125022,0.0019138300790418694,"Intel(R) Xeon(R) Gold 6240 CPU @ 2.60GHz/2 device(s), TDP:150.0",Tesla V100-SXM2-32GB 4 device(s),Linux,CH/Vaud,0
