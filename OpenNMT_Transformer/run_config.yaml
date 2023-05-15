@@ -29,9 +29,9 @@ gpu_ranks: [0]
 
 # Where to save the checkpoints
 save_model: "./${{dataset_name}}/checkpoints/${{dataset_name}}"
-save_checkpoint_steps: 200
+save_checkpoint_steps: 20000
 keep_checkpoint: 3
-train_steps: 200
+train_steps: 200000
 valid_steps: 10000
 report_every: 100
 

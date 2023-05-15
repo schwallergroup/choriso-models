@@ -1,5 +1,6 @@
 import argparse
 import os
+import torch
 from utils import set_pythonpath, prepare_parser
 from g2s_model import G2SArgs, G2S
 from onmt_model import OpenNMTArgs, OpenNMT
