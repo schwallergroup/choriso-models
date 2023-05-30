@@ -4,9 +4,6 @@ import torch
 from utils import set_pythonpath, prepare_parser
 from g2s_model import G2SArgs, G2S
 from onmt_model import OpenNMTArgs, OpenNMT
-from hf_model import HuggingFaceArgs, HuggingFaceTransformer
-from neuralsym_model import NeuralsymArgs, Neuralsym
-from diffuseq_model import DiffuSeq
 from benchmark_models import BenchmarkPipeline
 
 
@@ -23,19 +20,11 @@ def get_base_parsers():
     parser_g2s = subparsers.add_parser('Graph2SMILES', aliases=['G2S', 'g2s', 'graph2smiles'],
                                        help='Graph2SMILES model')
     parser_onmt = subparsers.add_parser('OpenNMT', aliases=['ONMT', 'onmt', 'opennmt'], help='OpenNMT model')
-    parser_hf = subparsers.add_parser('HuggingFace', aliases=['HF', 'hf', 'huggingface', 'Huggingface'],
-                                      help='Huggingface model')
-    parser_ns = subparsers.add_parser('Neuralsym', aliases=['NS', 'ns', 'neuralsym', 'NeuralSym'],
-                                      help='Neuralsym model')
 
     return parser, {"G2S": {"base_parser": parser_g2s,
                             "args_class": G2SArgs()},
                     "ONMT": {"base_parser": parser_onmt,
-                             "args_class": OpenNMTArgs()},
-                    "NeuralSym": {"base_parser": parser_ns,
-                                  "args_class": NeuralsymArgs()},}
-                    # "HF": {"base_parser": parser_hf,
-                    #       "args_class": HuggingFaceArgs()}}
+                             "args_class": OpenNMTArgs()},}
 
 
 def add_mode_subparser(model_parser):
@@ -83,12 +72,6 @@ def main(args):
         reaction_model = G2S()
     elif args.model in ["OpenNMT", 'ONMT', 'onmt', 'opennmt']:
         reaction_model = OpenNMT()
-    elif args.model in ["HuggingFace", 'HF', 'hf', 'huggingface', 'Huggingface']:
-        reaction_model = HuggingFaceTransformer()
-    elif args.model in ["Neuralsym", 'NS', 'ns', 'neuralsym', 'NeuralSym']:
-        reaction_model = Neuralsym()
-    elif args.model in ["DiffuSeq", "diffuseq", "diffusion"]:
-        reaction_model = DiffuSeq()
     else:
         raise NotImplementedError("The model does not yet exist.")
 

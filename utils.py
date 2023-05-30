@@ -126,35 +126,6 @@ def prepare_data(data: pd.DataFrame, rsmiles_col="SMILES"):
     return data
 
 
-def random_split(data: pd.DataFrame, val_percent, test_percent):
-    """Prepare a random data split, based on the given data and percentages."""
-    val_size = int(val_percent * len(data))
-    test_size = int(test_percent * len(data))
-
-    np.random.shuffle(data.values)
-
-    test_data = data[:test_size]
-    val_data = data[test_size:test_size + val_size]
-    train_data = data[test_size + val_size:]
-
-    return train_data, val_data, test_data
-
-
-class ReactionForwardDataset(torch.utils.data.Dataset):
-    """Class wrapper for reaction forward prediction data. Adapted from
-    https://huggingface.co/transformers/v3.2.0/custom_datasets.html"""
-
-    def __init__(self, tokenizer_outs):
-        self.tokenizer_outs = tokenizer_outs
-
-    def __getitem__(self, idx):
-        item = {key: torch.tensor(val[idx]) for key, val in self.tokenizer_outs.items()}
-        return item
-
-    def __len__(self):
-        return len(self.tokenizer_outs["labels"])
-
-
 def csv_to_txt(data_dir: str):
     """Converts a train, val and test files to src and tgt txt files."""
     file_names = ["test", "val", "train"]
