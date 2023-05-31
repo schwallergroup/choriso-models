@@ -57,8 +57,6 @@ class OpenNMT(ReactionModel):
     def preprocess(self, dataset="cjhif"):
         """Do data preprocessing. Skip if preprocessed data already exists"""
         data_dir = os.path.join(os.path.dirname(self.model_dir), "data", dataset)
-        # transfer the tsv files, if not yet done. Please set clone_name to the name of your git clone of the dataset
-        self.setup_tsv(dataset=dataset, clone_name="cjhif-dataset")
 
         csv_to_txt(data_dir)
         with open("run_config.yaml", "r") as yaml_file:

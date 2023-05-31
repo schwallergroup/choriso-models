@@ -52,9 +52,6 @@ class G2S(ReactionModel):
         """Do data preprocessing. Skip if preprocessed data already exists"""
         data_dir = os.path.join(os.path.dirname(self.model_dir), "data", dataset)
 
-        # transfer the tsv files, if not yet done. Please set clone_name to the name of your git clone of the dataset
-        self.setup_tsv(dataset=dataset, clone_name="cjhif-dataset")
-
         csv_to_txt(data_dir)
 
         prefix = f"{dataset}_{self.model_name}"

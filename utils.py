@@ -25,14 +25,6 @@ def overwrite_config_with_tokenizer(config, tokenizer):
     return config
 
 
-def transfer_data(origin_folder, destination):
-    files = ["train.tsv", "val.tsv", "test.tsv"]
-    files_to_copy = [os.path.join(origin_folder, file) for file in files if not os.path.exists(os.path.join(destination, file))]
-    if len(files_to_copy) > 0:
-        files_to_copy = " ".join(files_to_copy)
-        os.system(f"cp {files_to_copy} {destination}")
-
-
 def set_pythonpath(path):
     # Get the current value of PYTHONPATH (if it exists)
     pythonpath = os.getenv('PYTHONPATH', '')
