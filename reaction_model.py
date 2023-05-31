@@ -1,7 +1,6 @@
 import abc
 import os
 from model_args import ReactionModelArgs
-from utils import transfer_data
 
 
 class ReactionModel(abc.ABC):
