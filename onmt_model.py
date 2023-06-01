@@ -7,7 +7,7 @@ import pandas as pd
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from model_args import ReactionModelArgs
-from utils import prepare_parser, csv_to_txt, set_pythonpath
+from utils import prepare_parser, csv_to_txt, set_pythonpath, standardize_output
 
 from onmt.opts import train_opts, translate_opts, dynamic_prepare_opts, config_opts
 
@@ -105,45 +105,27 @@ class OpenNMT(ReactionModel):
         # TODO make best model configurable
         best_model = os.path.join(self.model_dir, dataset, "checkpoints", f"{dataset}_step_{best_model_step}.pt")
         out_file = os.path.join(self.model_dir, dataset, "results", "predictions.txt")
+        src_file = f"../data/{dataset}/src-test.txt"
         tgt_file = f"../data/{dataset}/tgt-test.txt"
 
         n_outputs = 10
         beams = 10
         cmd = f"export MKL_SERVICE_FORCE_INTEL=1\n" \
-              f"onmt_translate -model {best_model} -gpu 0 --src ../data/{dataset}/src-test.txt " \
+              f"onmt_translate -model {best_model} -gpu 0 --src {src_file} " \
               f"--tgt {tgt_file} --output {out_file} --n_best {n_outputs} --beam_size {beams} " \
               f"--max_length 512 --batch_size 64"
 
         os.system(cmd)
 
-        # TODO implement evaluation, standardize output format
         predictions = [result.replace(" ", "").replace("\n", "") for result in open(out_file, "r").readlines()]
-        print(predictions)
-        print(len(predictions))
-
         predictions = [predictions[i:i + n_outputs] for i in range(0, len(predictions), n_outputs)]
-        print(len(predictions))
+
         targets = [target.replace(" ", "").replace("\n", "") for target in open(tgt_file, "r").readlines()]
-
-        reaction_file = os.path.join(os.path.dirname(tgt_file), "test.tsv")
-        reactions = pd.read_csv(reaction_file, sep="\t", error_bad_lines=False)["canonic_rxn"].tolist()
-
-        # Create a list of column names for the predictions
-        pred_cols = [f"pred_{i}" for i in range(len(predictions[0]))]
-
-        # Create a list of dictionaries representing each row of the DataFrame
-        rows = []
-        for rxn, prod, preds in zip(reactions, targets, predictions):
-            row = {"canonical_rxn": rxn, "target": prod}
-            row.update({pred_col: pred for pred_col, pred in zip(pred_cols, preds)})
-            rows.append(row)
-
-        # Create the DataFrame
-        df = pd.DataFrame(rows)
+        reactants = [reactant.replace(" ", "").replace("\n", "") for reactant in open(src_file, "r").readlines()]
 
         # Save the DataFrame to a CSV file
         csv_file = f"./{dataset}/results/all_results.csv"
-        df.to_csv(csv_file, index=False)
+        standardize_output(reactants, targets, predictions, csv_file)
 
 
 if __name__ == "__main__":

@@ -175,6 +175,24 @@ def csv_to_jsonl(data_dir: str, target_dir: str):
                 f.write('\n')
 
 
+def standardize_output(reactants, targets, predictions, csv_out_path):
+
+    # Create a list of column names for the predictions
+    pred_cols = [f"pred_{i}" for i in range(len(predictions[0]))]
+
+    # Create a list of dictionaries representing each row of the DataFrame
+    rows = []
+    for reac, prod, preds in zip(reactants, targets, predictions):
+        row = {"canonical_rxn": reac + ">>" + prod, "target": prod}
+        row.update({pred_col: pred for pred_col, pred in zip(pred_cols, preds)})
+        rows.append(row)
+
+    # Create the DataFrame
+    df = pd.DataFrame(rows)
+
+    # Save the DataFrame to a CSV file
+    df.to_csv(csv_out_path, index=False)
+
 if __name__ == "__main__":
 
     preds = pd.read_csv('OpenNMT_Transformer/runs/models/cjhif_model_step_200000_test_predictions.txt', sep="\t",

@@ -4,7 +4,7 @@ import pandas as pd
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from model_args import ReactionModelArgs
-from utils import prepare_parser, csv_to_txt, set_pythonpath, transfer_data
+from utils import prepare_parser, csv_to_txt, set_pythonpath, standardize_output
 
 from Graph2SMILES.preprocess import get_preprocess_parser
 from Graph2SMILES.train import get_train_parser
@@ -172,6 +172,7 @@ class G2S(ReactionModel):
         checkpoint = f"./{dataset}/checkpoints/{prefix}.{self.exp_no}/{last_model}"
 
         result_file = f"./{dataset}/results/{prefix}.{self.exp_no}.result.txt"
+        src_file = f"../data/{dataset}/src-test.txt"
         tgt_file = f"../data/{dataset}/tgt-test.txt"
 
         cmd = f"python predict.py " \
@@ -198,32 +199,14 @@ class G2S(ReactionModel):
 
         os.system(cmd)
 
-        # TODO implement evaluation, standardize output format
-
         # list of results, each result is a string separated by commas. split by comma, remove spaces and "\n"
         predictions = [result.replace(" ", "").replace("\n", "").split(",") for result in open(result_file, "r").readlines()]
-
         targets = [target.replace(" ", "").replace("\n", "") for target in open(tgt_file, "r").readlines()]
-
-        reaction_file = os.path.join(os.path.dirname(tgt_file), "test.tsv")
-        reactions = pd.read_csv(reaction_file, sep="\t", error_bad_lines=False)["canonic_rxn"].tolist()
-
-        # Create a list of column names for the predictions
-        pred_cols = [f"pred_{i}" for i in range(len(predictions[0]))]
-
-        # Create a list of dictionaries representing each row of the DataFrame
-        rows = []
-        for rxn, prod, preds in zip(reactions, targets, predictions):
-            row = {"canonical_rxn": rxn, "target": prod}
-            row.update({pred_col: pred for pred_col, pred in zip(pred_cols, preds)})
-            rows.append(row)
-
-        # Create the DataFrame
-        df = pd.DataFrame(rows)
+        reactants = [reactant.replace(" ", "").replace("\n", "") for reactant in open(src_file, "r").readlines()]
 
         # Save the DataFrame to a CSV file
         csv_file = f"./{dataset}/results/all_results.csv"
-        df.to_csv(csv_file, index=False)
+        standardize_output(reactants, targets, predictions, csv_file)
 
 
 if __name__ == "__main__":
