@@ -78,11 +78,8 @@ class G2S(ReactionModel):
 
         os.system(cmd)
 
-        # os.system("sh Graph2SMILES/scripts/preprocess.sh")
-
     def train(self, dataset="cjhif"):
         """Train the reaction model. Should also contain validation and test steps"""
-        # os.system("sh Graph2SMILES/scripts/train_g2s.sh")
 
         load_from = ""
         task = "reaction_prediction"
@@ -162,11 +159,9 @@ class G2S(ReactionModel):
 
     def predict(self, dataset="cjhif"):
         """Predict provided data with the reaction model"""
-        # os.system("sh Graph2SMILES/scripts/predict.sh")
 
         prefix = f"{dataset}_{self.model_name}"
 
-        # TODO make this automatic
         number_of_saves = (self.max_steps // self.save_iter) - 1
         last_model = f"model.{self.max_steps}_{number_of_saves}.pt"
         checkpoint = f"./{dataset}/checkpoints/{prefix}.{self.exp_no}/{last_model}"

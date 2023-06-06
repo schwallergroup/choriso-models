@@ -8,7 +8,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import wandb
-from codecarbon import EmissionsTracker
 from Graph2SMILES.models.graph2seq_series_rel import Graph2SeqSeriesRel
 from Graph2SMILES.models.seq2seq import Seq2Seq
 from torch.nn.init import xavier_uniform_
@@ -98,11 +97,9 @@ def main(args):
     o_start = time.time()
 
     wandb.init(project="Graph2SMILES")
-    tracker = EmissionsTracker()
 
     logging.info("Start training")
     for epoch in range(args.epoch):
-        tracker.start()
         model.zero_grad()
 
         train_dataset.sort()
@@ -122,7 +119,6 @@ def main(args):
         for batch_idx, batch in enumerate(train_loader):
             if total_step > args.max_steps:
                 logging.info("Max steps reached, finish training")
-                tracker.stop()
                 exit(0)
 
             batch.to(device)
@@ -308,10 +304,6 @@ def main(args):
 
             model.zero_grad()
             accum = 0
-
-        emission = tracker.stop()
-
-        wandb.log({"CO2 emission (in Kg)": emission})
 
 
 if __name__ == "__main__":
