@@ -59,7 +59,7 @@ def gen_reac_fps_helper(args, rxn_smi):
 
 def gen_reac_fps(args):
     # parallelizing makes it very slow for some reason
-    processed_dir = "processed"
+    processed_dir = args.dataset + "/results/processed"
     if not os.path.exists(processed_dir):
         os.makedirs(processed_dir)
 
@@ -113,7 +113,7 @@ def var_col(col):
 
 
 def variance_cutoff(args):
-    processed_dir = "processed"
+    processed_dir = args.dataset + "/results/processed"
     if not os.path.exists(processed_dir):
         os.makedirs(processed_dir)
 
@@ -202,7 +202,7 @@ def get_train_templates(args):
     52% and 79% of all chemical reactions from 2015 and after, respectively.
     '''
     logging.info('Extracting templates from training data')
-    processed_dir = "processed"
+    processed_dir = args.dataset + "/results/processed"
     if not os.path.exists(processed_dir):
         os.makedirs(processed_dir)
 
@@ -217,7 +217,7 @@ def get_train_templates(args):
 
         templates = {}
 
-        all_templates = data['template'].tolist()
+        all_templates = data[args.template_col].tolist()
         for rxn_template in tqdm(all_templates, total=len(all_templates)):
             r = rxn_template.split('>>')[0]
             p = rxn_template.split('>>')[-1]
@@ -265,7 +265,7 @@ def remove_atom_map(prod_smi_map):
 
 def match_templates(args):
     logging.info(f'Loading templates from file: {args.templates_file}')
-    processed_dir = "processed"
+    processed_dir = args.dataset + "/results/processed"
     if not os.path.exists(processed_dir):
         os.makedirs(processed_dir)
 
@@ -298,7 +298,7 @@ def match_templates(args):
         data = pd.read_csv(os.path.join(args.data_folder, args.dataset, f"{phase}.tsv"), sep="\t")
 
         rxns = []
-        for idx, (rxn_smi, rxn_template) in enumerate(zip(data['canonic_rxn'].tolist(), data['template'].tolist())):
+        for idx, (rxn_smi, rxn_template) in enumerate(zip(data['canonic_rxn'].tolist(), data[args.template_col].tolist())):
             r = rxn_smi.split('>>')[0]
             p = rxn_smi.split('>>')[-1]
             rxns.append((idx, r, p, rxn_template))
@@ -373,6 +373,7 @@ def parse_args():
     parser.add_argument("--radius", help="Fingerprint radius", type=int, default=2)
     parser.add_argument("--fp_size", help="Fingerprint size", type=int, default=1000000)
     parser.add_argument("--final_fp_size", help="Fingerprint size", type=int, default=32681)
+    parser.add_argument("--template_col", help="Column of template in the dataframe", type=str, default="template_r0")
     return parser.parse_args()
 
 
@@ -397,7 +398,7 @@ if __name__ == '__main__':
         args.data_folder = Path(args.data_folder)
 
     if args.output_file_prefix is None:
-        args.output_file_prefix = f'{args.dataset}/{args.fp_size}dim_{args.radius}rad'
+        args.output_file_prefix = f'{args.fp_size}dim_{args.radius}rad'
 
     logging.info(args)
 
