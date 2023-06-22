@@ -1,32 +1,7 @@
 import argparse
 import os
-import wandb
-
 from benchmark_models import ReactionModel, BenchmarkPipeline
-from model_args import ReactionModelArgs
 from utils import prepare_parser, set_pythonpath
-
-
-class NeuralsymArgs(ReactionModelArgs):
-
-    def __init__(self):
-        super().__init__()
-        pass
-
-    def preprocess_args(self):
-        parser = argparse.ArgumentParser(description='preprocess')
-        pass
-        return parser
-
-    def training_args(self):
-        parser = argparse.ArgumentParser(description='train')
-        pass
-        return parser
-
-    def predict_args(self):
-        parser = argparse.ArgumentParser(description='predict')
-        pass
-        return parser
 
 
 class Neuralsym(ReactionModel):
@@ -35,12 +10,8 @@ class Neuralsym(ReactionModel):
         self.name = "Neuralsym"
         super().__init__()
 
-        self.args = NeuralsymArgs()
-
     def preprocess(self, dataset="cjhif"):
         """Do data preprocessing. Skip if preprocessed data already exists"""
-        # transfer the tsv files, if not yet done. Please set clone_name to the name of your git clone of the dataset
-        self.setup_tsv(dataset=dataset, clone_name="cjhif-dataset")
 
         os.system(f"python prepare_data.py --dataset {dataset}")  # TODO add args
 
