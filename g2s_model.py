@@ -3,28 +3,7 @@ import argparse
 import pandas as pd
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
-from model_args import ReactionModelArgs
 from utils import prepare_parser, csv_to_txt, set_pythonpath, standardize_output
-
-from Graph2SMILES.preprocess import get_preprocess_parser
-from Graph2SMILES.train import get_train_parser
-from Graph2SMILES.predict import get_predict_parser
-
-
-class G2SArgs(ReactionModelArgs):
-
-    def __init__(self):
-        super().__init__()
-        pass
-
-    def preprocess_args(self):
-        return get_preprocess_parser()
-
-    def training_args(self):
-        return get_train_parser()
-
-    def predict_args(self):
-        return get_predict_parser()
 
 
 class G2S(ReactionModel):
@@ -32,7 +11,6 @@ class G2S(ReactionModel):
     def __init__(self):
         self.name = "Graph2SMILES"
         super().__init__()
-        self.args = G2SArgs()
 
         self.model_name = "g2s_series_rel"
 

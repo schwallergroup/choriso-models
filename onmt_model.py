@@ -1,15 +1,10 @@
 import argparse
 import os
-import wandb
 import yaml
 import tempfile
-import pandas as pd
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
-from model_args import ReactionModelArgs
 from utils import prepare_parser, csv_to_txt, set_pythonpath, standardize_output
-
-from onmt.opts import train_opts, translate_opts, dynamic_prepare_opts, config_opts
 
 
 def substitute_dataset_name(d, dataset_name):
@@ -23,36 +18,11 @@ def substitute_dataset_name(d, dataset_name):
         return d
 
 
-class OpenNMTArgs(ReactionModelArgs):
-
-    def __init__(self):
-        super().__init__()
-        pass
-
-    def preprocess_args(self):
-        parser = argparse.ArgumentParser(description='preprocess')
-        dynamic_prepare_opts(parser, build_vocab_only=True)
-        return parser
-
-    def training_args(self):
-        parser = argparse.ArgumentParser(description='train')
-        train_opts(parser)
-        return parser
-
-    def predict_args(self):
-        parser = argparse.ArgumentParser(description='predict')
-        config_opts(parser)
-        translate_opts(parser, dynamic=True)
-        return parser
-
-
 class OpenNMT(ReactionModel):
 
     def __init__(self):
         self.name = "OpenNMT_Transformer"
         super().__init__()
-
-        self.args = OpenNMTArgs()
 
     def preprocess(self, dataset="cjhif"):
         """Do data preprocessing. Skip if preprocessed data already exists"""
