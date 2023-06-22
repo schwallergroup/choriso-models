@@ -2,8 +2,9 @@ import argparse
 import os
 import torch
 from utils import set_pythonpath, prepare_parser
-from g2s_model import G2SArgs, G2S
-from onmt_model import OpenNMTArgs, OpenNMT
+from g2s_model import G2S
+from onmt_model import OpenNMT
+from neuralsym_model import Neuralsym
 from benchmark_models import BenchmarkPipeline
 
 
@@ -72,19 +73,17 @@ def main(args):
         reaction_model = G2S()
     elif args.model in ["OpenNMT", 'ONMT', 'onmt', 'opennmt']:
         reaction_model = OpenNMT()
+    elif args.model in ["neuralsym", "NeuralSym", "Template", "template"]:
+        reaction_model = OpenNMT()
     else:
         raise NotImplementedError("The model does not yet exist.")
 
-    # set pythonpath
     set_pythonpath(path=os.getcwd())
 
-    # change working dir
     os.chdir(reaction_model.name)
 
-    # instantiate the pipeline with the model
     pipeline = BenchmarkPipeline(model=reaction_model)
 
-    # call pipeline function based on args
     pipeline.run_mode_from_args(args)
 
 
