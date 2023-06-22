@@ -29,7 +29,7 @@ class TemplateModel(ReactionModel):
         data_dict = {}
         num_templates = 0
 
-        for data_split in ["train", "valid", "test"]:
+        for data_split in ["train", "valid"]:
             fps = torch.load(os.path.join(data_dir, f"{data_split}_fps.pt"))
             template_idx = torch.load(os.path.join(data_dir, f"{data_split}_fps.pt"))
             num_templates = max(num_templates, max(template_idx))
