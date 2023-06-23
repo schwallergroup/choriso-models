@@ -59,7 +59,7 @@ def gen_reac_fps_helper(args, rxn_smi):
 
 def gen_reac_fps(args):
     # parallelizing makes it very slow for some reason
-    processed_dir = args.dataset + "/results/processed"
+    processed_dir = args.dataset + "/processed"
     if not os.path.exists(processed_dir):
         os.makedirs(processed_dir)
 
@@ -113,7 +113,7 @@ def var_col(col):
 
 
 def variance_cutoff(args):
-    processed_dir = args.dataset + "/results/processed"
+    processed_dir = args.dataset + "/processed"
     if not os.path.exists(processed_dir):
         os.makedirs(processed_dir)
 
@@ -202,7 +202,7 @@ def get_train_templates(args):
     52% and 79% of all chemical reactions from 2015 and after, respectively.
     '''
     logging.info('Extracting templates from training data')
-    processed_dir = args.dataset + "/results/processed"
+    processed_dir = args.dataset + "/processed"
     if not os.path.exists(processed_dir):
         os.makedirs(processed_dir)
 
@@ -265,7 +265,7 @@ def remove_atom_map(prod_smi_map):
 
 def match_templates(args):
     logging.info(f'Loading templates from file: {args.templates_file}')
-    processed_dir = args.dataset + "/results/processed"
+    processed_dir = args.dataset + "/processed"
     if not os.path.exists(processed_dir):
         os.makedirs(processed_dir)
 
