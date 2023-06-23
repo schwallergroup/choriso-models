@@ -218,7 +218,12 @@ def get_train_templates(args):
         templates = {}
 
         all_templates = data[args.template_col].tolist()
-        for rxn_template in tqdm(all_templates, total=len(all_templates)):
+        filtered = []
+        for i in all_templates:
+            if type(i) == str:
+                filtered.append(i)
+
+        for rxn_template in tqdm(filtered, total=len(filtered)):
             r = rxn_template.split('>>')[0]
             p = rxn_template.split('>>')[-1]
 
@@ -244,9 +249,13 @@ def get_template_idx(temps_dict, task):
     # original label generation pipeline
     # extract template for this rxn_smi, and match it to template dictionary from training data
 
-    r_temp = cano_smarts(rxn_template.split('>>')[0])
-    p_temp = cano_smarts(rxn_template.split('>>')[-1])
-    cano_temp = r_temp + '>>' + p_temp
+    try:
+        r_temp = cano_smarts(rxn_template.split('>>')[0])
+        p_temp = cano_smarts(rxn_template.split('>>')[-1])
+        cano_temp = r_temp + '>>' + p_temp
+    except:
+        logging.info(f'Could not parse {rxn_template}')
+        return rxn_idx, len(temps_dict)
 
     if cano_temp in temps_dict:
         return rxn_idx, temps_dict[cano_temp]
