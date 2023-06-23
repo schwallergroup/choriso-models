@@ -7,7 +7,7 @@ from utils import prepare_parser, set_pythonpath
 class Neuralsym(ReactionModel):
 
     def __init__(self):
-        self.name = "Neuralsym"
+        self.name = "neuralsym"
         super().__init__()
 
     def preprocess(self, dataset="cjhif"):

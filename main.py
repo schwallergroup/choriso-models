@@ -74,7 +74,7 @@ def main(args):
     elif args.model in ["OpenNMT", 'ONMT', 'onmt', 'opennmt']:
         reaction_model = OpenNMT()
     elif args.model in ["neuralsym", "NeuralSym", "Template", "template"]:
-        reaction_model = OpenNMT()
+        reaction_model = Neuralsym()
     else:
         raise NotImplementedError("The model does not yet exist.")
 
