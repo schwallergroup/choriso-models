@@ -30,7 +30,7 @@ class Neuralsym(ReactionModel):
               f"--expt_name {model}_{seed}_depth0_dim300_lr1e3_stop2_fac30_pat1 " \
               f"--log_file {model}_{seed}_depth0_dim300_lr1e3_stop2_fac30_pat1 " \
               f"--do_test " \
-              f"--reacfps_prefix {dataset}_to_32681_reac_fps" \
+              f"--reacfps_prefix {dataset}_to_32681_reac_fps " \
               f"--labels_prefix {dataset}_to_32681_labels " \
               f"--csv_prefix {dataset}_to_32681_csv " \
               f"--bs 300 " \
@@ -44,7 +44,8 @@ class Neuralsym(ReactionModel):
               f"--hidden_size 300 " \
               f"--lr_scheduler_factor 0.3 " \
               f"--lr_scheduler_patience 1 " \
-              f"--checkpoint"
+              f"--checkpoint " \
+              f"--dataset {dataset}"
 
         os.system(cmd)
 
@@ -69,6 +70,7 @@ class Neuralsym(ReactionModel):
               f"--model Highway " \
               f"--expt_name '{model}_{seed}_depth0_dim300_lr1e3_stop2_fac30_pat1' " \
               f"--seed {seed} " \
+              f"--dataset {dataset}"
 
         os.system(cmd)
 

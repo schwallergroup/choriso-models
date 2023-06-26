@@ -29,14 +29,14 @@ from rdkit.Chem import AllChem
 from neuralsym.model import TemplateNN_Highway, TemplateNN_FC
 from neuralsym.dataset import FingerprintDataset
 
-DATA_FOLDER = Path(__file__).resolve().parent / 'data'
-CHECKPOINT_FOLDER = Path(__file__).resolve().parent / 'checkpoint'
-
 def infer_all(args):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    
+
+    data_folder = args.dataset + "/processed"
+    checkpoint_folder = os.path.join(args.dataset, "checkpoints")
+
     logging.info(f'Loading templates from file: {args.templates_file}')
-    with open(DATA_FOLDER / args.templates_file, 'r') as f:
+    with open(data_folder / args.templates_file, 'r') as f:
         templates = f.readlines()
     templates_filtered = []
     for p in templates:
@@ -47,7 +47,7 @@ def infer_all(args):
 
     # load model from checkpoint
     checkpoint = torch.load(
-        CHECKPOINT_FOLDER / f"{args.expt_name}.pth.tar",
+        checkpoint_folder / f"{args.expt_name}.pth.tar",
         map_location=device,
     )
 
@@ -93,7 +93,7 @@ def infer_all(args):
             preds = torch.cat(preds, dim=0).squeeze(dim=-1).cpu().numpy()
         logging.info(f'preds.shape: {preds.shape}')
         np.save(
-            DATA_FOLDER / f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_{args.seed}_{phase}",
+            data_folder / f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_{args.seed}_{phase}",
             preds
         )
         logging.info(f'Saved preds of {phase} as npy!')
@@ -141,8 +141,9 @@ def gen_precs(templates_filtered, preds, phase_topk, task):
     return precursors, seen, dup_count
 
 def compile_into_csv(args):
+    data_folder = args.dataset + "/processed"
     logging.info(f'Loading templates from file: {args.templates_file}')
-    with open(DATA_FOLDER / args.templates_file, 'r') as f:
+    with open(data_folder / args.templates_file, 'r') as f:
         templates = f.readlines()
     templates_filtered = []
     for p in templates:
@@ -153,14 +154,14 @@ def compile_into_csv(args):
 
     for phase in args.phases:
         # load predictions npy files
-        preds = np.load(DATA_FOLDER / f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_{args.seed}_{phase}.npy")
+        preds = np.load(data_folder / f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_{args.seed}_{phase}.npy")
 
         # load mapped_rxn_smi
-        with open(DATA_FOLDER / f'{args.rxn_smi_prefix}_{phase}.pickle', 'rb') as f:
+        with open(data_folder / f'{args.rxn_smi_prefix}_{phase}.pickle', 'rb') as f:
             clean_rxnsmi_phase = pickle.load(f)
 
         proposals_data = pd.read_csv(
-            DATA_FOLDER / f"{args.csv_prefix}_{phase}.csv", 
+            data_folder / f"{args.csv_prefix}_{phase}.csv",
             index_col=None, dtype='str'
         )
 
@@ -197,9 +198,9 @@ def compile_into_csv(args):
             proposed_precs_phase.append(seen)
             proposed_precs_phase_withdups.append(precursors)
 
-        with open(DATA_FOLDER / f'precs_{args.seed}_{phase}.pickle', 'wb') as f:
+        with open(data_folder / f'precs_{args.seed}_{phase}.pickle', 'wb') as f:
             pickle.dump(proposed_precs_phase_withdups, f)
-        with open(DATA_FOLDER / f'seen_{args.seed}_{phase}.pickle', 'wb') as f:
+        with open(data_folder / f'seen_{args.seed}_{phase}.pickle', 'wb') as f:
             pickle.dump(proposed_precs_phase, f)
         
         dup_count /= len(clean_rxnsmi_phase)
@@ -271,7 +272,7 @@ def compile_into_csv(args):
         phase_dataframe.columns = col_names
 
         phase_dataframe.to_csv(
-            DATA_FOLDER / 
+            data_folder /
             f'neuralsym_{args.topk}topk_{args.maxk}maxk_noGT_{args.seed}_{phase}.csv',
             index=False
         )
@@ -397,6 +398,8 @@ def parse_args():
     # model params
     parser.add_argument("--hidden_size", help="hidden size", type=int, default=300)
     parser.add_argument("--depth", help="depth", type=int, default=0)
+    parser.add_argument("--dataset", help="dataset", type=str, default="cjhif")
+
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -414,6 +417,8 @@ if __name__ == '__main__':
     logger.addHandler(fh)
     logger.addHandler(sh)
 
+    data_folder = args.dataset + '_processed'
+
     if args.labels_prefix is None:
         args.labels_prefix = f'50k_1000000dim_{args.radius}rad_to_{args.fp_size}_labels'
     if args.prodfps_prefix is None:
@@ -422,6 +427,6 @@ if __name__ == '__main__':
         args.csv_prefix = f'50k_1000000dim_{args.radius}rad_to_{args.fp_size}_csv'
 
     logging.info(f'{args}')
-    if not (DATA_FOLDER / f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_train.npy").exists():
+    if not (data_folder / f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_train.npy").exists():
         infer_all(args) # <10 sec to infer on train + valid + test on 1x RTX2080
     compile_into_csv(args) # this is slow, needs ~1.5h on 8 cores (parallelized)

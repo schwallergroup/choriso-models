@@ -14,7 +14,6 @@ import torch.optim as optim
 import pandas as pd
 from rdchiral.main import rdchiralReaction, rdchiralReactants, rdchiralRun
 import wandb
-from codecarbon import EmissionsTracker
 
 from torch.utils.data import DataLoader
 from datetime import datetime
@@ -28,8 +27,6 @@ from rdkit import RDLogger
 from neuralsym.model import TemplateNN_Highway, TemplateNN_FC
 from neuralsym.dataset import FingerprintDataset
 
-DATA_FOLDER = Path(__file__).resolve().parent / 'processed'  # 'data'
-CHECKPOINT_FOLDER = Path(__file__).resolve().parent / 'checkpoint'
 
 def seed_everything(seed: Optional[int] = 0) -> None:
     torch.manual_seed(seed)
@@ -42,8 +39,11 @@ def seed_everything(seed: Optional[int] = 0) -> None:
 def train(args):
     seed_everything(args.random_seed)
 
+    data_folder = args.dataset + "/processed"
+    checkpoint_folder = os.path.join(args.dataset, "checkpoints")
+
     logging.info(f'Loading templates from file: {args.templates_file}')
-    with open(DATA_FOLDER / args.templates_file, 'r') as f:
+    with open(data_folder / args.templates_file, 'r') as f:
         templates = f.readlines()
     templates_filtered = []
     for p in templates:
@@ -91,7 +91,7 @@ def train(args):
     del train_dataset, valid_dataset
 
     proposals_data_valid = pd.read_csv(
-        DATA_FOLDER / f"{args.csv_prefix}_val.csv",
+        data_folder / f"{args.csv_prefix}_val.csv",
         index_col=None, dtype='str'
     )
 
@@ -111,11 +111,9 @@ def train(args):
     wait = 0 # early stopping patience counter
 
     wandb.init(project="NeuralSym")
-    tracker = EmissionsTracker()
 
     start = time.time()
     for epoch in range(args.epochs):
-        tracker.start()
         train_loss, train_correct, train_seen = 0, defaultdict(int), 0
         train_loader = tqdm(train_loader, desc='training')
         model.train()
@@ -265,7 +263,7 @@ def train(args):
                 "max_valid_acc": max_valid_acc
             }
             checkpoint_filename = (
-                CHECKPOINT_FOLDER
+                checkpoint_folder
                 / f"{args.expt_name}.pth.tar" # _{epoch:04d}
             )
             torch.save(checkpoint_dict, checkpoint_filename)
@@ -311,17 +309,16 @@ def train(args):
             \n" # {valid_losses[-1]:.4f}
         logging.info(message)
 
-        epoch_emission = tracker.stop()
-        wandb.log({"CO2 emission (in Kg)": epoch_emission})
 
     logging.info(f'Finished training, total time (minutes): {(time.time() - start) / 60}')
     return model
 
 def test(model, args):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    
+
+    data_folder = args.dataset + "/processed"
     logging.info(f'Loading templates from file: {args.templates_file}')
-    with open(DATA_FOLDER / args.templates_file, 'r') as f:
+    with open(data_folder / args.templates_file, 'r') as f:
         templates = f.readlines()
     templates_filtered = []
     for p in templates:
@@ -343,7 +340,7 @@ def test(model, args):
     del test_dataset
 
     proposals_data_test = pd.read_csv(
-        DATA_FOLDER / f"{args.csv_prefix}_test.csv", 
+        data_folder / f"{args.csv_prefix}_test.csv",
         index_col=None, dtype='str'
     )
     k_to_calc = [1, 2, 3, 5, 10, 20, 50, 100]
@@ -478,6 +475,7 @@ def parse_args():
     # model params
     parser.add_argument("--hidden_size", help="hidden size", type=int, default=300)
     parser.add_argument("--depth", help="depth", type=int, default=0)
+    parser.add_argument("--dataset", help="dataset", type=str, default="cjhif")
 
     return parser.parse_args()
 
@@ -498,14 +496,17 @@ if __name__ == '__main__':
     
     logging.info(args)
 
+    templates_file = os.path.join(args.dataset, "processed", args.templates_file)
+    checkpoint_folder = os.path.join(args.dataset, "checkpoints")
+
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    if not os.path.exists(CHECKPOINT_FOLDER):
-        os.mkdir(CHECKPOINT_FOLDER)
+    if not os.path.exists(checkpoint_folder):
+        os.mkdir(checkpoint_folder)
     if args.do_train:
         model = train(args)
     else:
-        logging.info(f'Loading templates from file: {args.templates_file}')
-        with open(DATA_FOLDER / args.templates_file, 'r') as f:
+        logging.info(f'Loading templates from file: {templates_file}')
+        with open(templates_file, 'r') as f:
             templates = f.readlines()
         templates_filtered = []
         for p in templates:
@@ -515,7 +516,7 @@ if __name__ == '__main__':
         logging.info(f'Total number of template patterns: {len(templates_filtered)}')
         # load model from saved checkpoint
         checkpoint = torch.load(
-            CHECKPOINT_FOLDER / f"{args.expt_name}.pth.tar",
+            checkpoint_folder / f"{args.expt_name}.pth.tar",
             map_location=device,
         )
         if args.model == 'Highway':
