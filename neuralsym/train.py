@@ -75,17 +75,15 @@ def train(args):
     criterion = nn.CrossEntropyLoss(reduction='sum')
     optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
 
-    train_dataset = FingerprintDataset(
-                            args.reacfps_prefix+'_train.npz',
-                            args.labels_prefix+'_train.npy'
-                        )
+    train_dataset = FingerprintDataset(args.reacfps_prefix+'_train.npz',
+                                       args.labels_prefix+'_train.npy',
+                                       root=data_folder)
     train_size = len(train_dataset)
     train_loader = DataLoader(train_dataset, batch_size=args.bs, shuffle=True)
 
-    valid_dataset = FingerprintDataset(
-                            args.reacfps_prefix+'_val.npz',
-                            args.labels_prefix+'_val.npy'
-                        )
+    valid_dataset = FingerprintDataset(args.reacfps_prefix+'_val.npz',
+                                       args.labels_prefix+'_val.npy',
+                                       root=data_folder)
     valid_size = len(valid_dataset)
     valid_loader = DataLoader(valid_dataset, batch_size=args.bs_eval, shuffle=False)
     del train_dataset, valid_dataset
