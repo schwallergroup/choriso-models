@@ -10,26 +10,13 @@ class Neuralsym(ReactionModel):
         self.name = "neuralsym"
         super().__init__()
 
-    def preprocess(self, dataset="cjhif"):
-        """Do data preprocessing. Skip if preprocessed data already exists"""
-
-        os.system(f"python prepare_data.py --dataset {dataset}")  # TODO add args
-
-    def train(self, dataset="cjhif"):
-        """Train the reaction model. Should also contain validation and test steps"""
-        """wandb.init(project="Neuralsym", sync_tensorboard=True)
-        os.system(f"sh neuralsym/train.sh ")  # TODO add args
-        wandb.finish()"""
-
-        model = "Highway"
-        seed = 77777777
+    def get_cmd(self, model, seed, dataset, mode):
 
         cmd = f"CUDA_LAUNCH_BLOCKING=1\n" \
               f"python train.py " \
               f"--model {model} " \
               f"--expt_name {model}_{seed}_depth0_dim300_lr1e3_stop2_fac30_pat1 " \
               f"--log_file {model}_{seed}_depth0_dim300_lr1e3_stop2_fac30_pat1 " \
-              f"--do_test " \
               f"--reacfps_prefix {dataset}_to_32681_reac_fps " \
               f"--labels_prefix {dataset}_to_32681_labels " \
               f"--csv_prefix {dataset}_to_32681_csv " \
@@ -45,17 +32,37 @@ class Neuralsym(ReactionModel):
               f"--lr_scheduler_factor 0.3 " \
               f"--lr_scheduler_patience 1 " \
               f"--checkpoint " \
-              f"--dataset {dataset}"
+              f"--dataset {dataset} "
+
+        if mode == "train":
+            cmd += "--do_train "
+
+        if mode == "test":
+            cmd += "--do_test "
+
+        return cmd
+
+    def preprocess(self, dataset="cjhif"):
+        """Do data preprocessing. Skip if preprocessed data already exists"""
+
+        os.system(f"python prepare_data.py --dataset {dataset}")  # TODO add args
+
+    def train(self, dataset="cjhif"):
+        """Train the reaction model. Should also contain validation and test steps"""
+
+        model = "Highway"
+        seed = 77777777
+
+        cmd = self.get_cmd(model, seed, dataset, "train")
 
         os.system(cmd)
 
     def predict(self, dataset="cjhif"):
         """Predict provided data with the reaction model"""
-        # os.system("sh neuralsym/infer_all.sh")
 
         model = "Highway"
         seed = 77777777
-
+        """
         cmd = f"python infer_all.py " \
               f"--csv_prefix {dataset}_1000000dim_2rad_to_32681_csv " \
               f"--labels_prefix {dataset}_1000000dim_2rad_to_32681_labels " \
@@ -71,7 +78,8 @@ class Neuralsym(ReactionModel):
               f"--expt_name '{model}_{seed}_depth0_dim300_lr1e3_stop2_fac30_pat1' " \
               f"--seed {seed} " \
               f"--dataset {dataset}"
-
+        """
+        cmd = self.get_cmd(model, seed, dataset, "test")
         os.system(cmd)
 
         # TODO implement evaluation, standardize output format
