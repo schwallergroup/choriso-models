@@ -414,10 +414,10 @@ if __name__ == '__main__':
 
     logging.info(args)
 
-    if not (args.data_folder / f"{args.output_file_prefix}_reac_fps_val.npz").exists():
+    if not (os.path.join(args.dataset, "processed", f"{args.output_file_prefix}_reac_fps_val.npz")).exists():
         # ~2 min on 40k train prod_smi on 16 cores for 32681-dim
         gen_reac_fps(args)
-    if not (args.data_folder / f"{args.output_file_prefix}_to_{args.final_fp_size}_reac_fps_val.npz").exists():
+    if not (os.path.join(args.dataset, "processed", f"{args.output_file_prefix}_to_{args.final_fp_size}_reac_fps_val.npz")).exists():
         # for training dataset (40k rxn_smi):
         # ~1 min to do log(x+1) transformation on 16 cores, and then
         # ~2 min to gather variance statistics across 1 million indices on 16 cores, and then
@@ -425,10 +425,10 @@ if __name__ == '__main__':
         variance_cutoff(args)
 
     args.output_file_prefix = f'{args.output_file_prefix}_to_{args.final_fp_size}'
-    if not (args.data_folder / args.templates_file).exists():
+    if not (os.path.join(args.dataset, "processed", args.templates_file)).exists():
         # ~40 sec on 40k train rxn_smi on 16 cores
         get_train_templates(args)
-    if not (args.data_folder / f"{args.output_file_prefix}_csv_train.csv").exists():
+    if not (os.path.join(args.dataset, "processed", f"{args.output_file_prefix}_csv_train.csv")).exists():
         # ~3-4 min on 40k train rxn_smi on 16 cores
         match_templates(args)
     

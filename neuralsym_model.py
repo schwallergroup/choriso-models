@@ -45,7 +45,7 @@ class Neuralsym(ReactionModel):
     def preprocess(self, dataset="cjhif"):
         """Do data preprocessing. Skip if preprocessed data already exists"""
 
-        os.system(f"python prepare_data.py --dataset {dataset}")  # TODO add args
+        os.system(f"python prepare_data.py --output_file_prefix {dataset} --dataset {dataset}")  # TODO add args
 
     def train(self, dataset="cjhif"):
         """Train the reaction model. Should also contain validation and test steps"""
