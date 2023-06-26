@@ -39,7 +39,7 @@ def seed_everything(seed: Optional[int] = 0) -> None:
 def train(args):
     seed_everything(args.random_seed)
 
-    data_folder = os.path.join(args.dataset, "/processed")
+    data_folder = os.path.join(args.dataset, "processed")
     checkpoint_folder = os.path.join(args.dataset, "checkpoints")
 
     logging.info(f'Loading templates from file: {args.templates_file}')
