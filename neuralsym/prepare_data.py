@@ -169,7 +169,7 @@ def variance_cutoff(args):
             reac_fps_path,
             thresholded
         )
-        
+
 
 def get_tpl(task):
     idx, react, prod = task
@@ -184,7 +184,7 @@ def cano_smarts(smarts):
     # logging.info(f'Canonicalizing {smarts}')
     tmp = Chem.MolFromSmarts(smarts)
     if tmp is None:
-        logging.info(f'Could not parse {smarts}')
+        logging.info(f'Could not parse {smarts} in cano_smarts')
         return smarts
     # do not remove atom map number
     # [a.ClearProp('molAtomMapNumber') for a in tmp.GetAtoms()]
@@ -207,7 +207,6 @@ def get_train_templates(args):
         os.makedirs(processed_dir)
 
     templates_path = f"{processed_dir}/{args.templates_file}"
-    print("Templates_path: ", templates_path)
     if os.path.exists(templates_path):
         pass
 
@@ -254,7 +253,7 @@ def get_template_idx(temps_dict, task):
         p_temp = cano_smarts(rxn_template.split('>>')[-1])
         cano_temp = r_temp + '>>' + p_temp
     except:
-        logging.info(f'Could not parse {rxn_template}')
+        # logging.info(f'Could not parse {rxn_template} in get_template_idx')
         return rxn_idx, len(temps_dict)
 
     if cano_temp in temps_dict:
@@ -307,7 +306,7 @@ def match_templates(args):
         data = pd.read_csv(os.path.join(args.data_folder, args.dataset, f"{phase}.tsv"), sep="\t")
 
         rxns = []
-        for idx, (rxn_smi, rxn_template) in enumerate(zip(data['canonic_rxn'].tolist(), data[args.template_col].tolist())):
+        for idx, (rxn_smi, rxn_template) in enumerate(zip(data['rxnmapper_aam'].tolist(), data[args.template_col].tolist())):
             r = rxn_smi.split('>>')[0]
             p = rxn_smi.split('>>')[-1]
             rxns.append((idx, r, p, rxn_template))
@@ -322,36 +321,50 @@ def match_templates(args):
         found = 0
         get_template_partial = partial(get_template_idx, temps_dict)
         # don't use imap_unordered!!!! it doesn't guarantee the order, or we can use it and then sort by rxn_idx
-        for result in tqdm(pool.imap_unordered(get_template_partial, rxns), total=len(rxns), desc="Matching templates"):
+        # for result in tqdm(pool.imap_unordered(get_template_partial, rxns), total=len(rxns), desc="Matching templates"):
+        for rxn in tqdm(rxns, total=len(rxns), desc="Matching templates"):
+            result = get_template_idx(temps_dict, rxn)
             rxn_idx, template_idx = result
 
-            try:
-                prod_smi_map = data[rxn_idx]["canonic_rxn"].split('>>')[-1]
+            prod_smi_map = data.iloc[rxn_idx]["rxnmapper_aam"].split('>>')[-1]
+            prod_mol = Chem.MolFromSmiles(prod_smi_map)
+            [atom.ClearProp('molAtomMapNumber') for atom in prod_mol.GetAtoms()]
+            prod_smi_nomap = Chem.MolToSmiles(prod_mol, True)
+            # Sometimes stereochem takes another canonicalization...
+            prod_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(prod_smi_nomap), True)
+            """try:
+                prod_smi_map = data.iloc[rxn_idx]["rxnmapper_aam"].split('>>')[-1]
                 prod_mol = Chem.MolFromSmiles(prod_smi_map)
                 [atom.ClearProp('molAtomMapNumber') for atom in prod_mol.GetAtoms()]
                 prod_smi_nomap = Chem.MolToSmiles(prod_mol, True)
                 # Sometimes stereochem takes another canonicalization...
                 prod_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(prod_smi_nomap), True)
             except:
-                continue
+                print(f"Caught error. Skipping")
+                continue"""
 
             template = temps_filtered[template_idx] if template_idx != len(temps_filtered) else ''
             rows.append([
                 rxn_idx,
                 prod_smi_nomap,
                 phase_reac_smi_nomap[rxn_idx],
-                template, 
+                template,
                 template_idx,
             ])
             # labels.append(template_idx)
             found += (template_idx != len(temps_filtered))
 
             if phase == 'train' and template_idx == len(temps_filtered):
-                logging.info(f'At {rxn_idx} of train, could not recall template for some reason')
+                # logging.info(f'At {rxn_idx} of train, could not recall template for some reason')
+                pass
+            if phase == 'train' and template_idx != len(temps_filtered):
+                # logging.info(f'At {rxn_idx} of train, found template {template_idx}')
+                pass
 
         logging.info(f'Template coverage: {found / len(rxns) * 100:.2f}%')
         rows.sort(key=lambda x: x[0])  # sort by rxn_idx
         labels = np.array(rows)[:, -1]
+
         # labels = np.array(labels)
         np.save(
             labels_path,
