@@ -39,11 +39,11 @@ def seed_everything(seed: Optional[int] = 0) -> None:
 def train(args):
     seed_everything(args.random_seed)
 
-    data_folder = args.dataset + "/processed"
+    data_folder = os.path.join(args.dataset, "/processed")
     checkpoint_folder = os.path.join(args.dataset, "checkpoints")
 
     logging.info(f'Loading templates from file: {args.templates_file}')
-    with open(data_folder / args.templates_file, 'r') as f:
+    with open(os.path.join(data_folder, args.templates_file), 'r') as f:
         templates = f.readlines()
     templates_filtered = []
     for p in templates:
@@ -91,7 +91,7 @@ def train(args):
     del train_dataset, valid_dataset
 
     proposals_data_valid = pd.read_csv(
-        data_folder / f"{args.csv_prefix}_val.csv",
+        os.path.join(data_folder, f"{args.csv_prefix}_val.csv"),
         index_col=None, dtype='str'
     )
 
@@ -263,8 +263,8 @@ def train(args):
                 "max_valid_acc": max_valid_acc
             }
             checkpoint_filename = (
-                checkpoint_folder
-                / f"{args.expt_name}.pth.tar" # _{epoch:04d}
+                os.path.join(checkpoint_folder,
+                f"{args.expt_name}.pth.tar") # _{epoch:04d}
             )
             torch.save(checkpoint_dict, checkpoint_filename)
 
@@ -316,9 +316,9 @@ def train(args):
 def test(model, args):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    data_folder = args.dataset + "/processed"
+    data_folder = os.path.join(args.dataset, "/processed")
     logging.info(f'Loading templates from file: {args.templates_file}')
-    with open(data_folder / args.templates_file, 'r') as f:
+    with open(os.path.join(data_folder, args.templates_file), 'r') as f:
         templates = f.readlines()
     templates_filtered = []
     for p in templates:
@@ -340,7 +340,7 @@ def test(model, args):
     del test_dataset
 
     proposals_data_test = pd.read_csv(
-        data_folder / f"{args.csv_prefix}_test.csv",
+        os.path.join(data_folder, f"{args.csv_prefix}_test.csv"),
         index_col=None, dtype='str'
     )
     k_to_calc = [1, 2, 3, 5, 10, 20, 50, 100]
@@ -516,7 +516,7 @@ if __name__ == '__main__':
         logging.info(f'Total number of template patterns: {len(templates_filtered)}')
         # load model from saved checkpoint
         checkpoint = torch.load(
-            checkpoint_folder / f"{args.expt_name}.pth.tar",
+            os.path.join(checkpoint_folder, f"{args.expt_name}.pth.tar"),
             map_location=device,
         )
         if args.model == 'Highway':

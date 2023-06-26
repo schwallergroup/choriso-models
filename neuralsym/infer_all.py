@@ -36,7 +36,7 @@ def infer_all(args):
     checkpoint_folder = os.path.join(args.dataset, "checkpoints")
 
     logging.info(f'Loading templates from file: {args.templates_file}')
-    with open(data_folder / args.templates_file, 'r') as f:
+    with open(os.path.join(data_folder, args.templates_file), 'r') as f:
         templates = f.readlines()
     templates_filtered = []
     for p in templates:
@@ -47,7 +47,7 @@ def infer_all(args):
 
     # load model from checkpoint
     checkpoint = torch.load(
-        checkpoint_folder / f"{args.expt_name}.pth.tar",
+        os.path.join(checkpoint_folder, f"{args.expt_name}.pth.tar"),
         map_location=device,
     )
 
@@ -93,7 +93,7 @@ def infer_all(args):
             preds = torch.cat(preds, dim=0).squeeze(dim=-1).cpu().numpy()
         logging.info(f'preds.shape: {preds.shape}')
         np.save(
-            data_folder / f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_{args.seed}_{phase}",
+            os.path.join(data_folder, f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_{args.seed}_{phase}"),
             preds
         )
         logging.info(f'Saved preds of {phase} as npy!')
@@ -141,9 +141,9 @@ def gen_precs(templates_filtered, preds, phase_topk, task):
     return precursors, seen, dup_count
 
 def compile_into_csv(args):
-    data_folder = args.dataset + "/processed"
+    data_folder = os.path.join(args.dataset, "/processed")
     logging.info(f'Loading templates from file: {args.templates_file}')
-    with open(data_folder / args.templates_file, 'r') as f:
+    with open(os.path.join(data_folder, args.templates_file), 'r') as f:
         templates = f.readlines()
     templates_filtered = []
     for p in templates:
@@ -154,14 +154,14 @@ def compile_into_csv(args):
 
     for phase in args.phases:
         # load predictions npy files
-        preds = np.load(data_folder / f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_{args.seed}_{phase}.npy")
+        preds = np.load(os.path.join(data_folder, f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_{args.seed}_{phase}.npy"))
 
         # load mapped_rxn_smi
-        with open(data_folder / f'{args.rxn_smi_prefix}_{phase}.pickle', 'rb') as f:
+        with open(os.path.join(data_folder, f'{args.rxn_smi_prefix}_{phase}.pickle'), 'rb') as f:
             clean_rxnsmi_phase = pickle.load(f)
 
         proposals_data = pd.read_csv(
-            data_folder / f"{args.csv_prefix}_{phase}.csv",
+            os.path.join(data_folder, f"{args.csv_prefix}_{phase}.csv"),
             index_col=None, dtype='str'
         )
 
@@ -198,9 +198,9 @@ def compile_into_csv(args):
             proposed_precs_phase.append(seen)
             proposed_precs_phase_withdups.append(precursors)
 
-        with open(data_folder / f'precs_{args.seed}_{phase}.pickle', 'wb') as f:
+        with open(os.path.join(data_folder, f'precs_{args.seed}_{phase}.pickle'), 'wb') as f:
             pickle.dump(proposed_precs_phase_withdups, f)
-        with open(data_folder / f'seen_{args.seed}_{phase}.pickle', 'wb') as f:
+        with open(os.path.join(data_folder, f'seen_{args.seed}_{phase}.pickle'), 'wb') as f:
             pickle.dump(proposed_precs_phase, f)
         
         dup_count /= len(clean_rxnsmi_phase)
@@ -272,8 +272,8 @@ def compile_into_csv(args):
         phase_dataframe.columns = col_names
 
         phase_dataframe.to_csv(
-            data_folder /
-            f'neuralsym_{args.topk}topk_{args.maxk}maxk_noGT_{args.seed}_{phase}.csv',
+            os.path.join(data_folder,
+            f'neuralsym_{args.topk}topk_{args.maxk}maxk_noGT_{args.seed}_{phase}.csv'),
             index=False
         )
         logging.info(f'Saved proposals of {phase} as CSV!')
@@ -427,6 +427,6 @@ if __name__ == '__main__':
         args.csv_prefix = f'50k_1000000dim_{args.radius}rad_to_{args.fp_size}_csv'
 
     logging.info(f'{args}')
-    if not (data_folder / f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_train.npy").exists():
+    if not (os.path.join(data_folder, f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_train.npy")).exists():
         infer_all(args) # <10 sec to infer on train + valid + test on 1x RTX2080
     compile_into_csv(args) # this is slow, needs ~1.5h on 8 cores (parallelized)
