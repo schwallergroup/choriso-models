@@ -251,7 +251,9 @@ def get_template_idx(temps_dict, task):
     try:
         r_temp = cano_smarts(rxn_template.split('>>')[0])
         p_temp = cano_smarts(rxn_template.split('>>')[-1])
-        cano_temp = r_temp + '>>' + p_temp
+        # cano_temp = r_temp + '>>' + p_temp
+        # TODO check if generated templates are the wrong way
+        cano_temp = p_temp + '>>' + r_temp
     except:
         # logging.info(f'Could not parse {rxn_template} in get_template_idx')
         return rxn_idx, len(temps_dict)
@@ -291,7 +293,7 @@ def match_templates(args):
     logging.info(f'Total number of template patterns: {len(temps_filtered)}')
 
     logging.info('Matching against extracted templates')
-    for phase in ['train', 'val', 'test']:
+    for phase in ['val', 'test', 'train']:
         logging.info(f'Processing {phase}')
 
         labels_path = f"{processed_dir}/{args.output_file_prefix}_labels_{phase}"
@@ -326,22 +328,10 @@ def match_templates(args):
             result = get_template_idx(temps_dict, rxn)
             rxn_idx, template_idx = result
 
-            prod_smi_map = data.iloc[rxn_idx]["rxnmapper_aam"].split('>>')[-1]
-            prod_mol = Chem.MolFromSmiles(prod_smi_map)
-            [atom.ClearProp('molAtomMapNumber') for atom in prod_mol.GetAtoms()]
+            prod_mol = Chem.MolFromSmiles(rxn[2])
             prod_smi_nomap = Chem.MolToSmiles(prod_mol, True)
             # Sometimes stereochem takes another canonicalization...
             prod_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(prod_smi_nomap), True)
-            """try:
-                prod_smi_map = data.iloc[rxn_idx]["rxnmapper_aam"].split('>>')[-1]
-                prod_mol = Chem.MolFromSmiles(prod_smi_map)
-                [atom.ClearProp('molAtomMapNumber') for atom in prod_mol.GetAtoms()]
-                prod_smi_nomap = Chem.MolToSmiles(prod_mol, True)
-                # Sometimes stereochem takes another canonicalization...
-                prod_smi_nomap = Chem.MolToSmiles(Chem.MolFromSmiles(prod_smi_nomap), True)
-            except:
-                print(f"Caught error. Skipping")
-                continue"""
 
             template = temps_filtered[template_idx] if template_idx != len(temps_filtered) else ''
             rows.append([
