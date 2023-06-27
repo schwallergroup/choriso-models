@@ -353,7 +353,7 @@ def match_templates(args):
 
         logging.info(f'Template coverage: {found / len(rxns) * 100:.2f}%')
         rows.sort(key=lambda x: x[0])  # sort by rxn_idx
-        labels = np.array(rows)[:, -1]
+        labels = np.array(rows)[:, -1].astype(int)
 
         # labels = np.array(labels)
         np.save(
@@ -414,10 +414,10 @@ if __name__ == '__main__':
 
     logging.info(args)
 
-    if not (os.path.join(args.dataset, "processed", f"{args.output_file_prefix}_reac_fps_val.npz")).exists():
+    if not os.path.exists(os.path.join(args.dataset, "processed", f"{args.output_file_prefix}_reac_fps_val.npz")):
         # ~2 min on 40k train prod_smi on 16 cores for 32681-dim
         gen_reac_fps(args)
-    if not (os.path.join(args.dataset, "processed", f"{args.output_file_prefix}_to_{args.final_fp_size}_reac_fps_val.npz")).exists():
+    if not os.path.exists(os.path.join(args.dataset, "processed", f"{args.output_file_prefix}_to_{args.final_fp_size}_reac_fps_val.npz")):
         # for training dataset (40k rxn_smi):
         # ~1 min to do log(x+1) transformation on 16 cores, and then
         # ~2 min to gather variance statistics across 1 million indices on 16 cores, and then
@@ -425,10 +425,10 @@ if __name__ == '__main__':
         variance_cutoff(args)
 
     args.output_file_prefix = f'{args.output_file_prefix}_to_{args.final_fp_size}'
-    if not (os.path.join(args.dataset, "processed", args.templates_file)).exists():
+    if not os.path.exists(os.path.join(args.dataset, "processed", args.templates_file)):
         # ~40 sec on 40k train rxn_smi on 16 cores
         get_train_templates(args)
-    if not (os.path.join(args.dataset, "processed", f"{args.output_file_prefix}_csv_train.csv")).exists():
+    if not os.path.exists(os.path.join(args.dataset, "processed", f"{args.output_file_prefix}_csv_train.csv")):
         # ~3-4 min on 40k train rxn_smi on 16 cores
         match_templates(args)
     
