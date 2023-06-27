@@ -72,7 +72,7 @@ def infer_all(args):
 
     for phase in args.phases:
         dataset = FingerprintDataset(
-                        args.prodfps_prefix+f'_{phase}.npz', 
+                        args.reacfps_prefix+f'_{phase}.npz',
                         args.labels_prefix+f'_{phase}.npy'
                     )
         loader = DataLoader(dataset, batch_size=args.bs, shuffle=False)
@@ -141,7 +141,7 @@ def gen_precs(templates_filtered, preds, phase_topk, task):
     return precursors, seen, dup_count
 
 def compile_into_csv(args):
-    data_folder = os.path.join(args.dataset, "/processed")
+    data_folder = os.path.join(args.dataset, "processed")
     logging.info(f'Loading templates from file: {args.templates_file}')
     with open(os.path.join(data_folder, args.templates_file), 'r') as f:
         templates = f.readlines()
@@ -156,9 +156,12 @@ def compile_into_csv(args):
         # load predictions npy files
         preds = np.load(os.path.join(data_folder, f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_{args.seed}_{phase}.npy"))
 
-        # load mapped_rxn_smi
+        data = pd.read_csv(os.path.join("../data", args.dataset, "train.tsv"), sep="\t")
+        clean_rxnsmi_phase = data["rxnmapper_aam"].tolist()
+
+        """# load mapped_rxn_smi
         with open(os.path.join(data_folder, f'{args.rxn_smi_prefix}_{phase}.pickle'), 'rb') as f:
-            clean_rxnsmi_phase = pickle.load(f)
+            clean_rxnsmi_phase = pickle.load(f)"""
 
         proposals_data = pd.read_csv(
             os.path.join(data_folder, f"{args.csv_prefix}_{phase}.csv"),
@@ -373,7 +376,7 @@ def parse_args():
                         type=str, default="50k_clean_rxnsmi_noreagent_allmapped_canon")
     parser.add_argument("--templates_file", help="templates_file", 
                         type=str, default="50k_training_templates")
-    parser.add_argument("--prodfps_prefix",
+    parser.add_argument("--reacfps_prefix",
                         help="npz file of product fingerprints",
                         type=str)
     parser.add_argument("--labels_prefix",
@@ -421,8 +424,8 @@ if __name__ == '__main__':
 
     if args.labels_prefix is None:
         args.labels_prefix = f'50k_1000000dim_{args.radius}rad_to_{args.fp_size}_labels'
-    if args.prodfps_prefix is None:
-        args.prodfps_prefix = f'50k_1000000dim_{args.radius}rad_to_{args.fp_size}_prod_fps'
+    if args.reacfps_prefix is None:
+        args.reacfps_prefix = f'50k_1000000dim_{args.radius}rad_to_{args.fp_size}_prod_fps'
     if args.csv_prefix is None:
         args.csv_prefix = f'50k_1000000dim_{args.radius}rad_to_{args.fp_size}_csv'
 
