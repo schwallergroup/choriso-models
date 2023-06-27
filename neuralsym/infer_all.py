@@ -32,7 +32,7 @@ from neuralsym.dataset import FingerprintDataset
 def infer_all(args):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    data_folder = args.dataset + "/processed"
+    data_folder = os.path.join(args.dataset, "processed")
     checkpoint_folder = os.path.join(args.dataset, "checkpoints")
 
     logging.info(f'Loading templates from file: {args.templates_file}')
@@ -73,7 +73,7 @@ def infer_all(args):
     for phase in args.phases:
         dataset = FingerprintDataset(
                         args.prodfps_prefix+f'_{phase}.npz', 
-                        args.labels_prefix+f'_{phase}.npy'
+                        args.labels_prefix+f'_{phase}.npy', root=data_folder
                     )
         loader = DataLoader(dataset, batch_size=args.bs, shuffle=False)
         del dataset
@@ -372,7 +372,7 @@ def parse_args():
     parser.add_argument("--rxn_smi_prefix", help="rxn_smi file", 
                         type=str, default="50k_clean_rxnsmi_noreagent_allmapped_canon")
     parser.add_argument("--templates_file", help="templates_file", 
-                        type=str, default="50k_training_templates")
+                        type=str, default="training_templates.txt")
     parser.add_argument("--prodfps_prefix",
                         help="npz file of product fingerprints",
                         type=str)
@@ -427,6 +427,6 @@ if __name__ == '__main__':
         args.csv_prefix = f'50k_1000000dim_{args.radius}rad_to_{args.fp_size}_csv'
 
     logging.info(f'{args}')
-    if not (os.path.join(data_folder, f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_train.npy")).exists():
+    if not os.path.exists(os.path.join(data_folder, f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_train.npy")):
         infer_all(args) # <10 sec to infer on train + valid + test on 1x RTX2080
     compile_into_csv(args) # this is slow, needs ~1.5h on 8 cores (parallelized)

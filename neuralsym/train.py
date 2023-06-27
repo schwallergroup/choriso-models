@@ -314,7 +314,7 @@ def train(args):
 def test(model, args):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    data_folder = os.path.join(args.dataset, "/processed")
+    data_folder = os.path.join(args.dataset, "processed")
     logging.info(f'Loading templates from file: {args.templates_file}')
     with open(os.path.join(data_folder, args.templates_file), 'r') as f:
         templates = f.readlines()
@@ -328,7 +328,7 @@ def test(model, args):
     criterion = nn.CrossEntropyLoss(reduction='sum')
     test_dataset = FingerprintDataset(
                             args.reacfps_prefix+'_test.npz',
-                            args.labels_prefix+'_test.npy'
+                            args.labels_prefix+'_test.npy', root=data_folder
                         )
     test_dataset.labels = test_dataset.labels.astype(int)
     print(test_dataset.labels)
