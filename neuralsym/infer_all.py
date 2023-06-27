@@ -71,7 +71,7 @@ def infer_all(args):
     model.to(device)
 
     for phase in args.phases:
-        dataset = FingerprintDataset(args.prodfps_prefix+f'_{phase}.npz',
+        dataset = FingerprintDataset(args.reacfps_prefix+f'_{phase}.npz',
                                      args.labels_prefix+f'_{phase}.npy',
                                      root=data_folder
                                      )
@@ -156,7 +156,7 @@ def compile_into_csv(args):
         # load predictions npy files
         preds = np.load(os.path.join(data_folder, f"neuralsym_{args.topk}topk_{args.maxk}maxk_preds_{args.seed}_{phase}.npy"))
 
-        data = pd.read_csv(os.path.join("../data", args.dataset, "train.tsv"), sep="\t")
+        data = pd.read_csv(os.path.join("../data", args.dataset, f"{phase}.tsv"), sep="\t")
         clean_rxnsmi_phase = data["rxnmapper_aam"].tolist()
 
         """# load mapped_rxn_smi
@@ -376,7 +376,7 @@ def parse_args():
                         type=str, default="50k_clean_rxnsmi_noreagent_allmapped_canon")
     parser.add_argument("--templates_file", help="templates_file", 
                         type=str, default="training_templates.txt")
-    parser.add_argument("--prodfps_prefix",
+    parser.add_argument("--reacfps_prefix",
                         help="npz file of product fingerprints",
                         type=str)
     parser.add_argument("--labels_prefix",
@@ -389,7 +389,7 @@ def parse_args():
     parser.add_argument("--seed", help="Seed used for model training", type=int, default=1337)
     parser.add_argument("--model", help="['Highway', 'FC']", type=str, default='Highway')
     parser.add_argument("--phases", help="Phases to do inference on", type=str, 
-                        default=['train', 'valid', 'test'], nargs='+')
+                        default=['test'], nargs='+')
     parser.add_argument("--min_freq", help="Min freq of template", type=int, default=1)
     parser.add_argument("--radius", help="Fingerprint radius", type=int, default=2)
     parser.add_argument("--fp_size", help="Fingerprint size", type=int, default=32681)

@@ -69,11 +69,11 @@ class Neuralsym(ReactionModel):
               f"--templates_file training_templates.txt " \
               f"--rxn_smi_prefix {dataset}_clean_rxnsmi_noreagent_allmapped_canon " \
               f"--log_file 'infer_77777777_highway_depth0_dim300' " \
-              f"--prodfps_prefix {dataset}_to_32681_prod_fps " \
+              f"--reacfps_prefix {dataset}_to_32681_reac_fps " \
               f"--hidden_size 300 " \
               f"--depth 0 " \
-              f"--topk 200 " \
-              f"--maxk 200 " \
+              f"--topk 20 " \
+              f"--maxk 20 " \
               f"--model Highway " \
               f"--expt_name '{model}_{seed}_depth0_dim300_lr1e3_stop2_fac30_pat1' " \
               f"--seed {seed} " \
