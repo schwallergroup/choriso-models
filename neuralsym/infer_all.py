@@ -134,8 +134,6 @@ def gen_precs(templates_filtered, preds, phase_topk, task):
         else:
             dup_count += 1
 
-    seen = [remove_atom_map(i) for i in seen]
-
     if len(seen) < phase_topk:
         seen.extend(['9999'] * (phase_topk - len(seen)))
     else:
@@ -180,7 +178,8 @@ def compile_into_csv(args):
         proposals_phase = {}
         proposed_precs_phase, prod_smiles_phase, rcts_smiles_phase = [], [], []
         proposed_precs_phase_withdups = [] # true representation of model predictions, for calc_accs() 
-        prod_smiles_mapped_phase = [] # helper for analyse_proposed() 
+        prod_smiles_mapped_phase = [] # helper for analyse_proposed()
+        reac_smiles_mapped_phase = []
         phase_topk = args.topk if phase == 'train' else args.maxk
         dup_count = 0
         num_cores = len(os.sched_getaffinity(0))
@@ -200,6 +199,8 @@ def compile_into_csv(args):
             prod_smiles_phase.append(prod_smi_nomap)
 
             reac_smi = clean_rxnsmi_phase[i].split('>>')[0]
+            reac_smiles_mapped_phase.append(reac_smi)
+
             rcts_smi_nomap = proposals_data.iloc[i, 2]
             rcts_smiles_phase.append(rcts_smi_nomap)
 
@@ -212,7 +213,7 @@ def compile_into_csv(args):
         with open(os.path.join(data_folder, f'seen_{args.seed}_{phase}.pickle'), 'wb') as f:
             pickle.dump(proposed_precs_phase, f)
         
-        dup_count /= len(clean_rxnsmi_phase)
+        """dup_count /= len(clean_rxnsmi_phase)
         logging.info(f'Avg # dups per product: {dup_count}')
 
         # match predictions to true_precursors & get rank
@@ -239,26 +240,24 @@ def compile_into_csv(args):
                     clean_rxnsmi_phase,
                     rcts_smiles_phase,
                     proposed_precs_phase
-                )
+                )"""
         
         analyse_proposed(
-            prod_smiles_phase,
-            prod_smiles_mapped_phase,
+            rcts_smiles_phase,
+            reac_smiles_mapped_phase,
             proposals_phase, # this func needs this to be a dict {mapped_prod_smi: proposals}
         )
         
         combined = {} 
         zipped = []
-        for rxn_smi, prod_smi, rcts_smi, rank_of_true_precursor, proposed_rcts_smi in zip(
+        for rxn_smi, prod_smi, proposed_rcts_smi in zip(
             rxn_smi_no_map,
             prod_smiles_phase,
-            rcts_smiles_phase,
-            ranks_phase,
             proposed_precs_phase,
         ):
             result = []
             result.extend([rxn_smi, prod_smi])
-            result.extend(proposed_rcts_smi)
+            result.extend([remove_atom_map(i) for i in proposed_rcts_smi])
             zipped.append(result)
 
         combined[phase] = zipped
