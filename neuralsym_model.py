@@ -65,11 +65,11 @@ class Neuralsym(ReactionModel):
         """
         cmd = f"python infer_all.py " \
               f"--csv_prefix {dataset}_1000000dim_2rad_to_32681_csv " \
-              f"--labels_prefix {dataset}_1000000dim_2rad_to_32681_labels " \
+              f"--labels_prefix {dataset}_to_32681_labels " \
               f"--templates_file {dataset}_training_templates " \
               f"--rxn_smi_prefix {dataset}_clean_rxnsmi_noreagent_allmapped_canon " \
               f"--log_file 'infer_77777777_highway_depth0_dim300' " \
-              f"--prodfps_prefix {dataset}_1000000dim_2rad_to_32681_prod_fps " \
+              f"--reacfps_prefix {dataset}_to_32681_reac_fps " \
               f"--hidden_size 300 " \
               f"--depth 0 " \
               f"--topk 200 " \
