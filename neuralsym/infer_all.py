@@ -28,6 +28,7 @@ from rdkit.Chem import AllChem
 
 from neuralsym.model import TemplateNN_Highway, TemplateNN_FC
 from neuralsym.dataset import FingerprintDataset
+from neuralsym.prepare_data import remove_atom_map
 
 def infer_all(args):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -133,6 +134,8 @@ def gen_precs(templates_filtered, preds, phase_topk, task):
         else:
             dup_count += 1
 
+    seen = [remove_atom_map(i) for i in seen]
+
     if len(seen) < phase_topk:
         seen.extend(['9999'] * (phase_topk - len(seen)))
     else:
@@ -142,6 +145,7 @@ def gen_precs(templates_filtered, preds, phase_topk, task):
 
 def compile_into_csv(args):
     data_folder = os.path.join(args.dataset, "processed")
+    results_folder = os.path.join(args.dataset, "results")
     logging.info(f'Loading templates from file: {args.templates_file}')
     with open(os.path.join(data_folder, args.templates_file), 'r') as f:
         templates = f.readlines()
@@ -158,6 +162,7 @@ def compile_into_csv(args):
 
         data = pd.read_csv(os.path.join("../data", args.dataset, f"{phase}.tsv"), sep="\t")
         clean_rxnsmi_phase = data["rxnmapper_aam"].tolist()
+        rxn_smi_no_map = data["canonic_rxn"].tolist()
 
         """# load mapped_rxn_smi
         with open(os.path.join(data_folder, f'{args.rxn_smi_prefix}_{phase}.pickle'), 'rb') as f:
@@ -170,7 +175,7 @@ def compile_into_csv(args):
 
         tasks = []
         for i in range(len(clean_rxnsmi_phase)): # build tasks
-            tasks.append((i, proposals_data.iloc[i, 1]))
+            tasks.append((i, proposals_data.iloc[i, 2]))  # 2 is reactant data
 
         proposals_phase = {}
         proposed_precs_phase, prod_smiles_phase, rcts_smiles_phase = [], [], []
@@ -185,7 +190,7 @@ def compile_into_csv(args):
         gen_precs_partial = partial(gen_precs, templates_filtered, preds, phase_topk)
         for i, result in enumerate(tqdm(pool.imap(gen_precs_partial, tasks), 
                             total=len(clean_rxnsmi_phase), desc='Generating predicted reactants')):
-            precursors, seen, this_dup = result
+            predicted_reac, seen, this_dup = result
             dup_count += this_dup
 
             prod_smi = clean_rxnsmi_phase[i].split('>>')[-1]
@@ -194,12 +199,13 @@ def compile_into_csv(args):
             prod_smi_nomap = proposals_data.iloc[i, 1]
             prod_smiles_phase.append(prod_smi_nomap)
 
+            reac_smi = clean_rxnsmi_phase[i].split('>>')[0]
             rcts_smi_nomap = proposals_data.iloc[i, 2]
             rcts_smiles_phase.append(rcts_smi_nomap)
 
-            proposals_phase[prod_smi] = precursors
+            proposals_phase[reac_smi] = predicted_reac
             proposed_precs_phase.append(seen)
-            proposed_precs_phase_withdups.append(precursors)
+            proposed_precs_phase_withdups.append(predicted_reac)
 
         with open(os.path.join(data_folder, f'precs_{args.seed}_{phase}.pickle'), 'wb') as f:
             pickle.dump(proposed_precs_phase_withdups, f)
@@ -244,14 +250,14 @@ def compile_into_csv(args):
         combined = {} 
         zipped = []
         for rxn_smi, prod_smi, rcts_smi, rank_of_true_precursor, proposed_rcts_smi in zip(
-            clean_rxnsmi_phase,
+            rxn_smi_no_map,
             prod_smiles_phase,
             rcts_smiles_phase,
             ranks_phase,
             proposed_precs_phase,
         ):
             result = []
-            result.extend([rxn_smi, prod_smi, rcts_smi, rank_of_true_precursor])
+            result.extend([rxn_smi, prod_smi])
             result.extend(proposed_rcts_smi)
             zipped.append(result)
 
@@ -269,14 +275,13 @@ def compile_into_csv(args):
         if phase == 'train': # true precursor has been removed from the proposals, so whatever is left are negatives
             proposed_col_names = [f'neg_precursor_{i}' for i in range(1, args.topk + 1)]
         else: # validation/testing, we don't assume true precursor is present & we also do not remove them if present
-            proposed_col_names = [f'cand_precursor_{i}' for i in range(1, args.maxk + 1)]
-        col_names = ['orig_rxn_smi', 'prod_smi', 'true_precursors', 'rank_of_true_precursor']
+            proposed_col_names = [f'pred_{i}' for i in range(1, args.maxk + 1)]
+        col_names = ['canonical_rxn', 'target']
         col_names.extend(proposed_col_names)
         phase_dataframe.columns = col_names
 
         phase_dataframe.to_csv(
-            os.path.join(data_folder,
-            f'neuralsym_{args.topk}topk_{args.maxk}maxk_noGT_{args.seed}_{phase}.csv'),
+            os.path.join(results_folder, 'all_results.csv'),
             index=False
         )
         logging.info(f'Saved proposals of {phase} as CSV!')
