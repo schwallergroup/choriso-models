@@ -99,10 +99,10 @@ def infer_all(args):
         )
         logging.info(f'Saved preds of {phase} as npy!')
 
-def gen_precs(templates_filtered, preds, phase_topk, task):
-    i, prod_smi_nomap = task
+def gen_prods(templates_filtered, preds, phase_topk, task):
+    i, reac_smi_nomap = task
     # generate predictions from templates
-    precursors, dup_count = [], 0
+    products, dup_count = [], 0
     pred_temp_idxs = preds[i]
     for idx in pred_temp_idxs:
         template = templates_filtered[idx]
@@ -115,22 +115,22 @@ def gen_precs(templates_filtered, preds, phase_topk, task):
             # precursors.extend(precs)
             """rdkit version"""
             rxn = AllChem.ReactionFromSmarts(template)
-            prod = [Chem.MolFromSmiles(prod_smi_nomap)]
-            precs = rxn.RunReactants(prod)
-            precs = list(set([".".join([Chem.MolToSmiles(p) for p in prec]) for prec in precs]))
+            reac = [Chem.MolFromSmiles(reac_smi_nomap)]
+            prods = rxn.RunReactants(reac)
+            prods = list(set([".".join([Chem.MolToSmiles(p) for p in prod]) for prod in prods]))
             # canonicalize all predictions
-            precs = list(Chem.CanonSmiles(prec) for prec in precs)
-            precursors.extend(precs)
+            prods = list(Chem.CanonSmiles(prod) for prod in prods)
+            products.extend(prods)
         except:
             continue
 
     # remove duplicate predictions
     seen = []
-    for prec in precursors:
+    for prod in products:
         # canonicalize all predictions
         # prec = Chem.MolToSmiles(Chem.MolFromSmiles(prec), True)
-        if prec not in seen:
-            seen.append(prec)
+        if prod not in seen:
+            seen.append(prod)
         else:
             dup_count += 1
 
@@ -139,7 +139,7 @@ def gen_precs(templates_filtered, preds, phase_topk, task):
     else:
         seen = seen[:phase_topk]
     
-    return precursors, seen, dup_count
+    return products, seen, dup_count
 
 def compile_into_csv(args):
     data_folder = os.path.join(args.dataset, "processed")
@@ -162,17 +162,13 @@ def compile_into_csv(args):
         clean_rxnsmi_phase = data["rxnmapper_aam"].tolist()
         rxn_smi_no_map = data["canonic_rxn"].tolist()
 
-        """# load mapped_rxn_smi
-        with open(os.path.join(data_folder, f'{args.rxn_smi_prefix}_{phase}.pickle'), 'rb') as f:
-            clean_rxnsmi_phase = pickle.load(f)"""
-
         proposals_data = pd.read_csv(
             os.path.join(data_folder, f"{args.csv_prefix}_{phase}.csv"),
             index_col=None, dtype='str'
         )
 
         tasks = []
-        for i in range(len(clean_rxnsmi_phase)): # build tasks
+        for i in range(len(clean_rxnsmi_phase)):  # build tasks
             tasks.append((i, proposals_data.iloc[i, 2]))  # 2 is reactant data
 
         proposals_phase = {}
@@ -186,7 +182,7 @@ def compile_into_csv(args):
         logging.info(f'Parallelizing over {num_cores} cores')
         pool = multiprocessing.Pool(num_cores)
 
-        gen_precs_partial = partial(gen_precs, templates_filtered, preds, phase_topk)
+        gen_precs_partial = partial(gen_prods, templates_filtered, preds, phase_topk)
         for i, result in enumerate(tqdm(pool.imap(gen_precs_partial, tasks), 
                             total=len(clean_rxnsmi_phase), desc='Generating predicted reactants')):
             predicted_reac, seen, this_dup = result
@@ -245,19 +241,19 @@ def compile_into_csv(args):
         analyse_proposed(
             rcts_smiles_phase,
             reac_smiles_mapped_phase,
-            proposals_phase, # this func needs this to be a dict {mapped_prod_smi: proposals}
+            proposals_phase, # this func needs this to be a dict {mapped_reac_smi: proposals}
         )
         
         combined = {} 
         zipped = []
-        for rxn_smi, prod_smi, proposed_rcts_smi in zip(
+        for rxn_smi, proposed_rcts_smi in zip(
             rxn_smi_no_map,
-            prod_smiles_phase,
             proposed_precs_phase,
         ):
             result = []
+            prod_smi = rxn_smi.split('>>')[-1]
             result.extend([rxn_smi, prod_smi])
-            result.extend([remove_atom_map(i) for i in proposed_rcts_smi])
+            result.extend(proposed_rcts_smi)
             zipped.append(result)
 
         combined[phase] = zipped
@@ -338,30 +334,30 @@ def calc_accs(
     return ranks # dictionary 
 
 def analyse_proposed(
-                    prod_smiles_phase : List[str],
-                    prod_smiles_mapped_phase : List[str],
+                    reac_smiles_phase : List[str],
+                    reac_smiles_mapped_phase : List[str],
                     proposals_phase : Dict[str, List[str]],
                     ): 
     proposed_counter = Counter()
     total_proposed, min_proposed, max_proposed = 0, float('+inf'), float('-inf')
     key_count = 0
-    for key, mapped_key in zip(prod_smiles_phase, prod_smiles_mapped_phase): 
-        precursors = proposals_phase[mapped_key]
-        precursors_count = len(precursors)
-        total_proposed += precursors_count
-        if precursors_count > max_proposed:
-            max_proposed = precursors_count
-            prod_smi_max = key
-        if precursors_count < min_proposed:
-            min_proposed = precursors_count
-            prod_smi_min = key
+    for key, mapped_key in zip(reac_smiles_phase, reac_smiles_mapped_phase):
+        products = proposals_phase[mapped_key]
+        products_count = len(products)
+        total_proposed += products
+        if products_count > max_proposed:
+            max_proposed = products_count
+            reac_smi_max = key
+        if products_count < min_proposed:
+            min_proposed = products_count
+            reac_smi_min = key
         
-        proposed_counter[key] = precursors_count
+        proposed_counter[key] = products_count
         key_count += 1
         
     logging.info(f'Average precursors proposed per prod_smi (dups removed): {total_proposed / key_count}')
-    logging.info(f'Min precursors: {min_proposed} for {prod_smi_min}')
-    logging.info(f'Max precursors: {max_proposed} for {prod_smi_max})')
+    logging.info(f'Min precursors: {min_proposed} for {reac_smi_min}')
+    logging.info(f'Max precursors: {max_proposed} for {reac_smi_max})')
 
     logging.info(f'\nMost common 20:')
     for i in proposed_counter.most_common(20):

@@ -72,9 +72,6 @@ def gen_reac_fps(args):
             logging.info(f"Skipping gen_reac_fps for {phase} because it already exists")
             continue
 
-        """with open(args.data_folder / f'{args.rxnsmi_file_prefix}_{phase}.pickle', 'rb') as f:
-            clean_rxnsmi_phase = pickle.load(f)"""
-
         clean_rxnsmi_phase = pd.read_csv(os.path.join(args.data_folder, args.dataset, f"{phase}.tsv"), sep="\t")
         clean_rxnsmi_phase = clean_rxnsmi_phase["rxnmapper_aam"].values
         print(clean_rxnsmi_phase)
@@ -202,7 +199,7 @@ def get_train_templates(args):
     52% and 79% of all chemical reactions from 2015 and after, respectively.
     '''
     logging.info('Extracting templates from training data')
-    processed_dir = args.dataset + "/processed"
+    processed_dir = os.path.join(args.dataset, "processed")
     if not os.path.exists(processed_dir):
         os.makedirs(processed_dir)
 
@@ -227,8 +224,8 @@ def get_train_templates(args):
             p = rxn_template.split('>>')[-1]
 
             # canonicalize template (needed, bcos q a number of templates are equivalent, 10247 --> 10198)
-            p_temp = cano_smarts(r)
-            r_temp = cano_smarts(p)
+            r_temp = cano_smarts(r)
+            p_temp = cano_smarts(p)
             cano_temp = r_temp + '>>' + p_temp
 
             if cano_temp not in templates:
@@ -251,9 +248,9 @@ def get_template_idx(temps_dict, task):
     try:
         r_temp = cano_smarts(rxn_template.split('>>')[0])
         p_temp = cano_smarts(rxn_template.split('>>')[-1])
-        # cano_temp = r_temp + '>>' + p_temp
+        cano_temp = r_temp + '>>' + p_temp
         # TODO check if generated templates are the wrong way
-        cano_temp = p_temp + '>>' + r_temp
+        # cano_temp = p_temp + '>>' + r_temp
     except:
         # logging.info(f'Could not parse {rxn_template} in get_template_idx')
         return rxn_idx, len(temps_dict)
@@ -275,7 +272,7 @@ def remove_atom_map(prod_smi_map):
 
 def match_templates(args):
     logging.info(f'Loading templates from file: {args.templates_file}')
-    processed_dir = args.dataset + "/processed"
+    processed_dir = os.path.join(args.dataset, "processed")
     if not os.path.exists(processed_dir):
         os.makedirs(processed_dir)
 
