@@ -344,7 +344,7 @@ def analyse_proposed(
     for key, mapped_key in zip(reac_smiles_phase, reac_smiles_mapped_phase):
         products = proposals_phase[mapped_key]
         products_count = len(products)
-        total_proposed += products
+        total_proposed += products_count
         if products_count > max_proposed:
             max_proposed = products_count
             reac_smi_max = key
