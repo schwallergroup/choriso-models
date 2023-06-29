@@ -21,9 +21,18 @@ To run single models, you can run the following commands:
 ```
 python main.py -m [model] -p [phase] -ds [dataset_name]
 ```
-model: one of ('Graph2SMILES', 'G2S', 'g2s', 'graph2smiles') or ('OpenNMT', 'ONMT', 'onmt', 'opennmt') <br />
-phase: either t (preprocessing + training), p (predicting) or tp (preprocessing + training + predicting) <br />
-dataset_name: name of your dataset. data has to be put into ``data/<dataset_name>`` as described above <br />
+model:
+* ('Graph2SMILES', 'G2S', 'g2s', 'graph2smiles') for [Graph2SMILES](https://github.com/coleygroup/Graph2SMILES) <br />
+* ('OpenNMT', 'ONMT', 'onmt', 'opennmt') for [Molecular Transformer](https://github.com/pschwllr/MolecularTransformer) <br />
+* ("neuralsym", "NeuralSym", "Template", "template") for [template-based approach](https://github.com/linminhtoo/neuralsym) <br />
+
+phase:
+* t (preprocessing + training) <br />
+* p (predicting) <br />
+* tp (preprocessing + training + predicting) <br />
+
+dataset_name: 
+* name of your dataset. data has to be put into ``data/<dataset_name>`` as described above <br />
   
 For example, to train Graph2SMILES on choriso_low_mw and predict on the test set, run 
 ```
