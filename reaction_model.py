@@ -1,12 +1,10 @@
 import abc
 import os
-from model_args import ReactionModelArgs
 
 
 class ReactionModel(abc.ABC):
 
     name:  str
-    args: ReactionModelArgs
 
     def __init__(self):
         assert self.name is not None, "Please set name before calling super-class"

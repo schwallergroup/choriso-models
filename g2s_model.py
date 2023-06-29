@@ -1,6 +1,5 @@
 import os
 import argparse
-import pandas as pd
 
 from benchmark_models import ReactionModel, BenchmarkPipeline
 from utils import prepare_parser, csv_to_txt, set_pythonpath, standardize_output

@@ -10,7 +10,6 @@
 
 #SBATCH --time=0-96:00:00
 #SBATCH --mail-type=ALL
-#SBATCH --mail-user=malte.franke@rwth-aachen.de
 
 ### begin of executable commands
 module load cuda
@@ -20,7 +19,7 @@ export PATH=~/anaconda3/envs/reaction_prediction/bin:$PATH
 # conda env
 source activate reaction_prediction
 
-export PYTHONPATH=$PYTHONPATH:~/reaction_forward
+export PYTHONPATH=$PYTHONPATH:~/rxn_predict
 
 
 python main.py -model $model -p tp -ds $dataset

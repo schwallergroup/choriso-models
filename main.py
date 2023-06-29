@@ -1,6 +1,5 @@
 import argparse
 import os
-import torch
 from utils import set_pythonpath, prepare_parser
 from g2s_model import G2S
 from onmt_model import OpenNMT
@@ -8,66 +7,8 @@ from neuralsym_model import Neuralsym
 from benchmark_models import BenchmarkPipeline
 
 
-def get_base_parsers():
-    # Define the main parser
-    parser = argparse.ArgumentParser(description='Model benchmarking')
-
-    parser.add_argument('--dataset', aliases=['--ds'], type=str, default='cjhif',
-                        help='Dataset to use for training and evaluation')
-
-    # Define the subparsers for each model
-    subparsers = parser.add_subparsers(title='Models', dest='model', required=True)
-
-    parser_g2s = subparsers.add_parser('Graph2SMILES', aliases=['G2S', 'g2s', 'graph2smiles'],
-                                       help='Graph2SMILES model')
-    parser_onmt = subparsers.add_parser('OpenNMT', aliases=['ONMT', 'onmt', 'opennmt'], help='OpenNMT model')
-
-    return parser, {"G2S": {"base_parser": parser_g2s,
-                            "args_class": G2SArgs()},
-                    "ONMT": {"base_parser": parser_onmt,
-                             "args_class": OpenNMTArgs()},}
-
-
-def add_mode_subparser(model_parser):
-    mode_subparser = model_parser.add_subparsers(title="Run mode", dest="mode", required=True)
-
-    train_mode_parser = mode_subparser.add_parser('train', aliases=['t'], help='Training mode')
-    predict_mode_parser = mode_subparser.add_parser('predict', aliases=['p', 'pred'], help='Prediction mode')
-
-    return train_mode_parser, predict_mode_parser
-
-
-def build_parser():
-
-    parser, parser_dict = get_base_parsers()
-
-    for model in parser_dict:
-        model_base_parser = parser_dict[model]["base_parser"]
-        model_args = parser_dict[model]["args_class"]
-
-        train_parser, predict_parser = add_mode_subparser(model_base_parser)
-
-        for train_arg in model_args.training_args()._actions:
-            try:
-                train_parser._add_action(train_arg)
-            except:
-                continue
-
-        for pred_arg in model_args.predict_args()._actions:
-            try:
-                predict_parser._add_action(pred_arg)
-            except:
-                continue
-
-        parser_dict[model]["train_parser"] = train_parser
-        parser_dict[model]["predict_parser"] = predict_parser
-
-    return parser
-
-
 def main(args):
 
-    # TODO this is quite static, make more dynamic
     # instantiate model depending on args
     if args.model in ["Graph2SMILES", 'G2S', 'g2s', 'graph2smiles']:
         reaction_model = G2S()

@@ -1,5 +1,4 @@
 import eco2ai
-import os
 from reaction_model import *
 
 

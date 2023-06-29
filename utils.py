@@ -1,11 +1,8 @@
 import os
 import json
 import pandas as pd
-import numpy as np
-import torch
 from rdkit import Chem
 import sys
-from typing import List
 
 from Graph2SMILES.utils.data_utils import tokenize_smiles
 
@@ -39,56 +36,6 @@ def set_pythonpath(path):
 
 def remove_spaces(spaced_str: str):
     return spaced_str.replace(" ", "")
-
-
-def is_correct_pred(pred: str, target: str):
-    if pred == target:
-        return 1
-    else:
-        return 0
-
-
-def top_k_accuracy(preds: List[List[str]], targets: List[str], k: int=1):
-    assert k <= len(preds[0]), "k has to be smaller or equal than the amount of predictions per reaction"
-    assert k > 0, "k has to be greater than 0"
-
-    # transform to np arrays for easier handling. take the first k predictions
-    preds = np.array(preds)[:, :k]
-    preds = np.vectorize(lambda x: x.replace(" ", ""))(preds)
-    preds = np.vectorize(canonicalize_smiles)(preds)
-
-    targets = np.array(targets)
-    targets = np.vectorize(lambda x: x.replace(" ", ""))(targets)
-    targets = np.vectorize(canonicalize_smiles)(targets)
-
-    top_k_accs = []
-    # False valued rows will not be calculated. initialize with all True
-    rows_to_calculate = np.ones(targets.shape, dtype=bool)
-    for i in range(k):
-
-        # select pred column
-        kth_preds = preds[:, i]
-
-        # get indices that have to be calculated. Needs to be done for overwriting with new values
-        indices = np.argwhere(rows_to_calculate != False).squeeze()
-
-        # apply mask to only calculate not yet correctly predicted values
-        kth_preds = kth_preds[rows_to_calculate]
-        temp_targets = targets[rows_to_calculate]
-
-        # check if prediction was incorrect
-        incorrect_pred = kth_preds != temp_targets
-
-        # change mask to not calculate rows where there already was a correct prediction
-        rows_to_calculate[indices] = incorrect_pred
-
-        num_correct = len(rows_to_calculate) - np.sum(rows_to_calculate.astype(int), axis=0)
-
-        top_k_acc = num_correct / len(rows_to_calculate)
-        print(f"top-{i+1} accuracy: ", top_k_acc)
-        top_k_accs.append(top_k_acc)
-
-    return top_k_accs
 
 
 def canonicalize_smiles(smiles, verbose=False):
@@ -193,24 +140,3 @@ def standardize_output(reactants, targets, predictions, csv_out_path):
     # Save the DataFrame to a CSV file
     df.to_csv(csv_out_path, index=False)
 
-if __name__ == "__main__":
-
-    preds = pd.read_csv('OpenNMT_Transformer/runs/models/cjhif_model_step_200000_test_predictions.txt', sep="\t",
-                        header=None).values
-    preds = [pred[0] for pred in preds]
-
-    targets = pd.read_csv('data/cjhif/tgt-test.txt', sep="\t", header=None).values
-    targets = [target[0] for target in targets]
-
-    print(targets)
-    num_pred = int(len(preds)/len(targets))
-    preds = [preds[i:i+num_pred] for i in range(0, len(preds), num_pred)]
-
-    acc = top_k_accuracy(preds, targets, k=5)
-
-    print(acc)
-
-    """
-    data_dir = "data/cjhif/"
-    csv_to_txt(data_dir)
-    """
