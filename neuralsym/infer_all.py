@@ -268,9 +268,9 @@ def compile_into_csv(args):
         )
 
         if phase == 'train': # true precursor has been removed from the proposals, so whatever is left are negatives
-            proposed_col_names = [f'neg_precursor_{i}' for i in range(1, args.topk + 1)]
+            proposed_col_names = [f'neg_precursor_{i}' for i in range(args.topk)]
         else: # validation/testing, we don't assume true precursor is present & we also do not remove them if present
-            proposed_col_names = [f'pred_{i}' for i in range(1, args.maxk + 1)]
+            proposed_col_names = [f'pred_{i}' for i in range(args.maxk)]
         col_names = ['canonical_rxn', 'target']
         col_names.extend(proposed_col_names)
         phase_dataframe.columns = col_names
