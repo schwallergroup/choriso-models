@@ -3,7 +3,7 @@ This repository is released in addition to the [choriso dataset](https://github.
 We focus on the MolecularTransformer([Schwaller et al. 2019](https://pubs.acs.org/doi/full/10.1021/acscentsci.9b00576)) and Graph2SMILES([Tu et al. 2022](https://pubs.acs.org/doi/full/10.1021/acs.jcim.2c00321)) and study their performance, also regarding sustainability aspects.
 
 
-## Setup
+## 🚀 Installation
 To install and activate the environment, run the following commands:
 ```
 conda env create -f env.yml
@@ -16,7 +16,13 @@ Please follow the steps below to make sure your data is processed correctly:
 2. Alternatively, create data splits yourself with the file names above. Please name the reaction SMILES column "**canonic_rxn**".
 3. Move the data split (train.tsv, val.tsv and test.tsv) to ``data/<dataset_name>/`` 
 
-## Running the benchmark
+## 🔥 Quick start
+If you want to train the Molecular Transformer on the choriso dataset and predict on the test set, run:
+```
+python main.py -m onmt -p tp -ds choriso
+```
+
+##  :brain: Advanced usage
 To run single models, you can run the following commands:
 ```
 python main.py -m [model] -p [phase] -ds [dataset_name]
@@ -32,7 +38,7 @@ phase:
 * tp (preprocessing + training + predicting) <br />
 
 dataset_name: 
-* name of your dataset. data has to be put into ``data/<dataset_name>`` as described above <br />
+* name of your dataset. Data has to be put into ``data/<dataset_name>`` as described above <br />
   
 For example, to train Graph2SMILES on choriso_low_mw and predict on the test set, run 
 ```
