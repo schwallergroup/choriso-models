@@ -7,7 +7,7 @@ We focus on the MolecularTransformer([Schwaller et al. 2019](https://pubs.acs.or
 To install and activate the environment, run the following commands:
 ```
 conda env create -f env.yml
-conda activate reaction_prediction
+conda activate choriso-models
 ```
 
 Before you can train a model, you have to transfer the data into this repo. 

@@ -12,8 +12,8 @@
 #SBATCH --mail-type=ALL
 
 ### begin of executable commands
-module load cuda
-module load intel
+module load intel/19.0.5
+module load cuda/11.6.2
 
 export PATH=~/anaconda3/envs/choriso-models/bin:$PATH
 # conda env
