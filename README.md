@@ -46,10 +46,19 @@ python main.py -m g2s -p tp -ds choriso_low_mw
 ```
 In ``<model>/<dataset_name>/results/`` you can find the predictions (**all_results.csv**) as well as the sustainability evaluation.
 
+## 🤖 Batch submission
 Assuming you have the choriso splits in data/ and have a slurm system available, the whole benchmarking study can be submitted using 
 ```
 ./run_benchmark.sh
 ```
-This loops over specified models and dataset to submit jobs to your gpu cluster. 
+This loops over specified models and dataset to submit jobs to your GPU cluster. 
 You can modify this file to take in your datasets for automatic benchmarking.  
-Changes to the submission settings can be made in ```run_main.sh```.
+Submission settings can be changed in ```run_main.sh```.
+
+## 🌳 Sustainability assessment
+We use the [eco2AI](https://github.com/sb-ai-lab/Eco2AI) tool to track carbon emissions and compute power. 
+⚠️ Be aware that eco2AI tracks **all** GPU emissions from your system. 
+If your system has more than 1 GPUs and you run your code on only one of them, the reported GPU emissions for your run might be faulty (see this [issue](https://github.com/sb-ai-lab/Eco2AI/issues/11)). 
+For this reason, we used a remote slurm system to request single GPUs that are then tracked correctly.
+
+
