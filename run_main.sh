@@ -19,7 +19,7 @@ export PATH=~/anaconda3/envs/choriso-models/bin:$PATH
 # conda env
 source activate choriso-models
 
-export PYTHONPATH=$PYTHONPATH:~/choriso-models
+export PYTHONPATH=$PYTHONPATH:$SLURM_SUBMIT_DIR
 
 
-python main.py -model $model -p tp -ds $dataset
+WANDB_MODE=disabled python main.py -model $model -p tp -ds $dataset

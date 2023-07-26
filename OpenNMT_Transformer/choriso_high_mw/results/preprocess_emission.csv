@@ -1,2 +1,2 @@
 id,project_name,experiment_description,epoch,start_time,duration(s),power_consumption(kWh),CO2_emissions(kg),CPU_name,GPU_name,OS,region/country,cost
-30f5fe18-aeae-4600-87bf-6e8bd161bd92,OpenNMT_Transformer_benchmark,preprocess OpenNMT_Transformer model,N/A,2023-05-10 12:51:55,12.83472728729248,0.0005885808560785999,3.2469651506432045e-05,"Intel(R) Xeon(R) Gold 6240 CPU @ 2.60GHz/2 device(s), TDP:150.0",Tesla V100-SXM2-32GB 4 device(s),Linux,CH/Vaud,0
+da34f535-d0bd-448b-af0d-6793db8dec87,OpenNMT_Transformer_benchmark,preprocess OpenNMT_Transformer model,N/A,2023-07-25 09:28:09,16.332238912582397,0.00017714442124689426,9.772349142506168e-06,"Intel(R) Xeon(R) Gold 6230 CPU @ 2.10GHz/2 device(s), TDP:125.0",Tesla V100-PCIE-32GB 1 device(s),Linux,CH,0
