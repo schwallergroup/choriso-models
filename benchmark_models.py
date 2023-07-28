@@ -6,6 +6,8 @@ class BenchmarkPipeline:
 
     def __init__(self, model: ReactionModel):
         self.model = model
+        # TODO Change the alpha_2_code to your country's IP, otherwise there may be issues with url timeouts
+        self.alpha_2_code = "CH"
 
     def run_train_pipeline(self, dataset):
         tracker_path = f"{self.model.model_dir}/{dataset}/results"
@@ -14,7 +16,8 @@ class BenchmarkPipeline:
         preprocess_tracker = eco2ai.Tracker(
             project_name=f"{self.model.name}_benchmark",
             experiment_description=f"preprocess {self.model.name} model",
-            file_name=f"{tracker_path}/preprocess_emission.csv"
+            file_name=f"{tracker_path}/preprocess_emission.csv",
+            alpha_2_code=self.alpha_2_code,
         )
         preprocess_tracker.start()
         self.model.preprocess(dataset=dataset)
@@ -23,7 +26,8 @@ class BenchmarkPipeline:
         train_tracker = eco2ai.Tracker(
             project_name=f"{self.model.name}_benchmark",
             experiment_description=f"train {self.model.name} model",
-            file_name=f"{tracker_path}/train_emission.csv"
+            file_name=f"{tracker_path}/train_emission.csv",
+            alpha_2_code=self.alpha_2_code,
         )
         train_tracker.start()
         self.model.train(dataset=dataset)
@@ -36,7 +40,8 @@ class BenchmarkPipeline:
         predict_tracker = eco2ai.Tracker(
             project_name=f"{self.model.name}_benchmark",
             experiment_description=f"predict {self.model.name} model",
-            file_name=f"{tracker_path}/predict_emission.csv"
+            file_name=f"{tracker_path}/predict_emission.csv",
+            alpha_2_code=self.alpha_2_code,
         )
         predict_tracker.start()
         self.model.predict(dataset=dataset)

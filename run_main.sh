@@ -8,7 +8,7 @@
 #SBATCH --partition=gpu
 #SBATCH --qos=gpu
 
-#SBATCH --time=0-72:00:00
+#SBATCH --time=0-96:00:00
 #SBATCH --mail-type=ALL
 
 ### begin of executable commands
