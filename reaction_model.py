@@ -18,15 +18,15 @@ class ReactionModel(abc.ABC):
         if not os.path.exists(self.model_dir):
             os.mkdir(self.model_dir)
 
-    def preprocess(self, dataset="cjhif"):
+    def preprocess(self, dataset="choriso"):
         """Do data preprocessing. Skip if preprocessed data already exists"""
         pass
 
-    def train(self, dataset="cjhif"):
+    def train(self, dataset="choriso"):
         """Train the reaction model. Should also contain validation and test steps"""
         pass
 
-    def predict(self, dataset="cjhif"):
+    def predict(self, dataset="choriso"):
         """Predict provided data with the reaction model"""
         pass
 

@@ -3,7 +3,6 @@ import os
 from utils import set_pythonpath, prepare_parser
 from g2s_model import G2S
 from onmt_model import OpenNMT
-from neuralsym_model import Neuralsym
 from benchmark_models import BenchmarkPipeline
 
 
@@ -14,8 +13,6 @@ def main(args):
         reaction_model = G2S()
     elif args.model in ["OpenNMT", 'ONMT', 'onmt', 'opennmt']:
         reaction_model = OpenNMT()
-    elif args.model in ["neuralsym", "NeuralSym", "Template", "template"]:
-        reaction_model = Neuralsym()
     else:
         raise NotImplementedError("The model does not yet exist.")
 
