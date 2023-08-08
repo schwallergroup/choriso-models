@@ -1,5 +1,5 @@
 # choriso-models: reaction prediction benchmark 
-This repository is released in addition to the [choriso dataset] (https://github.com/schwallergroup/choriso) and provides functionality to benchmark models.
+This repository is released in addition to the [choriso dataset](https://github.com/schwallergroup/choriso) and provides functionality to benchmark models.
 We focus on the MolecularTransformer ([Schwaller et al. 2019](https://pubs.acs.org/doi/full/10.1021/acscentsci.9b00576)) and Graph2SMILES ([Tu et al. 2022](https://pubs.acs.org/doi/full/10.1021/acs.jcim.2c00321)) and study their performance, also regarding sustainability aspects.
 
 
