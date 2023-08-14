@@ -13,7 +13,7 @@ conda activate choriso-models
 Before you can train a model, you have to transfer the data into this repo. 
 Please follow the steps below to make sure your data is processed correctly:
 1. Follow the steps in [choriso](https://github.com/schwallergroup/choriso) to create data splits.  
-2. Alternatively, create data splits yourself with the file names above. Please name the reaction SMILES column "**canonic_rxn**".
+2. Alternatively, create data splits yourself naming the reaction SMILES column "**canonic_rxn**".
 3. Move the data split to ``data/<dataset_name>/`` 
 4. Rename your files to **train.tsv**, **val.tsv** and **test.tsv** respectively.
 
