@@ -1,0 +1,2 @@
+id,project_name,experiment_description,epoch,start_time,duration(s),power_consumption(kWh),CO2_emissions(kg),CPU_name,GPU_name,OS,region/country,cost
+1a42572d-e43f-4f49-8a89-bc9d2ee4a6e1,Graph2SMILES_benchmark,predict Graph2SMILES model,N/A,2023-08-14 10:28:02,3484.792422056198,0.05447294485980012,0.0030050544761357333,"Intel(R) Xeon(R) Gold 6230 CPU @ 2.10GHz/2 device(s), TDP:125.0",Tesla V100-PCIE-32GB 1 device(s),Linux,CH,0
