@@ -1,0 +1,11 @@
+,duration(s),power_consumption(kWh),kwh_scaled,CO2_emissions(kg),co2_scaled
+Graph2SMILES_choriso_high_mw,229528.47,4.87,78.37,0.27,87.42
+Graph2SMILES_choriso_low_mw,295219.31,6.21,73.32,0.34,84.27
+Graph2SMILES_choriso_product,291768.64,5.54,75.81,0.31,85.83
+Graph2SMILES_choriso_random,297912.17,6.28,73.05,0.35,84.09
+OpenNMT_Transformer_USPTO,103973.47,4.64,79.29,0.26,87.99
+OpenNMT_Transformer_choriso_augmented,92185.03,4.54,79.69,0.25,88.23
+OpenNMT_Transformer_choriso_high_mw,86195.46,4.12,81.39,0.23,89.26
+OpenNMT_Transformer_choriso_low_mw,93290.94,4.53,79.73,0.25,88.25
+OpenNMT_Transformer_choriso_product,92563.86,4.63,79.35,0.26,88.02
+OpenNMT_Transformer_choriso_random,92419.57,4.5,79.87,0.25,88.34
