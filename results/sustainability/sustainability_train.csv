@@ -1,0 +1,6 @@
+,duration(s),duration scaled,CO2_emissions(kg),co2_scaled
+Graph2SMILES_choriso,40.77,81.56,0.57,75.08
+Graph2SMILES_uspto,56.67,75.33,1.46,48.08
+OpenNMT_Transformer_choriso,19.76,90.59,0.32,85.01
+OpenNMT_Transformer_choriso_aug,26.49,87.6,1.16,55.9
+OpenNMT_Transformer_uspto,24.72,88.37,0.78,67.7
