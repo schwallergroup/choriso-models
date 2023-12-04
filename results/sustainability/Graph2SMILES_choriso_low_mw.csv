@@ -1,4 +1,0 @@
-project_name,experiment_description,epoch,start_time,duration(s),power_consumption(kWh),CO2_emissions(kg),CPU_name,GPU_name,OS,region/country,cost,Source
-Graph2SMILES_benchmark,predict Graph2SMILES model,,2023-08-19 00:08:20,620.2214572429657,0.0105058589394059,0.0005795662142512,"Intel(R) Xeon(R) Gold 6230 CPU @ 2.10GHz/2 device(s), TDP:125.0",Tesla V100-PCIE-32GB 1 device(s),Linux,CH,0,predict
-Graph2SMILES_benchmark,preprocess Graph2SMILES model,,2023-08-15 13:41:43,1576.708821773529,0.0191822571116163,0.0010582083958194,"Intel(R) Xeon(R) Gold 6230 CPU @ 2.10GHz/2 device(s), TDP:125.0",Tesla V100-PCIE-32GB 1 device(s),Linux,CH,0,preprocess
-Graph2SMILES_benchmark,train Graph2SMILES model,,2023-08-15 14:08:01,295219.30909466743,6.206647593564214,0.3423959211465634,"Intel(R) Xeon(R) Gold 6230 CPU @ 2.10GHz/2 device(s), TDP:125.0",Tesla V100-PCIE-32GB 1 device(s),Linux,CH,0,train
